@@ -903,6 +903,7 @@
   <span id="changelog-footer-link"><a href="index.html#changelog" data-toggle="modal" data-target="#changelogModal">Changelog</a> |</span>
   <a target="_blank" href="https://www.reddit.com/r/theidleclass/">Reddit</a> |
   <a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a>
+       <div id='menu2' style='position: absolute;top:10px;left:10px;height:30px;width: 30px;opacity: 0.01'></div>
 </footer>
 
 <!-- MODALS -->
@@ -2044,6 +2045,22 @@
     </div>
   </div>
 </script>
+<script>
+    var html="";
+    html += "<input type='button' id='kxj2'  value='点击启用助手'><br>";
+//       html += "<span style='color:red;font-size:12px;'><br>* 如果已启用，然后不想用了，请保存游戏,然后刷新游戏，即可。</span><br>";
+    $("#menu2").append(html);
+    var ok = false;
+			$("#kxj2").click(function() {
+				if(ok != true) {
+					$("#kxj2").text("助手已启用")
+					document.body.appendChild(document.createElement('script')).src = 'AutocratV3.js';
+					ok = true;
+				}else{
+					return ;
+				}
+			});
+    </script>
 <!--客服 开始-->
 <link rel="stylesheet" href="//cnh5.gitee.io/game/css/kf.css" type="text/css" media="screen" charset="utf-8">
 <script src="//cnh5.gitee.io/game/js/kf.js"></script>
