@@ -828,11 +828,11 @@
                  <table class="earned-table table">
                   <tbody>
                     <tr>
-                      <td>Initial Investment Value</td>
+                      <td>初始投资价值</td>
                       <td><span data-bind="text: initialPrice.displayVal()"></span></td>
                     </tr>
                     <tr>
-                      <td>Additional Cash Spent</td>
+                      <td>额外支出的现金</td>
                       <td><span data-bind="text: cashSpent.displayVal()"></span></td>
                     </tr>
                     <tr>
@@ -850,41 +850,41 @@
                   </tbody>
                 </table>
                 <button style="width: 100%" class="btn btn-danger" data-bind="click: fire, css: { 'layoffs': activeLayoff(), 'fudged': activeValBonus() }">
-                  <span data-bind="visible: !activeLayoff() && !activeValBonus()">Fire Employees</span>
-                  <span data-bind="visible: activeLayoff() && !activeValBonus()">Massive Layoffs</span>
-                  <span data-bind="visible: activeValBonus() && !activeLayoff()">Fudge the Numbers</span>
-                  <span data-bind="visible: activeLayoff() && activeValBonus()">Massive Layoffs While Fudging Numbers</span>
+                  <span data-bind="visible: !activeLayoff() && !activeValBonus()">解雇员工</span>
+                  <span data-bind="visible: activeLayoff() && !activeValBonus()">大规模裁员</span>
+                  <span data-bind="visible: activeValBonus() && !activeLayoff()">捏造数字</span>
+                  <span data-bind="visible: activeLayoff() && activeValBonus()">大规模裁员而捏造的数字</span>
                 </button>
               </div>
             </div>
             <div class="divider"></div>
-            <h5 class="employees-remaining">Employees Remaining: <span data-bind="text: currentEmployees.displayVal()"></span></h5>
+            <h5 class="employees-remaining">剩余员工: <span data-bind="text: currentEmployees.displayVal()"></span></h5>
             <div class="progress">
               <div class="progress-bar" role="progressbar" data-bind="style: { width: employeePercentageRemaining }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
             </div>
           </div>
 
           <div data-bind="visible: sold()" class="acquisition-success-box">
-            <h4><span data-bind="text: name"></span> Liquidated</h4>
+            <h4><span data-bind="text: name"></span> 违约</h4>
             <table class="earned-table table">
               <tbody>
                 <tr>
-                  <td>Total Employees Fired</td>
+                  <td>累计解雇员工</td>
                   <td><span data-bind="text: employeesFired()"></span></td>
                 </tr>
                 <tr>
-                  <td>Total Cash Value</td>
+                  <td>总现金价值</td>
                   <td><span data-bind="text: currentValue.displayVal()"></span></td>
                 </tr>
                 <tr>
-                  <td>Additional Cash Spent</td>
+                  <td>额外的现金花费</td>
                   <td><span data-bind="text: cashSpent.displayVal()"></span></td>
                 </tr>
               </tbody>
             </table>
             <div class="acquisition-earnings-box">
-              <h5>Net Earnings:</h5>
-              <h3>+ <span data-bind="text: netValue.displayVal()"></span> total</h3>
+              <h5>净收益:</h5>
+              <h3>+ <span data-bind="text: netValue.displayVal()"></span> 总共</h3>
             </div>
           </div>
 
@@ -898,7 +898,7 @@
 <div class="push">&nbsp;</div>
 
 <footer class="footer">
-  <p>The Idle Class v<span data-bind="text: generalStats()[10].displayVal"></span></p> |
+  <p>放置大亨 v<span data-bind="text: generalStats()[10].displayVal"></span></p> |
   <a href="https://www.smallgraygames.com/" target="_blank">作者主页</a> |
   <span id="changelog-footer-link"><a href="index.html#changelog" data-toggle="modal" data-target="#changelogModal">更新日志</a> |</span>
   <a target="_blank" href="https://www.reddit.com/r/theidleclass/">Reddit</a> |
@@ -953,7 +953,7 @@
       </div>
       <div class="modal-footer">
         <p><span data-bind="text: selectedUpgrade.flavorText"></span></p>
-        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
       </div>
     </div>
   </div>
