@@ -10,6 +10,7 @@
 //1.汉化字典
 
 var cnItems = {
+    
     _STYLE_: [
         '符号', '待归类单词', '待归类词组', '待归类长句', '成就'
     ],
@@ -271,6 +272,21 @@ var cnItems = {
     'Compulsory Sedation':                      '强制镇静',
     'Congenial Encouragement':                  '正面鼓励',
     'Content Creator':                          '原创作者',
+
+    _SHOWN_: function(){
+        console.log(this._OTHER_);
+        let
+            $cni /*词汇数组*/ = arguments[0] || this._OTHER_,
+            $str /*词汇字串*/ = document.createElement('div')
+        ;
+        $str = '汉化-待译（阳光汉化组）：\n\n';
+        //整理元素
+        for ( let i=0; i<$cni.length; i++ ) {
+            $str += ( '/*' + i + '*/ "' + $cni[i] + '": "",\n');
+        }
+        $str += '\n\n刷新可继续游戏；愿支持汉化请联系QQ：505397145。';
+        alert($str);
+    },
 
 };
 
