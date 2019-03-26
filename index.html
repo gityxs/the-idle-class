@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>The Idle Class</title>
+  <title>放置大亨 - The Idle Class</title>
   <meta name="description" content="The Idle Class is a fast-paced, visually thrilling journey into the never-ending bull market of capitalism. Those who click vigorously will inevitably become wealthy." /> 
 
   <!-- http://plaza.dsolver.ca/m/smallgraygames -->
@@ -220,11 +220,11 @@
       		      <h3 class="unit-num"><span data-bind="text: num.displayVal"></span><span style="font-size: 14px; margin-left: 10px; top: -2px; vertical-align: middle;" class="well well-sm"><span data-bind="text: cps.displayVal"></span> /秒</span></h3>
       		      <div class="unit-buttons">
         		      <button data-bind="css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default">
-                    <span>Hire</span>
+                    <span>雇佣</span>
                     <span data-bind="visible: $parent.buyRate() === 'max', text: numCanAfford"></span>
                   </button>
         		      <button class="btn btn-md btn-default unit-button-sell" data-bind="click: sell">
-                    <span>Fire</span>
+                    <span>解雇</span>
                     <span data-bind="visible: $parent.buyRate() === 'max'">全部</span>
                   </button>
       		      </div>
@@ -921,9 +921,9 @@
         <p data-bind="html: selectedUnit.descriptionText"></p>
         <ul data-bind="visible: selectedUnit.num.val() > 0">
           <li><b>Share of Total:</b> <span data-bind="text: selectedUnit.shareOfTotal"></span>%</li>
-          <li><b>Cash Per Second (One):</b> $<span data-bind="text: selectedUnit.individualEarnings"></span></li>
-          <li><b>Cash Per Second (All):</b> <span data-bind="text: selectedUnit.cps.displayVal"></span></li>
-          <li><b>Sell Value:</b> <span data-bind="text: selectedUnit.sellPrice.displayVal"></span></li>
+          <li><b>每秒收益 (单个):</b> $<span data-bind="text: selectedUnit.individualEarnings"></span></li>
+          <li><b>每秒收益 (全部):</b> <span data-bind="text: selectedUnit.cps.displayVal"></span></li>
+          <li><b>销售价值:</b> <span data-bind="text: selectedUnit.sellPrice.displayVal"></span></li>
         </ul>
         <ul data-bind="visible: selectedUnit.num.val() === 0">
           <li><b>Base Cash Per Second:</b> $<span data-bind="text: selectedUnit.baseClickDisplay"></span></li>
@@ -1410,8 +1410,8 @@
         </button>
       </div>
       <div class="modal-body">
-        <p class="well well-sm hide-mobile">While your presence ensures discipline among your subordinates, it sometimes feels almost as if your businesses could run without you being there at all...</p>
-        <h4 class="time-away-header">Time Spent Away</h4>
+        <p class="well well-sm hide-mobile">虽然您的存在确保了您的下属之间的纪律，但有时感觉您的企业几乎可以在没有您在那里的情况下运行...</p>
+        <h4 class="time-away-header">消磨时间</h4>
         <p class="time-away" data-bind="text: awayEarnings().time"></p>
 <!--         <div class="panel panel-default">
           <div class="panel-heading">Time Spent Away</div>
@@ -1420,21 +1420,21 @@
 
         <div class="col-md-4">
           <div class="panel panel-default">
-            <div class="panel-heading">Cash</div>
+            <div class="panel-heading">金钱</div>
             <div class="panel-body" data-bind="text: awayEarnings().cashProgress"></div>
           </div>
         </div>
         <div data-bind="css: { 'away-locked': locked().investments }" class="col-md-4">
           <i class="material-icons">lock</i>
           <div class="panel panel-default">
-            <div class="panel-heading">Investments</div>
+            <div class="panel-heading">投资</div>
             <div class="panel-body" data-bind="text: awayEarnings().investmentProgress"></div>
           </div>
         </div>
         <div data-bind="css: { 'away-locked': locked().acquisitions }" class="col-md-4">
           <i class="material-icons">lock</i>
           <div class="panel panel-default">
-            <div class="panel-heading">Acquisitions</div>
+            <div class="panel-heading">收购</div>
             <div class="panel-body" data-bind="text: awayEarnings().acquisitionProgress"></div>
           </div>
         </div>
@@ -1443,7 +1443,7 @@
           <i class="material-icons">lock</i>
         <div class="panel panel-default">
           <!-- Default panel contents -->
-          <div class="panel-heading">Patents</div>
+          <div class="panel-heading">专利</div>
 <!--           <div class="panel-body">
             <div data-bind="text: awayEarnings().patentsSoldValue"></div>
           </div> -->
@@ -1452,22 +1452,22 @@
           <table class="table earned-table">
             <tr>
               <td data-bind="visible: locked().research">???</td>
-              <td data-bind="visible: !locked().research">Earned From Patents</td>
+              <td data-bind="visible: !locked().research">专利收入</td>
               <td data-bind="text: awayEarnings().patentsSoldValue"></td>
             </tr>
             <tr>
               <td data-bind="visible: locked().research">???</td>
-              <td data-bind="visible: !locked().research">Patents Stored</td>
+              <td data-bind="visible: !locked().research">专利存储</td>
               <td data-bind="text: awayEarnings().patentsStored"></td>
             </tr>
             <tr>
               <td data-bind="visible: locked().research">???</td>
-              <td data-bind="visible: !locked().research">Patents Sold</td>
+              <td data-bind="visible: !locked().research">专利出售</td>
               <td data-bind="text: awayEarnings().patentsSold"></td>
             </tr>
             <tr>
               <td data-bind="visible: locked().research">???</td>
-              <td data-bind="visible: !locked().research">Employees Gone</td>
+              <td data-bind="visible: !locked().research">员工离职</td>
               <td data-bind="text: awayEarnings().employeesGone"></td>
             <tr>
           </table>

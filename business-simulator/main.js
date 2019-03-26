@@ -123,8 +123,8 @@ function initializeGame() {
   
   document.addEventListener("achievement-earned", function(e) {
     if (e.detail.name !== 'trigger' && game.enableNotifications()) {
-      var link = '<a class="alert-link" onclick="selectAchievement(\'' + e.detail.id + '\')" data-toggle="modal" data-target="#upgradeModal">' + e.detail.name  + '</a></div>';
-      var alert = getAlertHTML(e.detail.id, 'ACHIEVEMENT', 'alert-warning', link);
+      var link = '<a class="alert-link" onclick="selectAchievement(\'' + e.detail.id + '\')" data-toggle="modal" data-target="#upgradeModal">' + cnItem(e.detail.name)  + '</a></div>';
+      var alert = getAlertHTML(e.detail.id, '成就', 'alert-warning', link);
       $('#achievement-box').append(alert);
 
       setTimeout(function() {
@@ -136,8 +136,8 @@ function initializeGame() {
   document.addEventListener("employee-unlocked", function(e) {
     if (game.enableNotifications()) {
       var id = 'employee-alert-' + e.detail.id;
-      var link = '<a class="alert-link" onclick="selectEmployee(\'' + e.detail.id + '\', \'' + id + '\')" data-toggle="modal" data-target="#unitModal">' + e.detail.name  + '</a></div>';
-      var alert = getAlertHTML(id, 'NEW EMPLOYEE', 'alert-info', link);
+      var link = '<a class="alert-link" onclick="selectEmployee(\'' + e.detail.id + '\', \'' + id + '\')" data-toggle="modal" data-target="#unitModal">' + cnItem(e.detail.name)  + '</a></div>';
+      var alert = getAlertHTML(id, '新员工', 'alert-info', link);
       $('#achievement-box').append(alert);
 
       setTimeout(function() {

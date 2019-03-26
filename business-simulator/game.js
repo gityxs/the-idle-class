@@ -1909,8 +1909,8 @@ var game = (function() {
 	function Unit(id, name, icon, basePrice, baseClick, description, flavor) {
 	  this.id = id;
 	  this.name = cnItem(ko.observable(name));
-	  this.descriptionText = ko.observable(description);
-	  this.flavorText = ko.observable(flavor);
+	  this.descriptionText = ko.observable(cnItem(description));
+	  this.flavorText = ko.observable(cnItem(flavor));
 	  this.basePrice = ko.observable(basePrice);
 	  this.baseClick = ko.observable(baseClick);
 	  this.available = ko.observable(id === "0" ? true : false);
@@ -2022,7 +2022,7 @@ var game = (function() {
     selectedUnit.numMod.val(this.numMod.val());
 	  selectedUnit.basePrice(this.basePrice());
 	  selectedUnit.baseClick(this.baseClick());
-	  selectedUnit.descriptionText(this.descriptionText());
+	  selectedUnit.descriptionText(cnItem(this.descriptionText()));
 	  selectedUnit.flavorText(this.flavorText());
 	  selectedUnit.icon(this.icon());
 	};
@@ -2095,7 +2095,7 @@ var game = (function() {
 	  var nextId = (parseInt(this.id) + 1).toString();
 	  var nextUnit = getUnit(nextId);
 	  nextUnit.available(true);
-	  document.dispatchEvent(new CustomEvent("employee-unlocked", { "detail": { "id": nextId, "name": nextUnit.name() }}));
+	  document.dispatchEvent(new CustomEvent("employee-unlocked", { "detail": { "id": nextId, "name": cnItem(nextUnit.name()) }}));
 	};
 
   Unit.prototype.getPotentialEarnings = function() {
@@ -2107,7 +2107,7 @@ var game = (function() {
   };
 	
 	function Stat(name, baseVal, beforeDisplay, afterDisplay, longerFormat, longerSingleDigit, info) {
-	  this.name = name;
+	  this.name = cnItem(name);
 	  this.baseVal = baseVal;
 	  this.beforeDisplay = beforeDisplay ? beforeDisplay : '';
 	  this.afterDisplay = afterDisplay ? afterDisplay : '';
@@ -2142,7 +2142,7 @@ var game = (function() {
 	function DateStat(name, baseVal, info) {
     this.info = info;
     this.type = 'date';
-    this.name = name;
+    this.name = cnItem(name);
     this.baseVal = baseVal;
     this.val = ko.observable(baseVal);
     this.displayVal = ko.computed(function() {
@@ -2173,7 +2173,7 @@ var game = (function() {
 	
 	function Upgrade(id, name, price, flavor, icon) {
 	  this.id = id;
-	  this.name = ko.observable(name);
+	  this.name = cnItem(ko.observable(name));
 	  this.price = new Stat('Price', price ? price : 0, '$');
 	  this.date = ko.observable(null);
 	  this.available = ko.observable(false);
@@ -2196,7 +2196,7 @@ var game = (function() {
 	  this.select = function() {
 	    selectedUpgrade.descriptionText(this.descriptionText());
 	    selectedUpgrade.flavorText('"' + this.flavorText() + '"');
-	    selectedUpgrade.name(this.name());
+	    selectedUpgrade.name(cnItem(this.name()));
       selectedUpgrade.icon(this.icon());
       
       this.read(true);
@@ -2352,7 +2352,7 @@ var game = (function() {
 	    this.percentage = percentage;
 	    this.type = 'awardCount';
 	    
-	    this.descriptionText(description ? description : 'Boosts the percentage bonus of each of your achievements by <b>' + percentage + '%</b>. ');
+	    this.descriptionText(description ? cnItem(description) : 'Boosts the percentage bonus of each of your achievements by <b>' + percentage + '%</b>. ');
 	    
 	    this.handlePurchase = function() {
 	      achievementBonusRate.add(this.percentage);
@@ -2364,7 +2364,7 @@ var game = (function() {
     this.percentage = percentage;
     this.type = 'unitCount';
     
-    this.descriptionText(description ? description : 'Boosts the percentage bonus of each of your employees by <b>' + percentage + '%</b>. ');
+    this.descriptionText(description ? cnItem(description) : 'Boosts the percentage bonus of each of your employees by <b>' + percentage + '%</b>. ');
     
     this.handlePurchase = function() {
       unitCountBonusRate.add(this.percentage);
@@ -2377,7 +2377,7 @@ var game = (function() {
     this.type = 'unitCount';
     
     var name = getUnit(unit).name();
-    this.descriptionText(description ? description : 'Chokes each of your <b>' + name + '</b> for an extra <b>' + mod + '%</b> for every <b>' + name.substring(0, name.length - 1) + '</b> employed.');
+    this.descriptionText(description ? cnItem(description) : 'Chokes each of your <b>' + name + '</b> for an extra <b>' + mod + '%</b> for every <b>' + name.substring(0, name.length - 1) + '</b> employed.');
     
     this.handlePurchase = function() {
       getUnit(unit).numMod.add(this.mod);
@@ -2390,7 +2390,7 @@ var game = (function() {
 	
 	function AwardBase(id, name, threshold, unlocks, flavor) {
 	  this.id = id;
-	  this.name = name;
+	  this.name = cnItem(name);
 	  this.threshold = threshold;
 	  this.unlocks = unlocks;
 	  this.date = ko.observable(null);
@@ -2423,7 +2423,7 @@ var game = (function() {
           try {
             gtag('event', 'achievement_earned', {
               'event_category': 'business_simulator',
-              'event_label': this.name
+              'event_label': cnItem(this.name)
             });
           } catch (err) {
             console.log('Google Analytics is unavailable');
@@ -2432,7 +2432,7 @@ var game = (function() {
         
         this.awarded(true);
         document.dispatchEvent(new CustomEvent("achievement-earned", { "detail": { 
-          "name": this.name,
+          "name": cnItem(this.name),
           "id": this.id
         }}));
 	    }
@@ -2590,7 +2590,7 @@ var game = (function() {
     this.cashSpent = new Stat('Cash Spent', load ? load.spent : 0, '$');
     this.clicks = new Stat('Clicks', load ? load.clicks : 0);
     this.sizeDivider = load ? load.sizeD : sizeDivider;
-    this.name = load ? load.name : (name ? name : getCompanyName());
+    this.name = load ? cnItem(load.name) : (name ? name : getCompanyName());
     this.description = load ? load.desc : getAcquisitionDescription(this.name, this.initialEmployees);
     this.layoffTimer = null;
     this.activeLayoff = ko.observable(false);
@@ -3265,7 +3265,7 @@ var game = (function() {
 
   function AcquisitionWorker(id, num, name, baseProgress, cashSpent, basePrice, description, flavor) {
     this.id = id;
-    this.name = name;
+    this.name = cnItem(name);
     this.baseProgress = baseProgress;
     this.basePrice = basePrice;
     this.cashSpent = cashSpent;
@@ -3744,7 +3744,7 @@ var game = (function() {
     pastBusinesses.push({
       date: Date.now(),
       length: Date.now() - startTime.val(),
-      name: businessName().name(),
+      name: cnItem(businessName().name()),
       earned: totalCash.val()
     });
   }
@@ -3754,7 +3754,7 @@ var game = (function() {
       return {
         date: new Date(record.date).toLocaleDateString(),
         length: getFormattedTime(record.length),
-        name: record.name,
+        name: cnItem(record.name),
         earned: format(record.earned)
       }
     });
@@ -3780,11 +3780,11 @@ var game = (function() {
 	  this.timeCreated = new Date();
 	  this.currentValue = new Stat('Current Value', base, '$');
     this.finalTotal = ko.observable(null);
-    this.name = name ? name : getCompanyName();
+    this.name = name ? cnItem(name) : getCompanyName();
     this.payingOut = false;
 
     if (this.name.indexOf('undefined') > -1) {
-      this.name = getCompanyName();
+      this.name = cnItem(getCompanyName());
     }
 
 	  this.checkInterval = 1000;
@@ -3890,7 +3890,7 @@ var game = (function() {
       activeAcquisitions.push(new Acquisition('medium', this.name, getRandomInt(9500, 10500) * sizeDivider, earningsTotal, sizeDivider));
       activeInvestments.splice(activeInvestments.indexOf(this), 1);
 
-      document.dispatchEvent(new CustomEvent("acquisition-made", { "detail": this.name }));
+      document.dispatchEvent(new CustomEvent("acquisition-made", { "detail": cnItem(this.name) }));
     }
   }
   
@@ -4878,7 +4878,7 @@ var game = (function() {
         
         gameData.activeInvestments = activeInvestments().map(function(i) {
           return {
-            name: i.name,
+            name: cnItem(i.name),
             base: i.baseInvestment.val(),
             loadedTargetTime: i.targetTime,
             loadedProgress: i.timeRemaining(),
@@ -4894,8 +4894,8 @@ var game = (function() {
             spent: a.cashSpent.val(),
             clicks: a.clicks.val(),
             sizeD: a.sizeDivider,
-            name: a.name,
-            desc: a.description,
+            name: cnItem(a.name),
+            desc: cnItem(a.description),
             emp0: a.workers()[0].num(),
             emp1: a.workers()[1].num(),
             emp2: a.workers()[2].num(),
@@ -5063,7 +5063,7 @@ var game = (function() {
     }
 
     if (data.name) {
-      businessName().name(data.name);
+      businessName().name(cnItem(data.name));
     }
 
     bankruptcyModalViewed(data.settings.bankruptcyModalViewed);
@@ -5510,11 +5510,11 @@ var game = (function() {
   }
 
   function timeSinceStartFromLocaleStrings(startTime) {
-     return getFormattedTime(new Date(new Date().toLocaleString()) - new Date(startTime)) + " ago";
+     return getFormattedTime(new Date(new Date().toLocaleString()) - new Date(startTime)) + " 前";
   }
 	
 	function timeSinceStart(startTime) {
-     return getFormattedTime(new Date() - new Date(startTime)) + " ago";
+     return getFormattedTime(new Date() - new Date(startTime)) + " 前";
 	}
 
   function getFormattedTime(time, skipHours, doNotRound) {
