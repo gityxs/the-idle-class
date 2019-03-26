@@ -342,13 +342,13 @@ function getLineGraphData() {
 
 function getBankruptcyLabels() {
   return game.pastBusinesses().map(function(business) {
-    return business.name + ': ' + game.format(business.earned);
+    return cnItem(business.name) + ': ' + game.format(business.earned);
   });
 }
 
 function getPieChartLabels() {
   return game.units().map(function(unit) {
-    return unit.available() ? unit.name() : '?';
+    return unit.available() ? cnItem(unit.name()) : '?';
   });
 }
 

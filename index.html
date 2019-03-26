@@ -1149,7 +1149,7 @@
         <ul class="nav nav-tabs nav-justified" role="tablist" style="margin-top:0;">
           <li role="presentation" class="active">
             <a id="inboxToggle" href="index.html#inbox" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: toggleComposeView.bind(game, false)">
-              <span class="nav-tab-text">Inbox</span>
+              <span class="nav-tab-text">收件箱</span>
               <span class="badge" data-bind="text: mail().length, visible: mail().length"></span>
             </a>
           </li>
@@ -1168,15 +1168,15 @@
           <li role="presentation" data-bind="css: { 'nav-disabled': locked().outgoingMail }">
             <a href="index.html#compose" aria-controls="home" role="tab" data-bind="click: toggleComposeView.bind(game, true), attr: { 'data-toggle': locked().outgoingMail ? '' : 'tab'}">
               <i data-bind="visible: locked().outgoingMail" class="material-icons padlock-icon" aria-hidden="true">lock</i>
-              <span data-bind="attr: { title:  locked().outgoingMail ? 'Unlocks at $1 sextillion in total earnings' : ''}" class="nav-tab-text">Compose</span>
-              <span data-bind="visible: !locked().outgoingMail && composedStats1()[0].val() === 0" class="label label-success">NEW</span>
+              <span data-bind="attr: { title:  locked().outgoingMail ? 'Unlocks at $1 sextillion in total earnings' : ''}" class="nav-tab-text">撰写</span>
+              <span data-bind="visible: !locked().outgoingMail && composedStats1()[0].val() === 0" class="label label-success">新</span>
             </a>
           </li>
         </ul>
         <div class="tab-content">
           <div role="tabpanel" class="tab-pane active" id="inbox">
             <div class="no-mail-message" data-bind="fadeVisible: !mail().length && !awayMailInbox().active()">
-              <h4 class="no-content-message">All Caught Up</h4>
+              <h4 class="no-content-message">全部看过了</h4>
             </div>
             <div data-bind="visible: !awayMailInbox().active(), template: {
                               name: 'mail-template',
@@ -1188,19 +1188,19 @@
               <input data-bind="textinput: awayMailInbox().message" class="form-control" placeholder="Enter your out of office message..." maxlength="100">
               <table class="earned-table table">
                 <tr>
-                    <td>Away Since</td>
+                    <td>离开时间</td>
                     <td data-bind="text: awayMailInbox().start"></td>
                 </tr>
                 <tr>
-                    <td>Emails Rejected</td>
+                    <td>被拒绝的电子邮件</td>
                     <td data-bind="text: awayMailInbox().regularEmails.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>Urgent Emails Rejected</td>
+                  <td>被拒绝的紧急电子邮件</td>
                   <td data-bind="text: awayMailInbox().urgentEmails.displayVal"></td>
                 </tr>
               </table>
-              <h5 class="away-earned-header">Earned While Away:</h5>
+              <h5 class="away-earned-header">离开时获得:</h5>
               <div class="well well-sm">
                 <h4 data-bind="text: awayMailInbox().earned.displayVal"></h4>
               </div>
@@ -1245,16 +1245,16 @@
               <div data-bind="visible: composedMail().selectedDepartment() === '3'" class="resolution-box">
                 <table class="earned-table table">
                   <tr>
-                    <td>Base Stress Reduction</td>
+                    <td>基础压力减少</td>
                     <td data-bind="text: composedMail().resolution().baseStressReduction"></td>
                   </tr>
                   <tr>
-                    <td>Bonus</td>
+                    <td>奖励</td>
                     <td data-bind="text: composedMail().resolution().textBonus"></td>
                   </tr>
                 </table>
                 <h3 class="label-success">
-                  <span class="label-header">Total Stress Reduction:</span>
+                  <span class="label-header">减少总压力:</span>
                   <span data-bind="text: composedMail().resolution().totalStressReduction"></span>
                 </h3>
               </div>
@@ -1266,11 +1266,11 @@
               <div class="row modal-selects">
                 <div style="padding-right:5px;" class="col-md-6">
                   <select class="form-control" name="email-type" title="Email Type" data-bind="value: composedMail().selectedDepartment">
-                    <option value="" disabled selected hidden>Select Department...</option>
-                    <option value='0'>Investments</option>
+                    <option value="" disabled selected hidden>选择部门...</option>
+                    <option value='0'>投资</option>
                     <option value='1'>R&amp;D</option>
-                    <option value='2'>Acquisitions</option>
-                    <option value='3'>Human Resources</option>
+                    <option value='2'>收购</option>
+                    <option value='3'>人力资源</option>
                   </select>
                 </div>
                 <div style="padding-left:5px;" class="col-md-6">
@@ -1295,20 +1295,20 @@
           <input name="email-away" type="checkbox" data-bind="checked: awayMailInbox().active, event: { change: awayMailInbox().handleChange.bind(awayMailInbox()) }">
           <label for="email-away"><span class="hide-mobile">Toggle</span> Away</label>
         </div>
-        <button type="button" class="btn btn-primary" data-bind="visible: !awayMailInbox().active(), click: toggleEmailHelpView">Help</button>
+        <button type="button" class="btn btn-primary" data-bind="visible: !awayMailInbox().active(), click: toggleEmailHelpView">帮助</button>
         <button type="button" class="btn btn-primary" data-bind="visible: !awayMailInbox().active()" onclick="markAllAsRead()">
-          <span class="hide-mobile">Mark All As Read</span>
-          <span class="mobile-only-text">Reply All</span>
+          <span class="hide-mobile">全部标为已读</span>
+          <span class="mobile-only-text">回复全部</span>
         </button>
       </div>
       <div class="modal-footer" data-bind="visible: composeView">
         <div class="left-box well resting-box" data-bind="css: { 'stress-danger': composedMail().stressLevel.val() > 100 }">
-          <p>Stress<span class="hide-mobile"> Level</span>: </p>
+          <p>重要性<span class="hide-mobile"> 级别</span>: </p>
           <span class="stress-percent" data-bind="text: composedMail().stressLevel.displayVal"></span>
         </div>
-        <button type="button" class="btn btn-primary" data-bind="click: toggleComposeHelpView">Help</button>
+        <button type="button" class="btn btn-primary" data-bind="click: toggleComposeHelpView">帮助</button>
         <button type="button" class="btn btn-primary" data-bind="click: composedMail().send, attr: { disabled: composedMail().unavailable }">
-          <span>Send</span>
+          <span>发送</span>
         </button>
       </div>
     </div>
@@ -1321,7 +1321,7 @@
       <div class="modal-header">
         <i class="material-icons">mail</i>
         <h3 class="modal-title" id="acquisitionMailModalLabel">
-          Policy Proposals (<span data-bind="text: viewingAcquisition().mail().length"></span>)
+          政策建议 (<span data-bind="text: viewingAcquisition().mail().length"></span>)
         </h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -1331,7 +1331,7 @@
 
       <div class="modal-body" data-bind="visible: !awayPolicyInbox().active()">
         <div class="no-mail-message" data-bind="fadeVisible: !viewingAcquisition().mail().length">
-          <h4 class="no-content-message">All Caught Up</h4>
+          <h4 class="no-content-message">全部看过了</h4>
         </div>
         <div data-bind="template: {
                           name: 'mail-template',
@@ -1344,28 +1344,28 @@
         <input data-bind="textinput: awayPolicyInbox().message" class="form-control" placeholder="Enter your out of office message..." maxlength="100">
         <table class="earned-table table">
           <tr>
-              <td>Away Since</td>
+              <td>离开以后</td>
               <td data-bind="text: awayPolicyInbox().start"></td>
           </tr>
           <tr>
-              <td>Policy Emails Ignored</td>
+              <td>忽略的政策电子邮件</td>
               <td data-bind="text: awayPolicyInbox().policies.displayVal"></td>
           </tr>
         </table>
-        <h5 class="away-earned-header">Employees Quit While Away:</h5>
+        <h5 class="away-earned-header">离开后离职的员工:</h5>
         <div class="well well-sm">
           <h4 data-bind="text: awayPolicyInbox().fired.displayVal"></h4>
         </div>
       </div>
       <div class="modal-footer">
         <div data-bind="visible: locked().policyAway" class="left-box well">
-          <input name="policy-away" type="checkbox" data-bind="checked: awayPolicyInbox().active, event: { change: awayPolicyInbox().handleChange.bind(awayPolicyInbox()) }"><label for="policy-away">Toggle Away</label>
+          <input name="policy-away" type="checkbox" data-bind="checked: awayPolicyInbox().active, event: { change: awayPolicyInbox().handleChange.bind(awayPolicyInbox()) }"><label for="policy-away">切换离开</label>
         </div>
         <button type="button" class="btn btn-primary" onclick="markAllAsRead(true)">
-          <span class="hide-mobile">Accept All Proposals</span>
-          <span class="mobile-only-text">Accept All</span>
+          <span class="hide-mobile">接受所有提案</span>
+          <span class="mobile-only-text">全都接受</span>
         </button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
       </div>
     </div>
   </div>
@@ -1376,15 +1376,15 @@
     <div class="modal-content">
       <div class="modal-header">
         <i class="material-icons">domain</i>
-        <h3 class="modal-title" id="acquisitionHelpModalLabel">Acquiring Companies</h3>
+        <h3 class="modal-title" id="acquisitionHelpModalLabel">收购公司</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <blockquote class="blockquote text-right">
-          <p class="mb-0">Never, never, never, never give up.</p>
-          <footer class="blockquote-footer"><cite title="Source Title">Winston Churchill, President of England</cite></footer>
+          <p class="mb-0">永远，永远，永远，永不放弃。</p>
+          <footer class="blockquote-footer"><cite title="Source Title">温斯顿丘吉尔，英格兰总统</cite></footer>
         </blockquote>
 
         <p>While you could cash out every investment as soon as it's ready and walk away with money in hand, you could also choose to <b>acquire</b> the company instead.</p>
@@ -1999,17 +1999,17 @@
       <p class="email-info">
         <b>From:</b> 
         <span data-bind="text: from"></span>
-        <span data-bind="visible: isSpecial()" class="label label-danger">URGENT</span>
-        <span data-bind="visible: stressLevel === 0" class="label label-primary">LOW PRIORITY</span>
-        <span data-bind="visible: stressLevel === 1" class="label label-warning">HIGH PRIORITY</span>
+        <span data-bind="visible: isSpecial()" class="label label-danger">紧急</span>
+        <span data-bind="visible: stressLevel === 0" class="label label-primary">低优先级</span>
+        <span data-bind="visible: stressLevel === 1" class="label label-warning">高优先级</span>
       </p>
-      <p class="email-info"><b>Date:</b> <span data-bind="text: date.toLocaleString()"></span></p>
-      <p class="email-info"><b>Subject:</b> <span data-bind="text: subject"></span></p>
+      <p class="email-info"><b>日期:</b> <span data-bind="text: date.toLocaleString()"></span></p>
+      <p class="email-info"><b>主题:</b> <span data-bind="text: subject"></span></p>
       <p data-bind="text: body"></p>
       <textarea class="form-control" data-bind="value: inputText, attr: { title: isAcquisition() ? 'Add your notes' : 'Enter your response' }" maxlength="200"></textarea>
       <button class="btn btn-primary" type="submit">
-        <span data-bind="visible: !isAcquisition()">Reply</span>
-        <span data-bind="visible: isAcquisition()">Accept</span>
+        <span data-bind="visible: !isAcquisition()">回复</span>
+        <span data-bind="visible: isAcquisition()">接受</span>
       </button>
       <div style="clear:both;"></div>
     </form>
@@ -2017,11 +2017,11 @@
       <table class="earned-table table">
         <tbody>
           <tr>
-            <td>Text Bonus</td>
+            <td>文字奖励</td>
             <td data-bind="text: payoutBonus"></td>
           </tr>
           <tr>
-            <td>Time Bonus</td>
+            <td>时间奖励</td>
             <td data-bind="text: timeBonus"></td>
           </tr>
         </tbody>
@@ -2032,16 +2032,16 @@
       <table class="earned-table table">
         <tbody>
           <tr>
-            <td>Text Bonus</td>
+            <td>文字奖励</td>
             <td data-bind="text: payoutBonus"></td>
           </tr>
           <tr>
-            <td>Time Bonus</td>
+            <td>时间奖励</td>
             <td data-bind="text: timeBonus"></td>
           </tr>
         </tbody>
       </table>
-      <h2 class="label-danger"><span data-bind="text: payout"></span> Employees Quit</h2>
+      <h2 class="label-danger"><span data-bind="text: payout"></span> 员工辞职</h2>
     </div>
   </div>
 </script>
