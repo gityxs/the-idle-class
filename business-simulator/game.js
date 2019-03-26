@@ -1908,7 +1908,7 @@ var game = (function() {
 	
 	function Unit(id, name, icon, basePrice, baseClick, description, flavor) {
 	  this.id = id;
-	  this.name = cnItem(ko.observable(name));
+	  this.name = ko.observable(cnItem(name));
 	  this.descriptionText = ko.observable(cnItem(description));
 	  this.flavorText = ko.observable(cnItem(flavor));
 	  this.basePrice = ko.observable(basePrice);
@@ -2173,7 +2173,7 @@ var game = (function() {
 	
 	function Upgrade(id, name, price, flavor, icon) {
 	  this.id = id;
-	  this.name = cnItem(ko.observable(name));
+	  this.name = ko.observable(cnItem(name));
 	  this.price = new Stat('Price', price ? price : 0, '$');
 	  this.date = ko.observable(null);
 	  this.available = ko.observable(false);
