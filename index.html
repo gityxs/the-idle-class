@@ -9,7 +9,7 @@
   <meta name="description" content="The Idle Class is a fast-paced, visually thrilling journey into the never-ending bull market of capitalism. Those who click vigorously will inevitably become wealthy." /> 
 
   <!-- http://plaza.dsolver.ca/m/smallgraygames -->
-
+    <script src="zh.js"></script>
   <script src="//likexia.gitee.io/game/js/jquery.min.js"></script>
   <script src="knockout-3.4.2.js"></script>
   <script src="https://cdn.bootcss.com/Chart.js/2.7.3/Chart.min.js"></script>
@@ -39,8 +39,8 @@
           <!--<a class="navbar-brand" href="#">Project name</a>-->
           <p id="top-clickable-box">
             <button id="top-clickable" data-bind="css: { 'windfall': isWindfall()}" class="btn btn-primary btn-lg main-click" onclick="mainClick()">
-              <span data-bind="visible: !isWindfall()">Earn Dollars &raquo;</span>
-              <span data-bind="visible: isWindfall()">Earn Windfall &raquo;</span>
+              <span data-bind="visible: !isWindfall()">赚钱 &raquo;</span>
+              <span data-bind="visible: isWindfall()">意外收获 &raquo;</span>
             </button>
             <span data-bind="css: { 'windfall': isWindfall()}" class="label label-success click-value-display top-click-value-display">1</span>
           </p>
@@ -121,29 +121,29 @@
     <li role="presentation" class="active">
       <a href="index.html#store" aria-controls="home" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">shopping_cart</i>
-        <span class="nav-tab-text">Store</span>
+        <span class="nav-tab-text">商店</span>
         <span class="badge" data-bind="visible: newUpgradesCount.val, text: newUpgradesCount.displayVal"></span>
       </a>
     </li>
     <li role="presentation">
       <a href="index.html#achievements" data-bind="click: incrementViewCount.bind($data, 'achievementTab')" aria-controls="messages" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">check_circle</i>
-        <span class="nav-tab-text">Achievements & Upgrades</span>
+        <span class="nav-tab-text">成就 & 升级</span>
         <span class="badge" data-bind="visible: newAchievementCount.val, text: newAchievementCount.displayVal"></span>
       </a>
     </li>
     <li role="presentation">
       <a href="index.html#stats" onclick="reloadCharts()" data-bind="click: incrementViewCount.bind($data, 'statsTab')" aria-controls="settings" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">insert_chart</i>
-        <span class="nav-tab-text">Stats</span>
+        <span class="nav-tab-text">统计</span>
       </a>
     </li>
     <li role="presentation" data-bind="css: { 'nav-disabled': locked().investments }">
       <a href="index.html#investments" aria-controls="investments" role="tab" data-bind="attr: { 'data-toggle': locked().investments ? '' : 'tab'}">
         <i data-bind="visible: locked().investments" class="material-icons padlock-icon" aria-hidden="true">lock</i>
         <i class="material-icons nav-tab-icon">trending_up</i>
-        <span data-bind="attr: { title:  locked().investments ? 'Unlocks at $100 million in total earnings' : ''}" class="nav-tab-text">Investments</span>
-        <span data-bind="visible: !locked().investments && activeInvestments().length < 1 && investmentStats()[1].val() < 1 && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span>
+        <span data-bind="attr: { title:  locked().investments ? 'Unlocks at $100 million in total earnings' : ''}" class="nav-tab-text">投资</span>
+        <span data-bind="visible: !locked().investments && activeInvestments().length < 1 && investmentStats()[1].val() < 1 && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">新</span>
         <span class="badge" data-bind="visible: pendingInvestmentCount.val() > 0, text: pendingInvestmentCount.displayVal"></span>
       </a>
     </li>
@@ -151,8 +151,8 @@
       <a id="acquisition-tab" href="index.html#acquisitions" aria-controls="acquisitions" role="tab" data-bind="attr: { 'data-toggle': locked().acquisitions ? '' : 'tab'}">
         <i data-bind="visible: locked().acquisitions" class="material-icons padlock-icon">lock</i>
         <i class="material-icons nav-tab-icon">store</i>
-        <span data-bind="attr: { title:  locked().acquisitions ? 'Unlocks at $1 quintillion in total earnings' : ''}" class="nav-tab-text">Acquisitions</span>
-        <span data-bind="visible: !locked().acquisitions && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span>
+        <span data-bind="attr: { title:  locked().acquisitions ? 'Unlocks at $1 quintillion in total earnings' : ''}" class="nav-tab-text">收购</span>
+        <span data-bind="visible: !locked().acquisitions && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">新</span>
         <span class="badge" data-bind="visible: pendingAcquisitionCount.val() > 0, text: pendingAcquisitionCount.displayVal"></span>
       </a>
     </li>
@@ -162,8 +162,8 @@
   <div class="tab-content main-tabs">
     <div role="tabpanel" class="tab-pane active" id="store">
       <div class="col-md-6">
-  			<h3 class="upgrades-header">Upgrades
-          <button data-bind="click: buyAllUpgrades" class="btn btn-default btn-sm upgrade-all">Buy All</button>
+  			<h3 class="upgrades-header">升级
+          <button data-bind="click: buyAllUpgrades" class="btn btn-default btn-sm upgrade-all">购买全部</button>
         </h3>
   			<ul data-bind="foreach: availableUpgrades" class="upgrade-list">
   			  <li data-bind="visible: available">
@@ -180,7 +180,7 @@
     		      <div style="width: 100%;" class="unit-buttons">
       		      <button style="width: 100%;" data-bind="css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default">
                   <span data-bind="text: price.displayVal"></span>
-                  <span data-bind="visible: !read()" class="label label-success">NEW</span></button>
+                  <span data-bind="visible: !read()" class="label label-success">新</span></button>
       		   <!--    <a class="btn btn-lg btn-default" data-bind="click: select" data-toggle="modal" data-target="#upgradeModal">Details</a> -->
     		      </div>
             </div>
@@ -195,15 +195,15 @@
   			</ul>
   		</div>
   		<div class="col-md-6">
-    		<h3 class="employee-header">Employees</h3>
+    		<h3 class="employee-header">员工</h3>
     		<div class="buy-rate-selector">
-      		<h4>Purchase Rate:</h4>
+      		<h4>购买数量:</h4>
       		<div class="btn-group" role="group" aria-label="Buy Rate Buttons">
             <button data-bind="click: setBuyRate.bind($data, 1)" type="button" class="btn btn-default active">1</button>
             <button data-bind="click: setBuyRate.bind($data, 10)" type="button" class="btn btn-default">10</button>
             <button data-bind="click: setBuyRate.bind($data, 25)" type="button" class="btn btn-default">25</button>
             <button data-bind="click: setBuyRate.bind($data, 100)" type="button" class="btn btn-default">100</button>
-            <button data-bind="click: setBuyRate.bind($data, 'max')" type="button" class="btn btn-default">Max</button>
+            <button data-bind="click: setBuyRate.bind($data, 'max')" type="button" class="btn btn-default">最大</button>
           </div>
         </div>
         <ul class="employee-list" data-bind="foreach: units">
@@ -217,7 +217,7 @@
                 <span class="badge"><span data-bind="text: price.displayVal"></span></span>
               </div>
               <div class="panel-body">
-      		      <h3 class="unit-num"><span data-bind="text: num.displayVal"></span><span style="font-size: 14px; margin-left: 10px; top: -2px; vertical-align: middle;" class="well well-sm"><span data-bind="text: cps.displayVal"></span> /s</span></h3>
+      		      <h3 class="unit-num"><span data-bind="text: num.displayVal"></span><span style="font-size: 14px; margin-left: 10px; top: -2px; vertical-align: middle;" class="well well-sm"><span data-bind="text: cps.displayVal"></span> /秒</span></h3>
       		      <div class="unit-buttons">
         		      <button data-bind="css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default">
                     <span>Hire</span>
@@ -225,7 +225,7 @@
                   </button>
         		      <button class="btn btn-md btn-default unit-button-sell" data-bind="click: sell">
                     <span>Fire</span>
-                    <span data-bind="visible: $parent.buyRate() === 'max'">All</span>
+                    <span data-bind="visible: $parent.buyRate() === 'max'">全部</span>
                   </button>
       		      </div>
               </div>
@@ -234,13 +234,13 @@
               <div class="hover">
                 <p data-bind="html: descriptionText"></p>
                 <ul data-bind="visible: num.val() > 0">
-                  <li><b>Share of Total:</b> <span data-bind="text: shareOfTotal"></span>%</li>
-                  <li><b>Cash Per Second (One):</b> $<span data-bind="text: individualEarnings"></span></li>
-                  <li><b>Sell Value:</b> <span data-bind="text: sellPrice.displayVal"></span></li>
+                  <li><b>总占比:</b> <span data-bind="text: shareOfTotal"></span>%</li>
+                  <li><b>每秒收益 (单个):</b> $<span data-bind="text: individualEarnings"></span></li>
+                  <li><b>销售价值:</b> <span data-bind="text: sellPrice.displayVal"></span></li>
                 </ul>
                 <ul data-bind="visible: num.val() === 0">
-                  <li><b>Base Cash Per Second:</b> $<span data-bind="text: baseClickDisplay"></span></li>
-                  <li><b>Expected Cash Per Second (One):</b> $<span data-bind="text: potentialEarnings"></span></li>
+                  <li><b>基础每秒收益:</b> $<span data-bind="text: baseClickDisplay"></span></li>
+                  <li><b>预期每秒收益 (单个):</b> $<span data-bind="text: potentialEarnings"></span></li>
                 </ul>
                 <p class="flavor">"<span data-bind="html: flavorText"></span>"</p>
               </div>
@@ -255,7 +255,7 @@
 
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">Upgrades Owned</h3>
+          <h3 class="panel-title">已拥有升级</h3>
           <div class="stat-count">
             <h3 class="panel-title">
               <span data-bind="text: upgradeCount.displayVal"></span> / <span data-bind="text: totalUpgradeCount"></span>
@@ -269,8 +269,8 @@
        <table class="earned-table table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Price</th>
+            <th>名称</th>
+            <th>价格</th>
           </tr>
         </thead>
         <tbody data-bind="foreach: upgrades">
@@ -303,7 +303,7 @@
 
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">Achievements Unlocked</h3>
+          <h3 class="panel-title">已解锁成就</h3>
           <div class="stat-count">
             <h3 class="panel-title">
               <span data-bind="text: achievementCount.displayVal"></span> / <span data-bind="text: totalAchievementCount"></span>
@@ -318,8 +318,8 @@
             <table class="earned-table table" data-bind="visible: newAchievementCount.val() > 0">
               <thead>
                 <tr>
-                  <th style="position:relative;">Name <button class="btn btn-sm btn-primary clear-awards-btn" data-bind="click: clearAllAwards">Clear All</button></th>
-                  <th>Date Awarded</th>
+                  <th style="position:relative;">名称 <button class="btn btn-sm btn-primary clear-awards-btn" data-bind="click: clearAllAwards">全部已读</button></th>
+                  <th>达成时间</th>
                 </tr>
               </thead>
               <tbody data-bind="foreach: achievements">
@@ -328,7 +328,7 @@
                     <button data-toggle="modal" data-target="#upgradeModal" data-bind="click: select">
                       <span data-bind="visible: !awarded()">-</span>
                       <span class="name-text" data-bind="html: name, visible: awarded"></span>
-                      <span data-bind="visible: awarded() && !read()" class="label label-success">NEW</span>
+                      <span data-bind="visible: awarded() && !read()" class="label label-success">新</span>
                     </button>
                   </td>
                   <td>
@@ -350,8 +350,8 @@
            <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Date Awarded</th>
+                  <th>名称</th>
+                  <th>达成日期</th>
                 </tr>
               </thead>
               <tbody data-bind="foreach: achievements">
@@ -406,13 +406,13 @@
       <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">General Stats</h3>
+            <h3 class="panel-title">一般统计</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>名称</th>
                   <th>Value</th>
                 </tr>
               </thead>
@@ -453,14 +453,14 @@
       <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Cash Stats</h3>
+            <h3 class="panel-title">现金统计</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Value</th>
+                  <th>名称</th>
+                  <th>数量</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: cashStats }">
@@ -471,7 +471,7 @@
 
         <div data-bind="visible: enableCharts" class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Comparison of Earnings Types</h3>
+            <h3 class="panel-title">收益类型比较</h3>
           </div>
           <div class="panel-body">
             <canvas id="earnedComparisonGraph" width="400" height="400"></canvas>
@@ -480,14 +480,14 @@
 
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Email Stats</h3>
+            <h3 class="panel-title">电子邮件统计</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Value</th>
+                  <th>名称</th>
+                  <th>数量</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: emailStats }">
@@ -500,7 +500,7 @@
       <div data-bind="visible: enableCharts" class="col-md-4">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Investment Earnings by Type</h3>
+            <h3 class="panel-title">按类型划分的投资收益</h3>
           </div>
           <div class="panel-body">
             <div>
@@ -513,7 +513,7 @@
       <div data-bind="visible: enableCharts" class="col-md-4">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Email Earnings by Type</h3>
+            <h3 class="panel-title">电子邮件收益按类型</h3>
           </div>
           <div class="panel-body">
             <div>
@@ -526,7 +526,7 @@
       <div data-bind="visible: enableCharts" class="col-md-4">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Manual Click Earnings by Type</h3>
+            <h3 class="panel-title">手动点击收入按类型</h3>
           </div>
           <div class="panel-body">
             <div>
@@ -539,14 +539,14 @@
       <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Click Stats</h3>
+            <h3 class="panel-title">点击统计</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Value</th>
+                  <th>名称</th>
+                  <th>数量</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: clickStats }">
@@ -565,8 +565,8 @@
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Value</th>
+                  <th>名称</th>
+                  <th>数量</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: acquisitionStats }">
@@ -579,7 +579,7 @@
       <div data-bind="visible: enableCharts && pastBusinesses().length > 0" class="col-md-12">
         <div class="panel panel-default name-panel">
           <div class="panel-heading">
-            <h3 class="panel-title">Bankrupted Businesses</h3>
+            <h3 class="panel-title">破产的企业</h3>
               <button data-bind="visible: !bankruptcyListToggled(), click: toggleBankruptcyList">
                 <i class="material-icons">list</i>
               </button>
@@ -595,10 +595,10 @@
               <table class="earned-table table">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Date Bankrupted</th>
-                    <th class="hide-mobile">Length of Business</th>
-                    <th class="hide-mobile">Earnings at Bankruptcy</th>
+                    <th>名称</th>
+                    <th>破产日期</th>
+                    <th class="hide-mobile">业务长度</th>
+                    <th class="hide-mobile">破产收益</th>
                   </tr>
                 </thead>
                 <tbody data-bind="foreach: pastBusinessesFormatted">
@@ -618,14 +618,14 @@
       <div class="col-md-6 left-col">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Passive Stats</h3>
+            <h3 class="panel-title">被动统计</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Value</th>
+                  <th>名称</th>
+                  <th>数值</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: idleStats }">
@@ -638,14 +638,14 @@
       <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Research Stats</h3>
+            <h3 class="panel-title">研究统计</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Value</th>
+                  <th>名称</th>
+                  <th>数值</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: researchStats }">
@@ -658,15 +658,15 @@
       <div class="col-md-12">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Outgoing Email Stats</h3>
+            <h3 class="panel-title">传出电子邮件统计信息</h3>
           </div>
           <div class="panel-body">
             <div class="col-md-6">
               <table class="earned-table table">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Value</th>
+                    <th>名称</th>
+                    <th>数值</th>
                   </tr>
                 </thead>
                 <tbody data-bind="template: { name: 'stat-template', foreach: composedStats1 }">
@@ -677,8 +677,8 @@
               <table class="earned-table table">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Value</th>
+                    <th>名称</th>
+                    <th>数值</th>
                   </tr>
                 </thead>
                 <tbody data-bind="template: { name: 'stat-template', foreach: composedStats2 }">
@@ -691,16 +691,16 @@
 
     </div>
     <div role="tabpanel" class="tab-pane" id="investments">      
-      <h3><span class="header-text">Active Investments (<span data-bind="text: activeInvestments().length"></span>/<span data-bind="text: simultaneousInvestments.val()"></span>)</span>
+      <h3><span class="header-text">进行中的投资 (<span data-bind="text: activeInvestments().length"></span>/<span data-bind="text: simultaneousInvestments.val()"></span>)</span>
         <button class="btn btn-primary investment-btn" data-toggle="modal" data-target="#investmentModal">
-          <span class="text">Make Investment</span><span class="mobile-only-text">Invest</span>
+          <span class="text">进行投资</span><span class="mobile-only-text">投资</span>
         </button>
         <button style="margin-right: 10px" class="btn btn-primary investment-btn" data-bind="click: cashOutAllInvestments">
-          <span class="text">Cash Out All Completed</span><span class="mobile-only-text">Cash Out All</span>
+          <span class="text">全部兑现</span><span class="mobile-only-text">全部兑现</span>
         </button>
       </h3>
       <div data-bind="fadeVisible: !activeInvestments().length" class="no-investments-box">
-        <h4 class="no-content-message">No Investments Currently Active</h4>
+        <h4 class="no-content-message">目前无投资活动</h4>
       </div>
       <div class="active-investments" data-bind="template: {
                             foreach: activeInvestments,
@@ -717,7 +717,7 @@
             </div>
             <div class="investment-header-right">
               <div data-bind="visible: !active(), css: { 'disabled': $parent.locked().acquisitions || $parent.activeAcquisitions().length > 0 }" class="btn-group">
-                <button data-bind="click: handleAcquisition" class="btn btn-sm btn-success inv-acquisition-btn">Acquire</button>
+                <button data-bind="click: handleAcquisition" class="btn btn-sm btn-success inv-acquisition-btn">收购</button>
                 <button data-bind="click: handleAcquisition, visible: $parent.locked().acquisitions" class="btn btn-sm btn-success inv-acquisition-info-btn">
                   <i class="material-icons inv-acquisition-icon">lock</i>
                 </button>
@@ -725,8 +725,8 @@
                   <i class="material-icons inv-acquisition-icon">help</i>
                 </button>
               </div>
-              <button data-bind="visible: !active(), click: handlePayout" class="btn btn-sm btn-success">Cash Out</button>
-              <button data-bind="visible: active(), click: handlePayout" class="btn btn-sm btn-danger">Cancel</button>
+              <button data-bind="visible: !active(), click: handlePayout" class="btn btn-sm btn-success">提现</button>
+              <button data-bind="visible: active(), click: handlePayout" class="btn btn-sm btn-danger">取消</button>
               <div class="investment-data-box investment-time-remaining">
                 <span data-bind="text: displayTimeRemaining"></span>
               </div>
@@ -746,14 +746,14 @@
     </div>
 
     <div role="tabpanel" class="tab-pane" id="acquisitions">      
-      <h3>Active Acquisitions (<span data-bind="text: activeAcquisitions().length"></span>/<span data-bind="text: simultaneousAcquisitions.val()"></span>)
+      <h3>进行中的收购 (<span data-bind="text: activeAcquisitions().length"></span>/<span data-bind="text: simultaneousAcquisitions.val()"></span>)
         <button class="btn btn-primary inv-acquisition-help-btn" data-toggle="modal" data-target="#acquisitionHelpModal">
-          <span>Instructions</span>
+          <span>说明</span>
           <i class="material-icons">help</i>
         </button>
       </h3>
       <div data-bind="fadeVisible: !activeAcquisitions().length" class="no-investments-box">
-        <h4 class="no-content-message">No Acquisitions Currently Held</h4>
+        <h4 class="no-content-message">目前没有进行中的收购</h4>
       </div>
       <div class="active-investments" data-bind="template: {
                             foreach: activeAcquisitions,
@@ -984,7 +984,7 @@
         </ul>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
       </div>
     </div>
   </div>
@@ -994,18 +994,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="exportModalLabel">Export Save</h3>
+        <h3 class="modal-title" id="exportModalLabel">导出存档</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Your exported save data is below. Copy it somewhere safe to back up your save data.</p>
+        <p>导出的保存数据如下。将它复制到安全的地方以备份保存的数据。</p>
         <textarea class="export-data" data-bind="value: exportedSaveData"></textarea>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="copyToClipboard()">COPY TO CLIPBOARD</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+        <button type="button" class="btn btn-primary" onclick="copyToClipboard()">复制到剪切板</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
       </div>
     </div>
   </div>
@@ -1015,18 +1015,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="importModalLabel">Import Save</h3>
+        <h3 class="modal-title" id="importModalLabel">导入存档</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Enter your game data in the input below. Keep in mind that this will <b>permanently erase</b> your current game progress and replace it with the data you are importing.</p>
+        <p>在下面的输入框中粘贴您的游戏存档数据。 请记住，这将<b>永久删除</b>您当前的游戏进度，并将其替换为您导入的数据。</p>
         <textarea class="import-textarea"></textarea>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="importGameData();">Import</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="importGameData();">导入</button>
       </div>
     </div>
   </div>
@@ -1036,18 +1036,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="wipeSaveModalLabel">Wipe Save</h3>
+        <h3 class="modal-title" id="wipeSaveModalLabel">擦除存档</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Choosing to wipe your save will <b>permanently erase</b> all of your game progress. Nothing will be retained, and your data cannot be recovered.</p>
-        <p>Are you sure you want to do it?</p>
+        <p>选择硬复位，将会擦除存档数据，并<b>永久删除</b>您的所有游戏进度。 什么都不会保留，您的数据无法恢复。</p>
+        <p>你确定要这么做吗？</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.wipeSaveFile();">Destroy it all</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.wipeSaveFile();">摧毁一切</button>
       </div>
     </div>
   </div>
@@ -1057,24 +1057,24 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="bankruptcyModalLabel">Bankruptcy</h3>
+        <h3 class="modal-title" id="bankruptcyModalLabel">破产</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <blockquote class="blockquote text-right">
-          <p style="margin: 15px 0 0 0;" class="mb-0">I've failed over and over and over again in my life.</p>
-          <p style="margin: 0 0 15px 0;" class="mb-0">And that is why I succeed.</p>
-          <footer class="blockquote-footer"><cite title="Source Title">Michael "Basket Ball" Jordan</cite></footer>
+          <p style="margin: 15px 0 0 0;" class="mb-0">在我的生命中，我一次又一次地失败了。</p>
+          <p style="margin: 0 0 15px 0;" class="mb-0">这就是我成功的原因。</p>
+          <footer class="blockquote-footer"><cite title="Source Title">迈克尔“篮球”乔丹</cite></footer>
         </blockquote>
-        <p>Choosing to declare bankruptcy will put an end to your current business &mdash; <span data-bind="text: businessName().name"></span> &mdash; which you have been faithfully grinding since something like <span data-bind="text: startTime.displayVal"></span>.</p>
-        <p>However, while your employees, your upgrades, and your accumulated cash will all reset, capital never truly dies. You will reemerge from bankruptcy retaining <b>all of your achievements</b>, as well as a powerful sense of boot-strap grit.</p>
-        <p>Also, you'll start your next business with an additional <b data-bind="text: nextBankruptcyBonus.displayVal"></b> added to your <b>Bankruptcy Multiplier</b>, which is currently a total of <b data-bind="text: cashStats()[9].displayVal"></b>.</p>
+        <p>选择宣布破产将结束您当前的业务 &mdash; <span data-bind="text: businessName().name"></span> &mdash; 你一直在忠实地研磨自己的东西<span data-bind="text: startTime.displayVal"></span>.</p>
+        <p>然而，当您的员工，升级和累积的现金全部重置时，资本永远不会真正死亡。 您将重新出现破产保留<b>所有成就</b>，以及强大的启动性勇气。</p>
+        <p>此外，您还可以额外开展下一项业务 <b data-bind="text: nextBankruptcyBonus.displayVal"></b> 添加到你的 <b>破产乘数</b>, 目前共计 <b data-bind="text: cashStats()[9].displayVal"></b>.</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.restartGame();">Declare Bankruptcy</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.restartGame();">宣布破产</button>
       </div>
     </div>
   </div>
@@ -1084,7 +1084,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="investmentModalLabel">Make a New Investment</h3>
+        <h3 class="modal-title" id="investmentModalLabel">进行新的投资</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -1092,10 +1092,10 @@
       <form id="investmentForm">
         <div class="modal-body">
           <blockquote class="blockquote text-right">
-            <p class="mb-0">If you’re not a risk taker, you should get the hell out of business.</p>
-            <footer class="blockquote-footer"><cite title="Source Title">Ray Kroc, Burger King</cite></footer>
+            <p class="mb-0">如果你不是风险承担者，你就应该破产。</p>
+            <footer class="blockquote-footer"><cite title="Source Title">雷·克洛克，汉堡王</cite></footer>
           </blockquote>
-          <p>Divert <b>10%</b> of your current <b>Cash Per Second</b> into an extremely reputable, fully above-board multinational corporation. Your investment will grow at its regular per-second rate, along with an additional <b data-bind="text: interestRate.displayVal()"></b> in interest and a bonus for the length of time invested.</p>
+          <p>转移 <b>10%</b> of your current <b>Cash Per Second</b> into an extremely reputable, fully above-board multinational corporation. Your investment will grow at its regular per-second rate, along with an additional <b data-bind="text: interestRate.displayVal()"></b> in interest and a bonus for the length of time invested.</p>
             <label for="time">Time to mature:</label>
             <input class="investment-time-input form-control" id="time" name="time" type="number" min="1" oninput="validateInvestment()">
             <select class="form-control" name="time-unit" onchange="validateInvestment()" title="Unit of Time">
@@ -1104,9 +1104,9 @@
             </select>
         </div>
         <div class="modal-footer">
-          <p class="validation-msg">Suffocating regulations cap your investments at 1 day</p>
-          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='all'">Invest All</button>
-          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='one'">Invest</button>
+          <p class="validation-msg">令人窒息的法规将您的投资限制在1天</p>
+          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='all'">投资全部</button>
+          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='one'">投资</button>
         </div>
       </form>
     </div>
@@ -1119,7 +1119,7 @@
       <div class="modal-header">
         <i class="material-icons" aria-hidden="true">mail</i>
         <h3 class="modal-title" id="mailModalLabel">
-          Mail
+          邮件
         </h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -1129,8 +1129,8 @@
 
       <div class="modal-body" data-bind="visible: !awayMailInbox().active() && emailHelpView()">
         <blockquote class="blockquote text-right">
-          <p class="mb-0">My view is there’s no bad time to innovate.</p>
-          <footer class="blockquote-footer"><cite title="Source Title">Jeff Bezo</cite></footer>
+          <p class="mb-0">我的观点是没有任何不好的时候进行创新。</p>
+          <footer class="blockquote-footer"><cite title="Source Title">杰夫贝佐</cite></footer>
         </blockquote>
         <p>Every great entrepenuer knows that true innovation requires a leader who <b>listens to the wisdom of others</b>. When emails find their way to your inbox, then, it's only good business to answer them with punctuality and professionalism.</p>
         <p>Some executives find that they profit most from communication by <b>responding as quickly as possible.</b> Others feel that the greatest path to success is taking their time in order to <b>respond thoroughly and constructively.</b> And some, of course, are just too busy <b>rapidly innovating</b> to respond before hours or even days have passed.</p>
