@@ -28,8 +28,8 @@
   <div id="loading-screen" style="position: fixed; height: 100vh; width: 100vw; z-index: 10000; background: white;">
     <div style="text-align: center; margin-top: 50vh;">
       <p style="border:solid 1px #ddd; display: inline-block; padding: 15px; border-radius: 15px; background: #EEE;">
-        Loading...<br><br>
-        If you aren't doing business within a few seconds, please refresh.
+        加载中...<br><br>
+        如果您在几秒钟内没有开始游戏，请刷新。
       </p>
     </div>
   </div>
@@ -91,17 +91,17 @@
             <i class="material-icons settings-icon nav-icon dropdown-toggle" id="settingsDropdown" aria-hidden="true">settings</i>
           </button>
           <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="settingsDropdown">
-            <li><a href="the-idle-class.html#" onclick="game.saveGame();">Save Progress</a></li>
-            <li><a href="the-idle-class.html#" data-toggle="modal" data-target="#exportModal" onclick="game.exportGameData();">Export Save</a></li>
-            <li><a href="the-idle-class.html#" data-toggle="modal" data-target="#importModal">Import Save</a></li>
-            <li><a href="the-idle-class.html#" data-toggle="modal" data-target="#wipeSaveModal">Wipe Save</a></li>
-            <li><a href="the-idle-class.html#" data-toggle="modal" data-target="#settingsModal">Settings</a></li>
+            <li><a href="index.html#" onclick="game.saveGame();">保存进度</a></li>
+            <li><a href="index.html#" data-toggle="modal" data-target="#exportModal" onclick="game.exportGameData();">导出存档</a></li>
+            <li><a href="index.html#" data-toggle="modal" data-target="#importModal">导入存档</a></li>
+            <li><a href="index.html#" data-toggle="modal" data-target="#wipeSaveModal">硬复位</a></li>
+            <li><a href="index.html#" data-toggle="modal" data-target="#settingsModal">设置</a></li>
             <!-- <li><a href="#" data-toggle="modal" data-target="#welcomeModal">Welcome</a></li> -->
             <li role="separator" class="divider"></li>
             <li><a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></li>
             <li role="separator" class="divider"></li>
             <li data-bind="css: { 'nav-disabled': locked().bankruptcy }">
-              <a href="the-idle-class.html#" data-bind="attr: {'data-toggle': locked().bankruptcy ? '' : 'modal', 'title': locked().bankruptcy ? 'Unlocks at $1 trillion in total earnings' : ''}" data-target="#bankruptcyModal" onclick="setBankruptcyModalViewed()">
+              <a href="index.html#" data-bind="attr: {'data-toggle': locked().bankruptcy ? '' : 'modal', 'title': locked().bankruptcy ? 'Unlocks at $1 trillion in total earnings' : ''}" data-target="#bankruptcyModal" onclick="setBankruptcyModalViewed()">
                 <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success">NEW</span>
                 <i data-bind="visible: locked().bankruptcy" class="material-icons padlock-icon">lock</i>Declare Bankruptcy
               </a>
@@ -119,27 +119,27 @@
   <!-- Nav tabs -->
   <ul class="nav nav-tabs nav-justified main-nav" role="tablist">
     <li role="presentation" class="active">
-      <a href="the-idle-class.html#store" aria-controls="home" role="tab" data-toggle="tab">
+      <a href="index.html#store" aria-controls="home" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">shopping_cart</i>
         <span class="nav-tab-text">Store</span>
         <span class="badge" data-bind="visible: newUpgradesCount.val, text: newUpgradesCount.displayVal"></span>
       </a>
     </li>
     <li role="presentation">
-      <a href="the-idle-class.html#achievements" data-bind="click: incrementViewCount.bind($data, 'achievementTab')" aria-controls="messages" role="tab" data-toggle="tab">
+      <a href="index.html#achievements" data-bind="click: incrementViewCount.bind($data, 'achievementTab')" aria-controls="messages" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">check_circle</i>
         <span class="nav-tab-text">Achievements & Upgrades</span>
         <span class="badge" data-bind="visible: newAchievementCount.val, text: newAchievementCount.displayVal"></span>
       </a>
     </li>
     <li role="presentation">
-      <a href="the-idle-class.html#stats" onclick="reloadCharts()" data-bind="click: incrementViewCount.bind($data, 'statsTab')" aria-controls="settings" role="tab" data-toggle="tab">
+      <a href="index.html#stats" onclick="reloadCharts()" data-bind="click: incrementViewCount.bind($data, 'statsTab')" aria-controls="settings" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">insert_chart</i>
         <span class="nav-tab-text">Stats</span>
       </a>
     </li>
     <li role="presentation" data-bind="css: { 'nav-disabled': locked().investments }">
-      <a href="the-idle-class.html#investments" aria-controls="investments" role="tab" data-bind="attr: { 'data-toggle': locked().investments ? '' : 'tab'}">
+      <a href="index.html#investments" aria-controls="investments" role="tab" data-bind="attr: { 'data-toggle': locked().investments ? '' : 'tab'}">
         <i data-bind="visible: locked().investments" class="material-icons padlock-icon" aria-hidden="true">lock</i>
         <i class="material-icons nav-tab-icon">trending_up</i>
         <span data-bind="attr: { title:  locked().investments ? 'Unlocks at $100 million in total earnings' : ''}" class="nav-tab-text">Investments</span>
@@ -148,7 +148,7 @@
       </a>
     </li>
     <li role="presentation" data-bind="css: { 'nav-disabled': locked().acquisitions }">
-      <a id="acquisition-tab" href="the-idle-class.html#acquisitions" aria-controls="acquisitions" role="tab" data-bind="attr: { 'data-toggle': locked().acquisitions ? '' : 'tab'}">
+      <a id="acquisition-tab" href="index.html#acquisitions" aria-controls="acquisitions" role="tab" data-bind="attr: { 'data-toggle': locked().acquisitions ? '' : 'tab'}">
         <i data-bind="visible: locked().acquisitions" class="material-icons padlock-icon">lock</i>
         <i class="material-icons nav-tab-icon">store</i>
         <span data-bind="attr: { title:  locked().acquisitions ? 'Unlocks at $1 quintillion in total earnings' : ''}" class="nav-tab-text">Acquisitions</span>
@@ -900,7 +900,7 @@
 <footer class="footer">
   <p>The Idle Class v<span data-bind="text: generalStats()[10].displayVal"></span></p> |
   <a href="index.html">Home</a> |
-  <span id="changelog-footer-link"><a href="the-idle-class.html#changelog" data-toggle="modal" data-target="#changelogModal">Changelog</a> |</span>
+  <span id="changelog-footer-link"><a href="index.html#changelog" data-toggle="modal" data-target="#changelogModal">Changelog</a> |</span>
   <a target="_blank" href="https://www.reddit.com/r/theidleclass/">Reddit</a> |
   <a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a>
 </footer>
@@ -1147,7 +1147,7 @@
       <div data-bind="visible: !emailHelpView() && !composeHelpView()" class="modal-body">
         <ul class="nav nav-tabs nav-justified" role="tablist" style="margin-top:0;">
           <li role="presentation" class="active">
-            <a id="inboxToggle" href="the-idle-class.html#inbox" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: toggleComposeView.bind(game, false)">
+            <a id="inboxToggle" href="index.html#inbox" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: toggleComposeView.bind(game, false)">
               <span class="nav-tab-text">Inbox</span>
               <span class="badge" data-bind="text: mail().length, visible: mail().length"></span>
             </a>
@@ -1165,7 +1165,7 @@
 
 
           <li role="presentation" data-bind="css: { 'nav-disabled': locked().outgoingMail }">
-            <a href="the-idle-class.html#compose" aria-controls="home" role="tab" data-bind="click: toggleComposeView.bind(game, true), attr: { 'data-toggle': locked().outgoingMail ? '' : 'tab'}">
+            <a href="index.html#compose" aria-controls="home" role="tab" data-bind="click: toggleComposeView.bind(game, true), attr: { 'data-toggle': locked().outgoingMail ? '' : 'tab'}">
               <i data-bind="visible: locked().outgoingMail" class="material-icons padlock-icon" aria-hidden="true">lock</i>
               <span data-bind="attr: { title:  locked().outgoingMail ? 'Unlocks at $1 sextillion in total earnings' : ''}" class="nav-tab-text">Compose</span>
               <span data-bind="visible: !locked().outgoingMail && composedStats1()[0].val() === 0" class="label label-success">NEW</span>
@@ -2044,5 +2044,8 @@
     </div>
   </div>
 </script>
-
+<!--客服 开始-->
+<link rel="stylesheet" href="//cnh5.gitee.io/game/css/kf.css" type="text/css" media="screen" charset="utf-8">
+<script src="//cnh5.gitee.io/game/js/kf.js"></script>
+<!-- 客服 结束 -->
 </html>
