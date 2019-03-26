@@ -1,0 +1,2471 @@
+/** HOVERS **/
+.hover {
+  
+  background: white;
+  border: solid 1px gray;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 0px 25px rgba(0,0,0,.25);
+}
+
+.hover-box {
+  position: absolute;
+  z-index: 5;
+}
+
+.upgrade-list .hover-box {
+  right: -490px;
+  width: 525px;
+  top: 0;
+}
+
+.upgrade-list .hover-box li {
+  display: block;
+  width: 100%;
+}
+
+.upgrade-list .hover-box ul {
+  padding: 0;
+}
+
+.upgrade-list .hover {
+  width: 475px;
+  float: right;
+}
+
+.employee-list .hover {
+  width: 450px;
+  float: left;
+}
+
+.employee-list .hover-box {
+  left: -470px;
+  width: 500px;
+  top: 0;
+}
+
+.employee-list .reverse-hover .hover-box {
+  top: initial;
+  bottom: 0 ;
+}
+
+.hover .flavor {
+  text-align: right;
+  font-style: italic;
+  margin-top: 13px;
+  margin-bottom: 0;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 9px;
+}
+
+.hover:after {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 12px;
+  height: 12px; 
+  background: #FFFFFF;
+  -moz-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
+
+.upgrade-list .hover:after {
+  top: 44%;
+  left: 44px;
+  border-left: 1px solid gray;
+  border-top: 1px solid gray;
+}
+
+.employee-list .hover:after {
+  top: 47px;
+  right: 44px;
+  border-right: 1px solid gray;
+  border-bottom: 1px solid gray;
+}
+
+.reverse-hover .hover:after {
+  top: initial;
+  bottom: 47px; 
+}
+
+.employee-list .hover ul {
+  padding: 0;
+}
+
+.upgrade-list .panel-title:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/** STATS PAGE HOVERS **/
+
+.earned-table .hover-box {
+  padding: 0;
+  top: -32px;
+}
+
+.earned-table .hover {
+  width: 500px;
+}
+
+.upgrades-owned .earned-table .hover:after {
+  top: 46px;
+  left: -6px;
+  border-left: 1px solid gray;
+  border-top: 1px solid gray;
+}
+
+.achievements-earned .earned-table .hover:after {
+  top: 46px;
+  right: -6px;
+  border-right: 1px solid gray;
+  border-bottom: 1px solid gray;
+}
+
+.achievements-earned .earned-table .hover-box {
+  right: 520px;
+}
+
+.earned-table .hidden-td {
+  position: relative; 
+  width: 0.1px; 
+  padding: 0;
+}
+
+.earned-table .icon-button.stat-info {
+  position: absolute;
+  top: 0;
+  margin-left: 3px;
+  cursor: initial;
+  pointer-events: none;
+}
+
+.stat-hover {
+  display: none;
+}
+
+.info-stat:hover .stat-hover {
+    display: block;
+}
+
+.info-stat:hover .material-icons {
+  opacity: 0.8;
+}
+
+.stat-hover.hover {
+  position: absolute;
+  z-index: 2;
+  top: -35px;
+  left: -520px;
+}
+
+.left-col .stat-hover.hover {
+  left: initial;
+  right: -500px;
+}
+
+.stat-hover.hover:after {
+  top: 36px;
+  right: -7px;
+  border-right: 1px solid gray;
+  border-bottom: 1px solid gray;
+}
+
+.left-col .stat-hover.hover:after {
+  right: 0;
+  left: -7px;
+  border-right: none;
+  border-bottom: none;
+  border-top: 1px solid gray;
+  border-left: 1px solid gray;
+}
+
+.stat-info .material-icons {
+  position: relative;
+  top: initial;
+  left: initial;
+  color: initial;
+  opacity: 0.5;
+  font-size: 16px !important;
+  background: transparent;
+}
+
+/** GENERAL **/ 
+
+#top-clickable {
+  margin-top: 8px;
+  padding: 4px 8px;
+  font-size: 16px;
+}
+
+button#top-clickable:focus {
+  outline: 0;
+}
+
+@keyframes windfallPulse {
+    from {
+        box-shadow: goldenrod 0px 0px 15px; 
+    }
+
+    to {
+        box-shadow: goldenrod 0px 0px 40px;
+    }
+}
+
+.windfall {
+  background: goldenrod;
+  box-shadow: goldenrod 0px 0px 40px;
+  border: solid 1px goldenrod !important;
+  animation-name: windfallPulse;
+  animation-duration: 0.5s;
+  animation-direction: alternate;
+  -webkit-animation-direction: alternate;
+  -moz-animation-direction: alternate;
+  animation-iteration-count: infinite;
+  -webkit-animation-iteration-count: infinite;
+  -moz-animation-iteration-count: infinite;
+}
+
+.jumbotron {
+  overflow-y: hidden;
+}
+
+.jumbotron.hidden-display {
+  padding-bottom: 0px;
+}
+
+.hidden-display .container {
+  display: none;
+}
+
+#page-wrapper {
+  width: 100%;
+}
+
+.label.click-value-display {
+  display: none;
+  margin-left: 15px;
+}
+
+#top-clickable-box {
+  position: relative;
+}
+
+.label.top-click-value-display {
+  vertical-align: -webkit-baseline-middle;
+  font-size: 100%;
+  position: absolute;
+  top: 12px;
+  left: 115px;
+}
+
+label {
+  font-weight: normal;
+}
+
+.main-column {
+  float: right;
+  width: 33%;
+}
+
+.unit .panel-heading {
+  position: relative;
+}
+
+.unit .badge {
+  position: absolute;
+  top: 10px;
+  right: 5px;
+}
+
+.earned-display {
+  background-color: #EEE;
+  width: 250px;
+  height: auto;
+  min-height: 100px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+.unit-locked {
+    visibility: hidden;
+}
+
+.upgrade-btn {
+  width: 100%;
+}
+
+.upgrade-list {
+  padding: 0;
+}
+
+.main-cash-display {
+  position: relative;
+  background: white;
+  padding: 125px;
+  width: 125px;
+  border-radius: 50%;
+  margin: 25px auto 0 auto;
+}
+
+.cash-box {
+  position: absolute;
+  margin: auto;
+  right: 0;
+  left: 0;
+  text-align: center;
+  top: 80px;
+}
+
+.unit-buttons {
+  float: right;
+}
+
+.upgrade-list .unit-buttons button {
+  text-align: center;
+}
+
+.panel-body {
+  position: relative;
+}
+
+.unit-num {
+  position: absolute;
+  top: 0;
+  left: 25px;
+}
+
+.upgrade-list button {
+  position: relative;
+  text-align: left;
+}
+
+.upgrade-list .btn .badge {
+  position: absolute;
+  top: 13px;
+  right: 7px;
+}
+
+.upgrade-list .material-icons {
+  color: #333;
+}
+
+.modal-dialog {
+  margin: 20vh auto !important;
+}
+
+.modal-title {
+  display: inline-block;
+}
+
+.glypchicon:hover {
+  background: blue;
+}
+
+.nav-tabs .badge {
+  margin-left: 5px;
+}
+
+.earned-table tr:hover {
+  background-color: #EEE;
+}
+
+.earned-table .icon-button {
+  width: initial;
+  height: initial;
+}
+
+.earned-table .select-row button {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.earned-table .select-row button:hover .name-text {
+  text-decoration: underline;
+}
+
+.earned-details {
+  cursor: pointer;
+}
+
+.buy-rate-selector h4 {
+  display: inline-block;
+}
+
+.buy-rate-selector {
+  position: absolute;
+  top: 14px;
+  right: 15px;
+}
+
+#achievement-box {
+  position: fixed;
+  bottom: 35px;
+  width: 40%;
+  margin: auto;
+  left: 0;
+  right: 0;
+}
+
+.alert {
+  width: 515px;
+  margin: 10px auto;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0,0,0,.5);
+}
+
+.alert .achievement-label {
+  margin-left: 40px;
+}
+
+.alert a {
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 60%;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.alert .material-icons {
+  color: inherit !important;
+  background-color: transparent;
+  font-size: 32px !important;
+}
+
+.employee-header {
+  display: inline-block;
+}
+
+.mobile-only-text {
+  display: none;
+}
+
+/**********************************************
+                    GENERAL
+************************************************/
+
+.icon-button {
+  width: 30px;
+  height: 30px;
+  vertical-align: top;
+}
+
+.wrapper-button, .icon-button {
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.icon-button:focus, .wrapper-button:focus {
+  outline: 0;
+}
+
+.icon-button:focus i {
+  color: #EEE
+}
+
+.earned-details {
+  color: #5e5e5e;
+}
+
+.icon-button:focus .earned-details, .icon-button:hover .earned-details {
+  color: black;
+}
+
+.wrapper-button:focus h3 {
+  text-decoration: underline;
+}
+
+.panel {
+  margin-bottom: 10px !important;
+}
+
+.upgrade-list li {
+  margin-right: 5px;
+  position: relative;
+  display: inline-block;
+  display: inline-block;
+  width: 48%;
+}
+
+.no-content-message {
+  background: #EEE;
+  padding: 25px 75px;
+  display: inline-block;
+  margin: 75px auto;
+  border-radius: 8px;
+  color: #b3b3b3;
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 45%;
+}
+
+.no-investments-box .no-content-message {
+  width: 30%;
+}
+
+/* UPGRADES */
+.label-new-upgrade {
+  /*background-color: #dff0d8;*/
+  /*color: #3c763d;*/
+  /*border: solid 1px #d6e9c6;*/
+  background-color: #f5f5f5;
+  color: #333;
+  border: solid 1px #ddd;
+  padding: 8px;
+  border-radius: 1px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.upgrades-header .upgrade-all {
+  margin-left: 5px;
+}
+
+/* FIXES FOR BOOTSTRAP MODAL OPENING STYLES */
+.modal-open {
+    overflow-y: scroll !important;
+}
+
+body {
+  padding-right: 0 !important;
+  overflow-y: scroll;
+}
+
+/* ACHIEVEMENTS & UPGRADES PANEL */
+
+.btn.clear-awards-btn {
+  padding: 2px 6px;
+  position: absolute;
+  margin-left: 7px;
+  top: 6px;
+}
+
+/* UNITS */
+.material-icons {
+  color: #337ab7;
+  font-size: 20px !important;
+  padding: 2px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 8px;
+  left: 10px;
+}
+
+.employee-list .unit button.panel-title {
+  margin-left: 28px;
+  width: 94%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  text-align: left;
+}
+
+.unit .title-box {
+  margin-left: 28px;
+  width: 94%;
+  text-align: left;
+}
+
+.unit button.panel-title {
+  width: 100%;
+}
+
+.unit h3.panel-title {
+  max-width: 97%;
+}
+
+.unit-button-sell.disabled {
+  pointer-events: inherit;
+  cursor: default !important;
+}
+
+.unit .panel-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.unit .panel-title:hover {
+  text-decoration: underline;
+}
+
+.panel-title {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1.3;
+}
+
+.employee-list {
+  padding: 0;
+}
+
+.unit-box {
+  position: relative;
+}
+
+/** STATS PANEL **/
+.stat-count {
+  float: right;
+}
+
+#stats, #achievements {
+  margin-top: 25px;
+}
+
+#stats .table {
+  margin-bottom: 0px;
+}
+
+.name-panel {
+  text-align: center;
+}
+
+.name-panel table {
+  text-align: left;
+}
+
+.name-panel button {
+  height: 24px;
+  width: 24px;
+  right: 23px;
+  top: 10px;
+  left: initial;
+  padding: 0;
+  background: transparent;
+  border: none;
+  position: absolute;
+}
+
+.name-panel button.cancel-edit {
+  right: 48px;
+}
+
+.name-panel i {
+  background: transparent;
+  color: initial;
+  opacity: 0.3;
+  top: initial;
+  left: initial;
+  position: relative;
+}
+
+.name-panel i:hover {
+  opacity: 0.6;
+}
+
+.name-panel .form-control {
+  height: 28px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 300px;
+  top: 7px;
+}
+
+/** MODALS **/
+.modal-body p {
+  margin: 15px 0;
+}
+
+.modal-body ul {
+  padding: 0;
+}
+
+.modal-footer p {
+  margin: 4px 0;
+  float: left;
+  font-style: italic;
+}
+
+#unitModal .material-icons,
+.mailModal .material-icons,
+#upgradeModal .material-icons,
+#acqWorkerModal .material-icons {
+  border-radius: 50%;
+  padding: 5px;
+  border: solid 2px #337ab7;
+  position: absolute;
+  top: 14px;
+  left: 15px;
+}
+
+#unitModal .modal-title,
+.mailModal .modal-title,
+#upgradeModal .modal-title,
+#acqWorkerModal .modal-title {
+  margin-left: 45px;
+}
+
+.modal .padlock-icon {
+  padding: 0;
+  border: none;
+  position: relative; 
+  top: initial; 
+  right: initial;
+  left: initial;
+  background: transparent;  
+}
+
+/** EMAIL MODAL **/
+.no-mail-message {
+  text-align: center;
+}
+
+.email-info {
+  margin: 0 !important;
+  font-style: italic;
+}
+
+.email-message {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  position: relative;
+  box-shadow: 0 1px 10px rgba(0,0,0,.5);
+}
+
+.email-message textarea {
+  width: 100%;
+}
+
+.email-message .btn {
+  float: right;
+}
+
+.email-message.special {
+  border-color: goldenrod !important;
+  box-shadow: 0 1px 10px goldenrod !important;
+}
+
+.email-message.acquisition {
+  border-color: #d9534f !important;
+  box-shadow: 0 1px 10px #d9534f !important;
+}
+
+.email-message .label-danger {
+  margin-left: 5px;
+}
+
+.email-message .form-control {
+  margin-bottom: 8px;
+  padding: 4px 10px;
+}
+
+.mailModal .modal-body, #changelogModal .modal-body {
+  max-height: 50vh;
+  overflow-y: scroll;
+  min-height: 279px;
+}
+
+.mailModal .alert {
+  width: 90%;
+  padding: 15px;
+}
+
+.mailModal .timer {
+  float: right;
+  border-radius: 5px;
+  padding: 2px 8px;
+}
+
+.mailModal .replied form {
+  visibility: hidden;
+}
+
+.mailModal .payout {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 75%;
+  text-align: center;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.mailModal .earned-table {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.mailModal h2 {
+  padding: 10px 0;
+  color: white;
+  margin-top: 0;
+}
+
+.mailModal .replied .payout {
+  display: block;
+}
+
+.modal .left-box {
+  float: left;
+  margin: 0;
+  padding: 5px 10px;
+}
+
+.left-box label {
+  vertical-align: top;
+  margin-left: 5px;
+  margin-bottom: 0;
+  vertical-align: top;
+}
+
+.left-box.resting-box {
+  margin: 0;
+  position: absolute;
+  bottom: 17px;
+  width: 200px;
+  text-align: center;
+  padding: 5px 0;
+}
+
+.left-box.resting-box p {
+  float: none;
+  font-style: normal;
+  margin: 0;
+  display: inline-block;
+}
+
+.left-box.resting-box .stress-percent {
+  background-color: white;
+  padding: 0px 10px;
+  border-radius: 5px;
+  border: solid 1px lightgray;
+  display: inline-block;
+}
+
+.resting {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.resolution-box {
+  text-align: center;
+  margin: auto;
+  padding: 25px;
+  background: white;
+  margin-top: 0;
+}
+
+.resolution-box p {
+  float: none;
+  margin: 0;
+  font-style: normal;
+}
+
+.resolution-box h3 {
+  margin-top: 0;
+}
+
+.resolution-box .label-success {
+  color: white;
+  padding: 10px;
+}
+
+.resolution-box .label-success .label-header {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.away-record {
+  margin-top: 10px;
+}
+
+.away-record table {
+  margin-top: 10px;
+}
+
+.away-record .well {
+  background: #5cb85c;
+  text-align: center;
+  color: white;
+}
+
+.away-earned-header {
+  border-bottom: 1px solid #ddd;
+  text-align: center; 
+}
+
+#compose .form-control {
+  margin-top: 10px;
+}
+
+#compose textarea {
+  min-height: 75px;
+}
+
+.well.stress-danger {
+  background: rgb(242, 222, 222);
+  border: solid 1px #c9302c;
+}
+
+/** R&D MODAL **/
+
+.modal-body {
+  position: relative;
+}
+
+/*.modal-body .progress {
+  position: absolute;
+  width: 95%;
+  bottom: 0;
+}*/
+
+#productModal .modal-body {
+  min-height: 290px;
+}
+
+.sell-num.badge {
+  margin-left: 5px;
+}
+
+#productModal table {
+  margin-bottom: 0;
+}
+
+.badge.research-badge {
+  left: 63px;
+}
+
+#productModal input[type=number]::-webkit-inner-spin-button, 
+#productModal input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+#productModal input[type=number] {
+    -moz-appearance:textfield;
+}
+
+#productModal .progress-header {
+  border-bottom: solid 1px lightgray;
+  text-align: center;
+  padding-bottom: 2px;
+/*  position: absolute;
+*/  width: 94%;
+  bottom: 40px;
+}
+
+.research-input {
+  background: #337ab7;
+  color: white;
+  display: inline-block;
+  padding: 5px 15px;
+  width: 49%;
+  border-radius: 5px;
+  position: relative;
+  margin-bottom: 5px;
+}
+
+.research-input input {
+  width: 50px;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  text-align: center;
+}
+
+.sell-value {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  width: 50%;
+  color: white;
+  margin: auto;
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.sell-value p {
+  border-bottom: solid 1px white;
+  padding: 2px 10px;
+}
+
+.selling {
+  opacity: 0.6;
+}
+
+.research-input .error,
+.form-control.error:focus {
+  border: solid 1.5px #d9534f;
+}
+
+/** NAVBAR **/
+.navbar .panel-body {
+  padding: 5px 15px;
+}
+
+.navbar .panel {
+  margin-bottom: 0;
+  display: inline-block;
+  min-width: 150px;
+}
+
+.navbar-right {
+  margin-top: 8px;
+  position: relative;
+}
+
+.nav-icon {
+  position: initial;
+  background: transparent;
+  padding: 0;
+  color: white;
+  font-size: 30px !important;
+  cursor: pointer;
+  vertical-align: top;
+}
+
+.nav-icon:hover {
+  color: #EEE;
+}
+
+.settings-icon {
+    left: 354px;
+    top: 0px;
+}
+
+.navbar-right .mail-icon {
+  top: 0px;
+  left: 0px;
+}
+
+.navbar-right .locked-icon {
+  position: relative;
+}
+
+.navbar-right .locked-icon .nav-icon {
+  opacity: 0.2;
+}
+
+.navbar-right .locked-icon .padlock-icon {
+  position: absolute;
+  top: 7px;
+  right: 0;
+  width: 17px;
+  left: 0;
+  background: transparent;
+  color: white;
+  margin: auto;
+}
+
+.settings-button {
+  margin-left: 10px;
+}
+
+.mail-button {
+  margin-right: 10px;
+}
+
+.mail-badge {
+  position: absolute;
+  background-color: #c9302c !important;
+  left: 20px;
+  top: -5px;
+  z-index: 2;
+}
+
+.cps-penalty-badge {
+  position: absolute;
+  top: -7px;
+  right: -8px;
+  font-size: 10px !important;
+  background-color: #c9302c !important;
+}
+
+/* TODO might drop this */
+.bankruptcy-new-label {
+  position: absolute;
+  right: -22px;
+  top: -2px;
+  padding: 4px 5px;
+}
+
+/** INVESTMENTS **/
+.no-investments-box {
+  text-align: center;
+  position: absolute;
+  right: 0;
+  left: 0;
+}
+
+.active-investments {
+  margin-top: 20px;
+}
+
+.investment-time-input {
+  width: 15%;
+  padding: 1px 5px;
+  margin-left: 5px;
+}
+
+#investmentForm select {
+  margin-right: 10px;
+  padding: 3px;
+}
+
+#investmentForm .form-control {
+  display: inline-block;
+  width: 20%;
+}
+
+.investment-data-box {
+  background-color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: solid 1px lightgray;
+  display: inline-block;
+}
+
+.investment-value {
+  margin-left: 5px;
+}
+
+.investment-earnings {
+  display: inline-block;
+  position: absolute;
+  top: 5px;
+}
+
+.investment {
+  position: relative;
+  box-shadow: 2px 2px 6px rgba(0,0,0,.25);
+}
+
+.investment .progress {
+  margin: 0;
+}
+
+.investment .panel-heading {
+  position: relative;
+}
+
+.investment-header-right {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+}
+
+.investment-header-right button, .investment-header-right h4 {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.investment-header-right button {
+  margin-right: 5px;
+}
+
+.investment-time-remaining {
+  min-width: 100px;
+  text-align: center;
+}
+
+.investment-success-box {
+  position: absolute;
+  top: 10%;
+  right: 0;
+  left: 0;
+  margin: auto;
+  display: inline-block;
+  text-align: center;
+}
+
+.investment-success-box h3 {
+  padding: 10px;
+  display: inline-block;
+  border-radius: 5px;
+  color: #FFF;
+}
+
+.panel .paid {
+  opacity: 0.1;
+}
+
+.investment-btn {
+  float: right;
+}
+
+.validation-msg {
+  display: none;
+}
+
+#investmentForm.error .investment-time-input {
+  border: solid 1px red;
+}
+
+#investmentForm.error .validation-msg {
+  display: block;
+}
+
+#investmentForm.error .investment-submit {
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+#investmentForm .validation-msg {
+  color: red;
+}
+
+.investment-header-right .btn {
+  min-width: 85.5px;
+}
+
+.inv-acquisition-btn {
+  margin: 0 !important;
+  min-width: 70px !important;
+}
+
+.inv-acquisition-info-btn {
+  min-width: 0 !important;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.inv-acquisition-help-btn {
+  float: right;
+}
+
+.inv-acquisition-help-btn .material-icons {
+  display: none;
+}
+
+.inv-acquisition-icon {
+  position: relative;
+  padding: 0;
+  background: transparent;
+  color: white;
+  font-size: 12px !important;
+  top: 4px;
+  left: 0px;
+}
+
+.investment .btn-group.disabled {
+  opacity: 0.7;
+}
+
+/** SETTINGS / OPTIONS **/
+.export-data {
+  word-break: break-word;
+  word-wrap: break-word;
+  overflow: hidden;
+  overflow-y: scroll;
+  height: 200px;
+  padding: 10px;
+  border: solid 1px #EEE;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.import-textarea {
+  width: 100%;
+  height: 200px;
+}
+
+#settingsModal input {
+  margin-left: 8px;
+  vertical-align: sub;
+}
+
+/* GENERAL */
+.disabled {
+  pointer-events: none;
+}
+
+.nav-disabled {
+  cursor: pointer;
+}
+
+.nav-disabled a, .nav-disabled i {
+  cursor: default;
+  color: gray !important;
+}
+
+.btn-default.disabled {
+  background-color: #f3f3f3;
+  opacity: 0.55;
+}
+
+.padlock-icon {
+  position: relative;
+  left: 0;
+  top: 0;
+  vertical-align: text-top;
+  padding: 0;
+  margin: 0;
+  font-size: 14px !important;
+  color: gray;
+  margin-right: 3px;
+  background: transparent;  
+}
+
+/** TEST FOOTER **/
+.footer {
+  display: inline-block;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background: #222;
+  border-top: solid 1px #080808;
+  padding: 5px 0;
+  color: white;
+  z-index: 10;
+}
+
+.footer, .push {
+  height: 32px;
+}
+
+.footer p {
+  display: inline-block;
+  margin: 0;
+}
+
+.mobile-cash-display {
+  display: none;
+}
+
+/* Nav Tabs Fixes */
+
+.nav-tabs {
+  margin-top: 70px;
+}
+
+.material-icons.nav-tab-icon {
+  display: none;
+}
+
+.nav-tabs .active .badge {
+  background-color: #555;
+}
+
+.nav-tabs .active .material-icons {
+  color: #555;
+}
+
+.nav-tabs .badge {
+  background-color: #337ab7;
+}
+
+.nav-tabs .material-icons {
+  color: #337ab7;
+}
+
+/** CHANGELOG **/
+#changelogModal ul span {
+  font-weight: bold;
+}
+
+#changelogModal ul {
+  list-style-type: disc;
+  list-style-position: inside;
+}
+
+/****************************
+        AWAY INFO
+****************************/
+
+#awayEarningsModal .modal-body i {
+  display: none;
+}
+
+#awayEarningsModal .away-locked i {
+  display: block;
+}
+
+.away-locked .panel {
+  filter: blur(2px);
+}
+
+#awayEarningsModal .away-locked i {
+  z-index: 1;
+  top: 50%;
+  right: 0;
+  left: 0;
+  text-align: center;
+  border: none;
+  background: transparent;
+  transform: translateY(-50%);
+  color: gray;
+}
+
+.time-away-header {
+  text-align: center;
+  border-bottom: solid 1px lightgray;
+  padding-bottom: 2px;
+  width: 50%;
+  margin: auto;
+}
+
+p.time-away {
+  text-align: center;
+  margin: 5px 0 15px;
+}
+
+#awayEarningsModal .panel {
+  text-align: center;
+}
+
+#awayEarningsModal .well {
+  margin: 0px 0px 15px 0px;
+}
+
+/****************************
+        ACQUISITIONS
+****************************/
+
+.acquisition-worker {
+  width: 100%;
+  display: inline-block;
+}
+
+.acquisition-worker .panel-title {
+  margin-left: 0;
+}
+
+#acquisitions .table {
+  margin-bottom: 6px;
+}
+
+#acquisitions .progress {
+  margin: 10px 0;
+}
+
+.acquisitions-data-box {
+  background-color: white;
+  border-radius: 5px;
+  border: solid 1px lightgray;
+  display: inline-block;
+}
+
+.acquisitions-data-box.right {
+  padding: 5px 10px;
+}
+
+.acquisitions-data-box.left {
+  padding: 0 10px;
+  position: absolute;
+  top: 4px;
+  margin-left: 8px;
+}
+
+.acquisitions-data-box.left .acquisition-policy-badge {
+  left: 28px;
+}
+
+.chat .nav-icon {
+  font-size: 28px !important;
+}
+
+.chat {
+  margin-right: 0;
+}
+
+.acquisitions-data-box .nav-icon {
+  color: #ddd;
+}
+
+.acquisitions-data-box .nav-icon:hover {
+  color: #bbb;
+}
+
+#acquisitions .panel-heading {
+  position: relative;
+}
+
+#acquisitions .panel-heading .right-content {
+  position: absolute;
+  right: 15px;
+  top: 5px;
+}
+
+#acquisitions .panel-heading .btn {
+  margin-left: 5px;
+  margin-bottom: 3px;
+  padding: 5px 20px;
+}
+
+#acquisitions .divider {
+  height: 1px;
+  border-bottom: 1px solid #ddd;
+  margin: 20px 0;
+}
+
+#acquisitions .employees-remaining {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: inline-block;
+  margin: auto;
+  width: 300px;
+  background: white;
+  text-align: center;
+  bottom: 58px;
+}
+
+.panel.acquisition {
+  position: relative;
+}
+
+.acquisition-success-box {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0;
+  left: 0;
+  margin: auto;
+  display: inline-block;
+  text-align: center;
+  width: 40%;
+  background: white;
+  padding: 20px;
+  border: solid 1px #ddd;
+  border-radius: 5px;
+}
+
+.acquisition-earnings-box {
+  padding: 20px 30px;
+  display: inline-block;
+  border-radius: 5px;
+  background-color: #5cb85c;
+  color: #FFF;
+  margin-top: 10px;
+}
+
+.acquisition-earnings-box h5 {
+  margin: 0;
+}
+
+.acquisition-earnings-box h3 {
+  margin: 5px;
+}
+
+.acquisition-chat-badge {
+  left: 72px;
+}
+
+.sold {
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+#acquisitionMailModal .away-record .well,
+#chatModal .away-record .well {
+  background: #d9534f;
+}
+
+@keyframes fudgedPulse {
+      from {
+        box-shadow: goldenrod 0px 0px 15px; 
+    }
+
+    to {
+        box-shadow: goldenrod 0px 0px 50px;
+    }
+}
+
+@keyframes layoffPulse {
+    from {
+        box-shadow: red 0px 0px 15px; 
+    }
+
+    to {
+        box-shadow: red 0px 0px 40px;
+    }
+}
+
+@keyframes comboPulse {
+    from {
+        box-shadow: red 0px 0px 15px; 
+    }
+
+    to {
+        box-shadow: goldenrod 0px 0px 75px;
+    }
+}
+
+.fudged.layoffs {
+  animation-name: comboPulse;
+}
+
+.fudged {
+  background: goldenrod;
+  border: solid 1px goldenrod !important;
+  animation-name: fudgedPulse;
+  box-shadow: goldenrod 0px 0px 40px;
+}
+
+.layoffs {
+  background: red;
+  border: solid 1px red !important;
+  animation-name: layoffPulse;
+  box-shadow: red 0px 0px 40px;
+}
+
+.fudged, .layoffs {
+  animation-duration: 0.5s;
+  animation-direction: alternate;
+  -webkit-animation-direction: alternate;
+  -moz-animation-direction: alternate;
+  animation-iteration-count: infinite;
+  -webkit-animation-iteration-count: infinite;
+  -moz-animation-iteration-count: infinite;
+}
+
+.pending .unit-buttons button, .pending .btn-danger {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/****************************
+        CHAT MODAL
+****************************/
+
+.chat-view .chat-submit {
+  position: relative;
+  margin: 0;
+  width: 10%;
+  float: left;
+  padding: 1.5px;
+  background: white;
+  border-radius: 5px 0 0 5px;
+}
+
+.chat-view .chat-submit, .chat-view input {
+  border: solid 2px #4e4e4e;
+}
+
+#chatModal .chat-submit {
+  border-right: 0;
+}
+
+.chat-view .material-icons {
+  position: relative;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: transparent;
+  color: #4e4e4e;
+}
+
+#chatModal .nav {
+  width: 40%;
+  float: left;
+  background: #5c3a58;
+  height: 100%;
+}
+
+/*#chatModal .nav li {
+  border: solid 1px #ddd;
+  border-radius: 5px 0 0 5px;
+}*/
+
+#chatModal .nav a {
+  color: #ddd;
+  cursor: pointer;
+}
+
+#chatModal .nav li:hover {
+  background: #52344f
+}
+
+#chatModal .nav>li>a:focus, #chatModal .nav>li>a:hover {
+  background-color: inherit;
+  border-radius: 0;
+}
+
+#chatModal .nav > li.selected {
+  background: #49c4a1;
+}
+
+#chatModal li.selected a {
+  color: white;
+}
+
+#chatModal .selected .circle {
+  background: white !important;
+}
+
+#chatModal .empty-circle {
+  background: transparent !important;
+  border: solid 2px #49c4a1;
+}
+
+#chatModal .selected .empty-circle {
+  background: transparent !important;
+  border: solid 2px white;
+}
+
+#chatModal .chat-close {
+  display: none;
+  z-index: 0;
+  border: solid 2px #bbb;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  color: white;
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  border-radius: 100%;
+  text-align: center;
+  height: 16px;
+  width: 16px;
+}
+
+#chatModal .chat-close i {
+  color: #bbb;
+  font-size: 12px !important;
+  position: absolute;
+  padding: 0;
+}
+
+#chatModal .selected .chat-close {
+  border: solid 2px #ddd;
+}
+
+#chatModal .selected .chat-close i {
+  color: #ddd;
+}
+
+#chatModal .nav > li:hover .chat-close {
+  display: block;
+}
+
+#chatModal .chat-close:hover {
+  border: solid 2px #ddd;
+}
+
+#chatModal .chat-close:hover i {
+  color: #ddd;
+}
+
+#chatModal .selected .chat-close:hover {
+  border: solid 2px white;
+}
+
+#chatModal .selected .chat-close:hover i {
+  color: white;
+}
+
+#chatModal .right-box {
+  float: right;
+  width: 60%;
+  border-radius: 0 5px 5px 0;
+  padding-bottom: 8px;
+}
+
+#chatModal .right-box ul {
+  padding: 15px 15px 0;
+}
+
+#chatModal .right-box form {
+  width: 90%;
+  margin: auto;
+}
+
+#chatModal .modal-body.chat-view {
+  height: 334px;
+  padding: 0;
+}
+
+#chatModal .modal-footer {
+  clear: both;
+}
+
+#chat-response {
+  width: 100%;
+  padding: 5px;
+  float: left;
+  width: 90%;
+  border-radius: 0 5px 5px 0;
+}
+
+#chatModal .show-typing {
+  padding: 0 15px;
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+#chatModal .messages-box {
+  height: 245px;
+  overflow-y: scroll;
+  position: relative;
+}
+
+#chatModal .nav-pills .circle {
+  position: relative;
+  border-radius: 100%;
+  height: 10px;
+  width: 10px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+  background: #49c4a1;
+}
+
+#chatModal .nav-pills .badge {
+  position: absolute;
+  top: 12px;
+  right: 8px;
+  width: 26px;
+  background-color: #c9302c;
+}
+
+#chatModal .messages-box h4 {
+  margin: 70px auto;
+  text-align: center;
+  width: 80%;
+}
+
+#chatModal .fired-message-box {
+  margin: 44px auto;
+}
+
+#chatModal .fired-message {
+  background: #d9534f;
+  text-align: center;
+  width: 75%;
+  font-size: 20px;
+  border-radius: 5px;
+  color: white;
+  padding: 10px 20px;
+  margin: 0 auto;
+}
+
+/*****************************
+        DARK MODE
+*****************************/
+
+/* These styles all rely on a baseline stylesheet
+of the Bootswatch 'Darkly' theme */
+
+.darkmode .navbar-inverse {
+  background-color: #303030 !important;
+  margin: 0;
+  border-bottom: solid 1px #080808;
+}
+
+.darkmode .navbar-inverse .badge {
+  color: white !important;
+}
+
+.darkmode .navbar {
+  min-height: 0px !important;
+}
+
+.darkmode .hover {
+  background-color: #303030;
+}
+
+.darkmode .hover:after {
+  background-color: #303030;
+}
+
+.darkmode .padlock-icon {
+  color: #605e5e !important;
+  background: transparent;
+}
+
+.darkmode .nav-tabs .badge {
+  vertical-align: bottom !important;
+}
+
+.darkmode .footer {
+  background-color: #303030 !important;
+}
+
+.darkmode .buy-rate-selector button {
+  font-size: 12px;
+}
+
+.darkmode .earned-table tr:hover {
+  background-color: #373737;
+}
+
+.darkmode .form-control {
+  background-color: #464545 !important;
+  color: white !important;
+}
+
+.darkmode .btn.clear-awards-btn {
+  padding: 2px 6px;
+}
+
+.darkmode .resolution-box {
+  background: initial;
+}
+
+.darkmode .no-content-message {
+  background: #464545;
+  color: white;
+  max-width: 80%
+}
+
+.darkmode select {
+  color: black !important;
+}
+
+.darkmode .investment-data-box {
+  background-color: initial;
+}
+
+.darkmode tr {
+  border-bottom: solid 1px #464545;
+}
+
+.darkmode #investmentForm select {
+  padding: 4px;
+  margin-left: 2px;
+}
+
+.darkmode .investment-time-input {
+  padding: 4px 5px;
+  margin-left: 5px;
+}
+
+.darkmode .btn-group .btn {
+  padding: 10px 12px;
+}
+
+.darkmode .investment-header-right .btn-group .btn {
+  padding: 6px 15px;
+} 
+
+.darkmode .well {
+  background-color: #464545;
+}
+
+.darkmode .acquisitions-data-box {
+  background-color: initial;
+}
+
+.darkmode .employees-remaining {
+  background: initial;
+}
+
+.darkmode #chat-response {
+  padding: 4.5px;
+}
+
+.darkmode #acquisitions .employees-remaining {
+  background: transparent;
+  bottom: 62px;
+}
+
+.darkmode .acquisition-success-box {
+  background: #222222;
+}
+
+.darkmode .btn-default.disabled {
+  background-color: initial;
+}
+
+.darkmode .research-input input {
+  top: 8px;
+  padding: 2px 10px;
+  height: 35px;
+}
+
+.darkmode #productModal table {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.darkmode #stats .material-icons {
+  color: white;
+}
+
+.darkmode #stats .material-icons:hover {
+  color: #EEE;
+}
+
+.darkmode .left-box.resting-box {
+  bottom: 22px;
+}
+
+.darkmode .resting-box .stress-percent {
+  margin-left: 5px;
+  color: black;
+  font-size: 12px;
+}
+
+.darkmode .btn {
+  padding: 5px 15px;
+}
+
+.darkmode .investment-header-right {
+  top: 3px;
+}
+
+.darkmode.fixednav .nav.main-nav {
+  background: #222222;
+}
+
+@media only screen  
+and (max-width : 767px) {
+  .darkmode .navbar {
+    height: 48px;
+  }
+
+  .darkmode #top-clickable-box {
+    background: #303030 !important;
+  }
+}
+
+/*****************************
+        FIXED NAV 
+******************************/
+
+.fixednav .nav.main-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  padding: 70px 15px 0;
+  z-index: 1029;
+  background: white;
+}
+
+.fixednav .tab-content.main-tabs {
+  margin-top: 125px;
+}
+
+@media only screen
+and (min-width : 750px) {
+  .fixednav .nav.main-nav {
+    width: 750px;
+  }
+}
+
+@media only screen
+and (min-width : 992px) {
+  .fixednav .nav.main-nav {
+    width: 970px;
+  }
+}
+
+@media only screen
+and (min-width : 1200px) {
+  .fixednav .nav.main-nav {
+    width: 1170px !important;
+  }
+}
+
+/*****************************
+        MOBILE 
+*****************************/
+
+/* Fixes for extremely small screens */
+@media only screen
+and (max-width : 415px) {
+  
+  #achievements td:nth-child(2n), #achievements th:nth-child(2n),
+  #upgrades td:nth-child(2n), #upgrades th:nth-child(2n) {
+      display: none !important;
+  }
+
+  #achievements .panel-heading, #upgrades .panel-heading {
+    text-align: center;
+  }
+
+  .stat-count {
+    float: none;
+  }
+
+  .nav-tabs .badge {
+    display:  none;
+  }
+}
+
+@media only screen  
+and (max-width : 767px) {
+  .hide-mobile {
+    display: none;
+  }
+  .mobile-only-text {
+    display: inline-block;
+  }
+
+  /* Mobile Main Button */
+  #top-clickable-box {
+    position: fixed;
+    bottom: 25px;
+    right: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    background: #222;
+    border-top: solid 1px #080808;
+  }
+
+  #top-clickable {
+    padding: 10px;
+    width: 90%;
+    margin: 8px auto 12px;
+    display: block;
+  }
+
+  .footer {
+    border-top: none;
+  }
+
+  #changelog-footer-link {
+    display: none;
+  }
+
+  .label.top-click-value-display {
+    position: fixed;
+    bottom: 95px;
+    left: 0px;
+    right: 0px;
+    top: initial;
+    max-width: 90%;
+    margin: auto;
+    padding: 10px !important;
+    box-shadow: rgba(0, 0, 0, 0.5) 0px 5px 15px;
+  }
+
+  .upgrade-list li {
+    width: 100%;
+  }
+
+  /* Mobile Icons */
+  .settings-button {
+    margin-left: 0;
+  }
+
+  .mail-button {
+    margin-right: 5px;
+  }
+
+  .badge.research-badge {
+    left: 57px;
+  }
+
+  /* Mobile Modals */
+  .modal-footer p {
+    width: 75%;
+  }
+
+  .modal-footer .resting-box p {
+    width: initial;
+  }
+
+  .left-box.resting-box span.hide-mobile {
+    display: none;
+  }
+
+  .left-box.resting-box {
+    width: 150px;
+  }
+
+  .no-content-message {
+    padding: 20px 10px;
+  }
+
+  .modal-dialog {
+    margin: 10vh auto !important;
+  }
+
+  /* Mobile Cash Display */
+
+  .mobile-cash-display {
+    display:  block;
+    position: fixed;
+    top: -2px;
+    padding: 10px;
+    text-align: center;
+    left: 0;
+  }
+
+  .mobile-cash-display .panel {
+    display: inline-block;
+    margin: 0;
+    min-width: 90px;
+  }
+
+  .mobile-cash-display .panel-body {
+    padding: 5px 10px;
+  }
+
+  .alert {
+    width: 95%;
+  }
+
+  .alert a {
+    max-width: 46%;
+  }
+
+  .navbar-header {
+    display: inline-block;
+  }
+
+  .navbar-right {
+    display: inline-block;
+    float: right;
+  }
+
+  .navbar-right .panel {
+    display: none;
+  }
+
+/*  #top-clickable-box {
+    margin-left: 8%;
+    position: relative;
+  }*/
+
+/*  .click-value-display {
+    position: absolute;
+    top: 13px;
+    right: -136px;
+  }*/
+
+  h3.upgrades-header, h3.employee-header {
+    width: 100%;
+    text-align: center;
+  }
+
+  .buy-rate-selector {
+    position: relative;
+    top: 0;
+    right: 0;
+    text-align: center;
+    margin: 5px 0;
+  }
+
+  .buy-rate-selector h4 {
+    display: none;
+  }
+
+  .modal-dialog {
+    max-width: 90vw;
+  }
+
+  .unit-button-sell {
+    display: none !important;
+  }
+
+  #achievement-box {
+    bottom: 75px;
+    width: 95%;
+  }
+
+  /* Mobile Stats */
+  .name-panel .form-control {
+    left: 25px;
+    right: initial;
+    width: 210px;
+  }
+
+  /* Mobile Nav Tabs */
+  .nav.nav-tabs.nav-justified > li {
+    float: left;
+    width: 20%;
+  }
+
+  .modal .nav.nav-tabs.nav-justified > li {
+    float: left;
+    width: 50%;
+  }
+
+  .nav-tabs .material-icons {
+    position: absolute;
+    top: 18px;
+    left: 5px;
+  }
+
+  .nav-tab-text {
+    display: none;
+  }
+
+  .modal .nav-tab-text {
+    display: block;
+  }
+
+  .modal-selects .col-md-6 {
+    padding: 0 15px !important;
+  }
+
+  .material-icons.nav-tab-icon {
+    display: inline-block;
+    position: initial;
+    background: none;
+    vertical-align: middle;
+    font-size: 26px !important;
+  }
+
+  .nav.nav-tabs.nav-justified > li > a {
+    border-bottom: 1px solid #ddd !important;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .nav.nav-tabs.nav-justified > .active > a {
+    border: 1px solid #ddd !important;
+    border-bottom: #fff !important;
+  }
+
+  .nav .label-success {
+    position: absolute;
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: 55%;
+    top: -8px;
+  }
+
+  /* Overall body adjustments */
+
+  .btn-group {
+    z-index: 0;
+  }
+
+  .tab-content {
+    margin-bottom: 75px;
+  }
+
+  .modal .tab-content {
+    margin-bottom: 0;
+  }
+
+  .fixednav .tab-content.main-tabs {
+    margin-top: 135px;
+  }
+
+  /* Mobile Investments */
+  #investments h3 {
+    text-align: center;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .investment-header-right {
+    position: initial;
+    text-align: center;
+  }
+
+  .investment .investment-earnings {
+    display: none;
+  }
+
+  .modal-footer p {
+    text-align: left;
+  }
+
+  #investments .investment-btn {
+    float: none;
+    display: inline-block;
+    margin: 4% auto;
+  }
+
+  .no-investments-box .no-content-message {
+    width: 80%;
+    margin: 20px auto;
+  }
+
+  .investment-btn .text {
+    display: none;
+  }
+
+  #investments .header-text {
+    display: block;
+  }
+
+  .investment-time-remaining {
+    min-width: 90px;
+  }
+
+  /* Mobile Research */
+  .research-input {
+    width: 100%;
+  }
+
+  .sell-num.badge {
+    padding: 3px 6px;
+  }
+
+  /* Mobile Acquisitions */
+  .inv-acquisition-help-btn span {
+    display: none;
+  }
+
+  .inv-acquisition-help-btn .material-icons {
+    display: block;
+    position: relative;
+    color: white;
+    background: transparent;
+    top: 0;
+    left: 0;
+    padding: 0;
+  }
+
+  #acquisitions .panel-heading .right-content {
+    position: relative;
+    margin-top: 15px;
+    text-align: center;
+    top: 0px
+  }
+
+  .chat-name {
+    position: absolute;
+    width: 48px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .chat-view .chat-submit {
+    width: 16%;
+  }
+
+  #chat-response {
+    width: 80%;
+  }
+
+  /* Mobile Darkmode */
+  .darkmode .mobile-cash-display {
+    font-size: 14px;
+  }
+
+  .darkmode h3 {
+    font-size: 22px;
+  }
+
+  .darkmode .panel-title {
+    font-size: 17px;
+  }
+
+  .darkmode .investment-header-right .btn-group .btn {
+    padding: 6px 8px;
+  }
+
+  .darkmode .investment-time-remaining {
+    min-width: 80px;
+  }
+
+  .darkmode .left-box.resting-box {
+    left: 10px;
+    width: 140px;
+  }
+}

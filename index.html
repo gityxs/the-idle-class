@@ -1,0 +1,2048 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Idle Class</title>
+  <meta name="description" content="The Idle Class is a fast-paced, visually thrilling journey into the never-ending bull market of capitalism. Those who click vigorously will inevitably become wealthy." /> 
+
+  <!-- http://plaza.dsolver.ca/m/smallgraygames -->
+
+  <script src="//likexia.gitee.io/game/js/jquery.min.js"></script>
+  <script src="knockout-3.4.2.js"></script>
+  <script src="https://cdn.bootcss.com/Chart.js/2.7.3/Chart.min.js"></script>
+  <!--<script src-"https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>-->
+  <script src="https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js"></script>
+  <script defer src="business-simulator/game.js"></script>
+  <script defer src="business-simulator/main.js"></script>
+  <link rel="stylesheet" type="text/css" href="business-simulator/styles.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" title="dark">
+  <link rel="shortcut icon" href="business-simulator/favicon.ico" type="image/x-icon" />
+</head>
+
+<body data-bind="css: { darkmode: enableDarkMode, fixednav: enableFixedNavTabs }">
+  <div id="loading-screen" style="position: fixed; height: 100vh; width: 100vw; z-index: 10000; background: white;">
+    <div style="text-align: center; margin-top: 50vh;">
+      <p style="border:solid 1px #ddd; display: inline-block; padding: 15px; border-radius: 15px; background: #EEE;">
+        Loading...<br><br>
+        If you aren't doing business within a few seconds, please refresh.
+      </p>
+    </div>
+  </div>
+   <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <!--<a class="navbar-brand" href="#">Project name</a>-->
+          <p id="top-clickable-box">
+            <button id="top-clickable" data-bind="css: { 'windfall': isWindfall()}" class="btn btn-primary btn-lg main-click" onclick="mainClick()">
+              <span data-bind="visible: !isWindfall()">Earn Dollars &raquo;</span>
+              <span data-bind="visible: isWindfall()">Earn Windfall &raquo;</span>
+            </button>
+            <span data-bind="css: { 'windfall': isWindfall()}" class="label label-success click-value-display top-click-value-display">1</span>
+          </p>
+        </div>
+        <div class="mobile-cash-display">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <span data-bind="text: currentCash.displayVal">0</span>
+            </div>
+          </div>
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <span data-bind="text: accessibleDPS.displayVal">0</span>&nbsp;/s
+              <span class="badge cps-penalty-badge" data-bind="visible: activeInvestments().length - pendingInvestmentCount.val() > 0" title="Current deduction for active investments">
+                - <span data-bind="text: investmentPenaltyPercentage()"></span>%
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="navbar-right">
+          <span class="badge mail-badge" data-bind="text: mail().length, visible: mail().length"></span>
+          <button class="icon-button mail-button" data-toggle="modal" data-bind="click: setViewingInbox, attr: { 'data-target': locked().mail ? '' : '#mailModal', title:  locked().mail ? 'Unlocks at $100 in per-second earnings' : '' }, css: { 'locked-icon': locked().mail }">
+            <i data-bind="visible: locked().mail" class="material-icons padlock-icon" aria-hidden="true" style="">lock</i>
+            <i class="material-icons mail-icon nav-icon">mail</i>
+          </button>
+
+          <span class="badge mail-badge research-badge" data-bind="text: research().patents().length, visible: research().patents().length"></span>
+          <button class="icon-button mail-button" data-toggle="modal" data-bind="attr: { 'data-target': locked().research ? '' : '#productModal', title:  locked().research ? 'Unlocks at $100 billion in total earnings' : ''  }, css: { 'locked-icon': locked().research }">
+            <i data-bind="visible: locked().research" class="material-icons padlock-icon" aria-hidden="true" style="">lock</i>
+            <i class="material-icons mail-icon nav-icon">supervised_user_circle</i>
+          </button>
+
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <span data-bind="text: currentCash.displayVal">0</span>
+            </div>
+          </div>
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <span data-bind="text: accessibleDPS.displayVal">0</span>&nbsp;/s
+              <span class="badge cps-penalty-badge" data-bind="visible: activeInvestments().length - pendingInvestmentCount.val() > 0" title="Current deduction for active investments">
+                - <span data-bind="text: investmentPenaltyPercentage()"></span>%
+              </span>
+            </div>
+          </div>
+
+          <button class="icon-button settings-button" data-toggle="dropdown" aria-label="Settings Dropdown Button" aria-haspopup="true" aria-expanded="true">
+            <i class="material-icons settings-icon nav-icon dropdown-toggle" id="settingsDropdown" aria-hidden="true">settings</i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="settingsDropdown">
+            <li><a href="the-idle-class.html#" onclick="game.saveGame();">Save Progress</a></li>
+            <li><a href="the-idle-class.html#" data-toggle="modal" data-target="#exportModal" onclick="game.exportGameData();">Export Save</a></li>
+            <li><a href="the-idle-class.html#" data-toggle="modal" data-target="#importModal">Import Save</a></li>
+            <li><a href="the-idle-class.html#" data-toggle="modal" data-target="#wipeSaveModal">Wipe Save</a></li>
+            <li><a href="the-idle-class.html#" data-toggle="modal" data-target="#settingsModal">Settings</a></li>
+            <!-- <li><a href="#" data-toggle="modal" data-target="#welcomeModal">Welcome</a></li> -->
+            <li role="separator" class="divider"></li>
+            <li><a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></li>
+            <li role="separator" class="divider"></li>
+            <li data-bind="css: { 'nav-disabled': locked().bankruptcy }">
+              <a href="the-idle-class.html#" data-bind="attr: {'data-toggle': locked().bankruptcy ? '' : 'modal', 'title': locked().bankruptcy ? 'Unlocks at $1 trillion in total earnings' : ''}" data-target="#bankruptcyModal" onclick="setBankruptcyModalViewed()">
+                <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success">NEW</span>
+                <i data-bind="visible: locked().bankruptcy" class="material-icons padlock-icon">lock</i>Declare Bankruptcy
+              </a>
+            </li>
+          </ul>
+          <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success bankruptcy-new-label">NEW</span>
+
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+        </div><!--/.navbar-collapse -->
+      </div>
+    </nav>
+
+<div class="container">
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs nav-justified main-nav" role="tablist">
+    <li role="presentation" class="active">
+      <a href="the-idle-class.html#store" aria-controls="home" role="tab" data-toggle="tab">
+        <i class="material-icons nav-tab-icon">shopping_cart</i>
+        <span class="nav-tab-text">Store</span>
+        <span class="badge" data-bind="visible: newUpgradesCount.val, text: newUpgradesCount.displayVal"></span>
+      </a>
+    </li>
+    <li role="presentation">
+      <a href="the-idle-class.html#achievements" data-bind="click: incrementViewCount.bind($data, 'achievementTab')" aria-controls="messages" role="tab" data-toggle="tab">
+        <i class="material-icons nav-tab-icon">check_circle</i>
+        <span class="nav-tab-text">Achievements & Upgrades</span>
+        <span class="badge" data-bind="visible: newAchievementCount.val, text: newAchievementCount.displayVal"></span>
+      </a>
+    </li>
+    <li role="presentation">
+      <a href="the-idle-class.html#stats" onclick="reloadCharts()" data-bind="click: incrementViewCount.bind($data, 'statsTab')" aria-controls="settings" role="tab" data-toggle="tab">
+        <i class="material-icons nav-tab-icon">insert_chart</i>
+        <span class="nav-tab-text">Stats</span>
+      </a>
+    </li>
+    <li role="presentation" data-bind="css: { 'nav-disabled': locked().investments }">
+      <a href="the-idle-class.html#investments" aria-controls="investments" role="tab" data-bind="attr: { 'data-toggle': locked().investments ? '' : 'tab'}">
+        <i data-bind="visible: locked().investments" class="material-icons padlock-icon" aria-hidden="true">lock</i>
+        <i class="material-icons nav-tab-icon">trending_up</i>
+        <span data-bind="attr: { title:  locked().investments ? 'Unlocks at $100 million in total earnings' : ''}" class="nav-tab-text">Investments</span>
+        <span data-bind="visible: !locked().investments && activeInvestments().length < 1 && investmentStats()[1].val() < 1 && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span>
+        <span class="badge" data-bind="visible: pendingInvestmentCount.val() > 0, text: pendingInvestmentCount.displayVal"></span>
+      </a>
+    </li>
+    <li role="presentation" data-bind="css: { 'nav-disabled': locked().acquisitions }">
+      <a id="acquisition-tab" href="the-idle-class.html#acquisitions" aria-controls="acquisitions" role="tab" data-bind="attr: { 'data-toggle': locked().acquisitions ? '' : 'tab'}">
+        <i data-bind="visible: locked().acquisitions" class="material-icons padlock-icon">lock</i>
+        <i class="material-icons nav-tab-icon">store</i>
+        <span data-bind="attr: { title:  locked().acquisitions ? 'Unlocks at $1 quintillion in total earnings' : ''}" class="nav-tab-text">Acquisitions</span>
+        <span data-bind="visible: !locked().acquisitions && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span>
+        <span class="badge" data-bind="visible: pendingAcquisitionCount.val() > 0, text: pendingAcquisitionCount.displayVal"></span>
+      </a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content main-tabs">
+    <div role="tabpanel" class="tab-pane active" id="store">
+      <div class="col-md-6">
+  			<h3 class="upgrades-header">Upgrades
+          <button data-bind="click: buyAllUpgrades" class="btn btn-default btn-sm upgrade-all">Buy All</button>
+        </h3>
+  			<ul data-bind="foreach: availableUpgrades" class="upgrade-list">
+  			  <li data-bind="visible: available">
+  			    <div class="panel panel-default unit">
+            <div class="panel-heading">
+              <i class="material-icons" data-bind="text: icon"></i>
+              <div class="title-box">
+                <button class="wrapper-button panel-title" data-toggle="modal" data-target="#upgradeModal" data-bind="click: select, event: { mouseover: viewDetails, mouseout: leaveDetails }">
+                  <h3 class="panel-title" data-bind="text: name"></h3>
+                </button>
+              </div>
+            </div>
+            <div class="panel-body">
+    		      <div style="width: 100%;" class="unit-buttons">
+      		      <button style="width: 100%;" data-bind="css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default">
+                  <span data-bind="text: price.displayVal"></span>
+                  <span data-bind="visible: !read()" class="label label-success">NEW</span></button>
+      		   <!--    <a class="btn btn-lg btn-default" data-bind="click: select" data-toggle="modal" data-target="#upgradeModal">Details</a> -->
+    		      </div>
+            </div>
+          </div>
+          <div data-bind="visible: hoverVisible, event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
+            <div class="hover">
+              <p data-bind="html: descriptionText"></p>
+              <p class="flavor">"<span data-bind="html: flavorText"></span>"</p>
+            </div>
+          </div>
+  			  </li>
+  			</ul>
+  		</div>
+  		<div class="col-md-6">
+    		<h3 class="employee-header">Employees</h3>
+    		<div class="buy-rate-selector">
+      		<h4>Purchase Rate:</h4>
+      		<div class="btn-group" role="group" aria-label="Buy Rate Buttons">
+            <button data-bind="click: setBuyRate.bind($data, 1)" type="button" class="btn btn-default active">1</button>
+            <button data-bind="click: setBuyRate.bind($data, 10)" type="button" class="btn btn-default">10</button>
+            <button data-bind="click: setBuyRate.bind($data, 25)" type="button" class="btn btn-default">25</button>
+            <button data-bind="click: setBuyRate.bind($data, 100)" type="button" class="btn btn-default">100</button>
+            <button data-bind="click: setBuyRate.bind($data, 'max')" type="button" class="btn btn-default">Max</button>
+          </div>
+        </div>
+        <ul class="employee-list" data-bind="foreach: units">
+          <li data-bind="visible: available, event: { mouseover: viewDetails, mouseout: leaveDetails }, attr: { id: 'employee' + id }, css: { 'reverse-hover': id !== '0' && id !== '1' && ($parent.lastVisibleUnit() - 1 === parseInt(id) || ($parent.lastVisibleUnit()) === id)}" class="unit-box">
+      		  <div class="panel panel-primary unit">
+              <div class="panel-heading">
+                <i class="material-icons" data-bind="text: icon"></i>
+                <button class="wrapper-button panel-title" data-toggle="modal" data-target="#unitModal" data-bind="click: select">
+                  <h3 data-bind="text: name" class="panel-title" ></h3>
+                </button>
+                <span class="badge"><span data-bind="text: price.displayVal"></span></span>
+              </div>
+              <div class="panel-body">
+      		      <h3 class="unit-num"><span data-bind="text: num.displayVal"></span><span style="font-size: 14px; margin-left: 10px; top: -2px; vertical-align: middle;" class="well well-sm"><span data-bind="text: cps.displayVal"></span> /s</span></h3>
+      		      <div class="unit-buttons">
+        		      <button data-bind="css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default">
+                    <span>Hire</span>
+                    <span data-bind="visible: $parent.buyRate() === 'max', text: numCanAfford"></span>
+                  </button>
+        		      <button class="btn btn-md btn-default unit-button-sell" data-bind="click: sell">
+                    <span>Fire</span>
+                    <span data-bind="visible: $parent.buyRate() === 'max'">All</span>
+                  </button>
+      		      </div>
+              </div>
+            </div>
+            <div data-bind="visible: hoverVisible, event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
+              <div class="hover">
+                <p data-bind="html: descriptionText"></p>
+                <ul data-bind="visible: num.val() > 0">
+                  <li><b>Share of Total:</b> <span data-bind="text: shareOfTotal"></span>%</li>
+                  <li><b>Cash Per Second (One):</b> $<span data-bind="text: individualEarnings"></span></li>
+                  <li><b>Sell Value:</b> <span data-bind="text: sellPrice.displayVal"></span></li>
+                </ul>
+                <ul data-bind="visible: num.val() === 0">
+                  <li><b>Base Cash Per Second:</b> $<span data-bind="text: baseClickDisplay"></span></li>
+                  <li><b>Expected Cash Per Second (One):</b> $<span data-bind="text: potentialEarnings"></span></li>
+                </ul>
+                <p class="flavor">"<span data-bind="html: flavorText"></span>"</p>
+              </div>
+            </div>
+          </li>
+    		</ul>
+  		</div>
+    </div>
+    
+    <div role="tabpanel" class="tab-pane" id="achievements">
+    <div class="col-md-6 upgrades-owned">
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Upgrades Owned</h3>
+          <div class="stat-count">
+            <h3 class="panel-title">
+              <span data-bind="text: upgradeCount.displayVal"></span> / <span data-bind="text: totalUpgradeCount"></span>
+            </h3>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="progress">
+        <div class="progress-bar" role="progressbar" data-bind="style: { width: upgradePercentageEarned() }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
+      </div>
+       <table class="earned-table table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: upgrades">
+          <tr class="select-row" data-bind="visible: $parent.enableEmptyUpgradesAndAchievements() || bought(), event: { mouseover: viewDetails.bind($data, true), mouseout: leaveDetails }">
+            <td>
+              <button data-toggle="modal" data-target="#upgradeModal" data-bind="attr: { 'data-toggle': bought() ? 'modal' : ''}, click: select">
+                <span data-bind="visible: !bought()">-</span>
+                <span data-bind="text: name, visible: bought"></span>
+              </button>
+            </td>
+            <td>
+              <span data-bind="visible: !bought()">-</span>
+              <span data-bind="visible: bought"><span data-bind="text: price.displayVal"></span></span>
+            </td>
+            <td class="hidden-td">
+              <div data-bind="visible: hoverVisible, event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
+                <div class="hover">
+                  <p data-bind="html: descriptionText"></p>
+                  <p class="flavor">"<span data-bind="html: flavorText"></span>"</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      </div>
+		</div>
+		<div class="col-md-6 achievements-earned">
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Achievements Unlocked</h3>
+          <div class="stat-count">
+            <h3 class="panel-title">
+              <span data-bind="text: achievementCount.displayVal"></span> / <span data-bind="text: totalAchievementCount"></span>
+            </h3>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" data-bind="style: { width: achievementPercentageEarned() }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
+          </div>
+
+            <table class="earned-table table" data-bind="visible: newAchievementCount.val() > 0">
+              <thead>
+                <tr>
+                  <th style="position:relative;">Name <button class="btn btn-sm btn-primary clear-awards-btn" data-bind="click: clearAllAwards">Clear All</button></th>
+                  <th>Date Awarded</th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: achievements">
+                <tr class="select-row" data-bind="visible: name != 'trigger' && awarded() && !read(), event: { mouseover: viewDetails.bind($data, true), mouseout: leaveDetails }">
+                  <td>
+                    <button data-toggle="modal" data-target="#upgradeModal" data-bind="click: select">
+                      <span data-bind="visible: !awarded()">-</span>
+                      <span class="name-text" data-bind="html: name, visible: awarded"></span>
+                      <span data-bind="visible: awarded() && !read()" class="label label-success">NEW</span>
+                    </button>
+                  </td>
+                  <td>
+                    <span data-bind="visible: !awarded()">-</span>
+                    <span data-bind="text: new Date(date()).toLocaleString(), visible: awarded"></span>
+                  </td>
+                  <td class="hidden-td">
+                    <div data-bind="visible: hoverVisible, event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
+                      <div class="hover">
+                        <p data-bind="html: descriptionText"></p>
+                        <p class="flavor"><span data-bind="html: flavorText"></span></p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+           <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Date Awarded</th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: achievements">
+                <tr class="select-row" data-bind="visible: name != 'trigger' && ($parent.enableEmptyUpgradesAndAchievements() || (awarded() && read())), event: { mouseover: viewDetails.bind($data, true), mouseout: leaveDetails }">
+                  <td>
+                    <button data-target="#upgradeModal" data-bind="click: select, attr: { 'data-toggle': awarded() ? 'modal' : ''}">
+                      <span data-bind="visible: !awarded() || !read()">-</span>
+                      <span data-bind="text: name, visible: awarded() && read()"></span>
+                    </button>
+                  </td>
+                  <td>
+                    <span data-bind="visible: !awarded() || !read()">-</span>
+                    <span data-bind="text: new Date(date()).toLocaleString(), visible: awarded() && read()"></span>
+                  </td>
+                  <td class="hidden-td">
+                    <div data-bind="visible: hoverVisible() && read(), event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
+                      <div class="hover">
+                        <p data-bind="html: descriptionText"></p>
+                        <p class="flavor"><span data-bind="html: flavorText"></span></p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+      </div>
+		</div>
+	</div>
+	
+    <div role="tabpanel" class="tab-pane" id="stats">
+      <div class="col-md-12">
+        <div class="panel panel-default name-panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <span data-bind="visible: !businessName().editing(), text: businessName().name"></span>
+              <input type="text" data-bind="visible: businessName().editing(), textInput: businessName().newName" class="form-control" maxlength="100" placeholder="Enter a new business name">
+              <button data-bind="visible: !businessName().editing(), click: businessName().toggleEditing">
+                <i class="material-icons">edit</i>
+              </button>
+              <button class="cancel-edit" data-bind="visible: businessName().editing(), click: businessName().toggleEditing">
+                <i class="material-icons">cancel</i>
+              </button>
+              <button data-bind="visible: businessName().editing(), click: businessName().save">
+                <i class="material-icons">save</i>
+              </button>
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">General Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: generalStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div data-bind="visible: enableCharts" class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Employee Significance</h3>
+          </div>
+          <div class="panel-body">
+            <canvas id="unitsChart" width="400" height="400"></canvas>
+          </div>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Investment Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: investmentStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Cash Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: cashStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div data-bind="visible: enableCharts" class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Comparison of Earnings Types</h3>
+          </div>
+          <div class="panel-body">
+            <canvas id="earnedComparisonGraph" width="400" height="400"></canvas>
+          </div>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Email Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: emailStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div data-bind="visible: enableCharts" class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Investment Earnings by Type</h3>
+          </div>
+          <div class="panel-body">
+            <div>
+              <canvas id="investmentsChart" width="400" height="400"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-bind="visible: enableCharts" class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Email Earnings by Type</h3>
+          </div>
+          <div class="panel-body">
+            <div>
+              <canvas id="emailsChart" width="400" height="400"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-bind="visible: enableCharts" class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Manual Click Earnings by Type</h3>
+          </div>
+          <div class="panel-body">
+            <div>
+              <canvas id="clicksChart" width="400" height="400"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Click Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: clickStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Acquisition Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: acquisitionStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div data-bind="visible: enableCharts && pastBusinesses().length > 0" class="col-md-12">
+        <div class="panel panel-default name-panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">Bankrupted Businesses</h3>
+              <button data-bind="visible: !bankruptcyListToggled(), click: toggleBankruptcyList">
+                <i class="material-icons">list</i>
+              </button>
+              <button data-bind="visible: bankruptcyListToggled(), click: toggleBankruptcyList">
+                <i class="material-icons">bubble_chart</i>
+              </button>
+          </div>
+          <div class="panel-body">
+            <div data-bind="visible: !bankruptcyListToggled()">
+              <canvas id="bankrputcyChart" width="400" height="150"></canvas>
+            </div>
+            <div data-bind="visible: bankruptcyListToggled()">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Date Bankrupted</th>
+                    <th class="hide-mobile">Length of Business</th>
+                    <th class="hide-mobile">Earnings at Bankruptcy</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: pastBusinessesFormatted">
+                  <tr>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="text: date"></td>
+                    <td class="hide-mobile" data-bind="text: length"></td>
+                    <td class="hide-mobile" data-bind="text: earned"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 left-col">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Passive Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: idleStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Research Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: researchStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Outgoing Email Stats</h3>
+          </div>
+          <div class="panel-body">
+            <div class="col-md-6">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: composedStats1 }">
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: composedStats2 }">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div role="tabpanel" class="tab-pane" id="investments">      
+      <h3><span class="header-text">Active Investments (<span data-bind="text: activeInvestments().length"></span>/<span data-bind="text: simultaneousInvestments.val()"></span>)</span>
+        <button class="btn btn-primary investment-btn" data-toggle="modal" data-target="#investmentModal">
+          <span class="text">Make Investment</span><span class="mobile-only-text">Invest</span>
+        </button>
+        <button style="margin-right: 10px" class="btn btn-primary investment-btn" data-bind="click: cashOutAllInvestments">
+          <span class="text">Cash Out All Completed</span><span class="mobile-only-text">Cash Out All</span>
+        </button>
+      </h3>
+      <div data-bind="fadeVisible: !activeInvestments().length" class="no-investments-box">
+        <h4 class="no-content-message">No Investments Currently Active</h4>
+      </div>
+      <div class="active-investments" data-bind="template: {
+                            foreach: activeInvestments,
+                            beforeRemove: hideItem,
+                            afterAdd: showItem }">
+        <div class="panel panel-default investment">
+          <div data-bind="css: { 'paid': paid() }" class="panel-heading">
+            <h3 class="panel-title" data-bind="text: name"></h3>
+            <div class="investment-earnings">
+              <div class="investment-value investment-data-box">
+                $<span data-bind="text: baseEarnings.displayVal"></span>
+                <span class="label label-success">+ $<span data-bind="text: interestEarnings.displayVal"></span></span>
+              </div>
+            </div>
+            <div class="investment-header-right">
+              <div data-bind="visible: !active(), css: { 'disabled': $parent.locked().acquisitions || $parent.activeAcquisitions().length > 0 }" class="btn-group">
+                <button data-bind="click: handleAcquisition" class="btn btn-sm btn-success inv-acquisition-btn">Acquire</button>
+                <button data-bind="click: handleAcquisition, visible: $parent.locked().acquisitions" class="btn btn-sm btn-success inv-acquisition-info-btn">
+                  <i class="material-icons inv-acquisition-icon">lock</i>
+                </button>
+                <button data-bind="visible: !$parent.locked().acquisitions" class="btn btn-sm btn-success inv-acquisition-info-btn" data-toggle="modal" data-target="#acquisitionHelpModal">
+                  <i class="material-icons inv-acquisition-icon">help</i>
+                </button>
+              </div>
+              <button data-bind="visible: !active(), click: handlePayout" class="btn btn-sm btn-success">Cash Out</button>
+              <button data-bind="visible: active(), click: handlePayout" class="btn btn-sm btn-danger">Cancel</button>
+              <div class="investment-data-box investment-time-remaining">
+                <span data-bind="text: displayTimeRemaining"></span>
+              </div>
+            </div>
+          </div>
+          <div data-bind="css: { 'paid': paid() }" class="panel-body">
+      			<div class="progress">
+              <div class="progress-bar" role="progressbar" data-bind="style: { width: percentageRipe() }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
+            </div>
+          </div>
+          <div data-bind="visible: paid()" class="investment-success-box">
+            <h3 class="label-success">+ $<span data-bind="text: finalTotal"></span> total</h3>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="acquisitions">      
+      <h3>Active Acquisitions (<span data-bind="text: activeAcquisitions().length"></span>/<span data-bind="text: simultaneousAcquisitions.val()"></span>)
+        <button class="btn btn-primary inv-acquisition-help-btn" data-toggle="modal" data-target="#acquisitionHelpModal">
+          <span>Instructions</span>
+          <i class="material-icons">help</i>
+        </button>
+      </h3>
+      <div data-bind="fadeVisible: !activeAcquisitions().length" class="no-investments-box">
+        <h4 class="no-content-message">No Acquisitions Currently Held</h4>
+      </div>
+      <div class="active-investments" data-bind="template: {
+                            foreach: activeAcquisitions,
+                            beforeRemove: hideItem,
+                            afterAdd: showItem }">
+        <div data-bind="css: { 'pending': !active() }" class="panel panel-default acquisition">
+          <div data-bind="css: { 'sold': sold() }" class="panel-heading">
+            <h3 class="panel-title" data-bind="text: name"></h3>
+
+            <div class="acquisitions-data-box left">
+            <span class="badge mail-badge acquisition-policy-badge" data-bind="text: mail().length, visible: mail().length"></span>
+            <button class="icon-button mail-button" data-toggle="modal" data-bind="click: selectAcquisition" data-target="#acquisitionMailModal">
+              <i class="material-icons mail-icon nav-icon">mail</i>
+            </button>
+            <span class="badge mail-badge acquisition-chat-badge" data-bind="text: unreadMessages(), visible: unreadMessages()"></span>
+            <button class="icon-button mail-button chat" data-toggle="modal" data-bind="click: selectAcquisition" data-target="#chatModal">
+              <i class="material-icons mail-icon nav-icon chat-icon">chat</i>
+            </button>
+          </div>
+
+            <div class="right-content">
+              <h3 class="panel-title">Net Value:</h3>
+              <div class="acquisitions-data-box right">
+                <span data-bind="visible: netValue.val() < 0">-</span>
+                <span data-bind="text: netValue.displayVal()"></span>
+              </div>
+              <button class="btn btn-sm btn-danger" data-bind="css: { 'btn-success': !active(), 'btn-danger': active(), 'disabled': netValue.val() <= 0 }, click: sell">Sell</button>
+            </div>
+          </div>
+          <div data-bind="css: { 'sold': sold() }" class="panel-body">
+            <p class="well" data-bind="html: description"></p>
+            <div class="row">
+              <div class="col-md-7">
+                <div>
+                  <ul data-bind="foreach: workers" class="upgrade-list">
+                    <li>
+                      <div class="panel panel-primary unit acquisition-worker">
+                        <div class="panel-heading">
+                          <h3 class="panel-title" data-toggle="modal" data-target="#acqWorkerModal" data-bind="click: select, text: name, event: { mouseover: viewDetails, mouseout: leaveDetails }"></h3>
+                          <span class="badge">
+                            <span data-bind="text: price.displayVal"></span>
+                          </span>
+                        </div>
+                        <div class="panel-body">
+                          <h3 class="unit-num" data-bind="text: num"></h3>
+                          <div class="unit-buttons">
+                            <button data-bind="click: hire, css: { 'disabled': price.val() > $parent.netValue.val() }" class="btn btn-md btn-default">Hire</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div data-bind="visible: hoverVisible, event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
+                        <div class="hover">
+                          <p data-bind="html: descriptionText"></p>
+                          <ul>
+                            <li data-bind="visible: id === 'w1'"><b>Employees Fired (Per Click):</b>&nbsp;0.5</li>
+                            <li data-bind="visible: id === 'w1'"><b>Chance for Massive Layoffs (Per Click):</b>&nbsp;<span data-bind="text: $parent.layoffChance()"></span>%</li>
+                            <li data-bind="visible: id === 'w2'"><b>Employees Fired (Per Second):</b>&nbsp;1</li>
+                            <li data-bind="visible: id === 'w2'"><b>Chance for New Policies (Per Second):</b>&nbsp;<span data-bind="text: $parent.mailChance()"></span>%</li>
+                            <li data-bind="visible: id === 'w3'"><b>Additional Bonus to Current Valuation:</b>&nbsp;5%</li>
+                            <li data-bind="visible: id === 'w3'"><b>Chance for Fudged Numbers (Per Click):</b>&nbsp;<span data-bind="text: $parent.valBonusChance()"></span>%</li>
+                            <li data-bind="visible: id === 'w4'"><b>Employees Fired (Per Click):</b>&nbsp;0.25</li>
+                            <li data-bind="visible: id === 'w4'"><b>Employees Fired (Per Second):</b>&nbsp;0.5</li>
+                            <li data-bind="visible: id === 'w4'"><b>Chance for Chat Messages (Per Second):</b>&nbsp;<span data-bind="text: $parent.chatChance()"></span>%</li>
+                          </ul>
+                          <!-- <p class="flavor">"<span data-bind="html: flavorText"></span>"</p> -->
+                        </div>
+                      </div>
+                    </li>
+                </div>
+              </div>
+              <div class="col-md-5">
+                 <table class="earned-table table">
+                  <tbody>
+                    <tr>
+                      <td>Initial Investment Value</td>
+                      <td><span data-bind="text: initialPrice.displayVal()"></span></td>
+                    </tr>
+                    <tr>
+                      <td>Additional Cash Spent</td>
+                      <td><span data-bind="text: cashSpent.displayVal()"></span></td>
+                    </tr>
+                    <tr>
+                      <td>Firings Per Second</td>
+                      <td><span data-bind="text: autoMod.displayVal()"></span></td>
+                    </tr>
+                    <tr>
+                      <td>Firings Per Click</td>
+                      <td><span data-bind="text: clickMod.displayVal()"></span></td>
+                    </tr>
+                    <tr>
+                      <td>Bonus to Current Valuation</td>
+                      <td><span data-bind="text: valMod.displayVal()"></span>%</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <button style="width: 100%" class="btn btn-danger" data-bind="click: fire, css: { 'layoffs': activeLayoff(), 'fudged': activeValBonus() }">
+                  <span data-bind="visible: !activeLayoff() && !activeValBonus()">Fire Employees</span>
+                  <span data-bind="visible: activeLayoff() && !activeValBonus()">Massive Layoffs</span>
+                  <span data-bind="visible: activeValBonus() && !activeLayoff()">Fudge the Numbers</span>
+                  <span data-bind="visible: activeLayoff() && activeValBonus()">Massive Layoffs While Fudging Numbers</span>
+                </button>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <h5 class="employees-remaining">Employees Remaining: <span data-bind="text: currentEmployees.displayVal()"></span></h5>
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" data-bind="style: { width: employeePercentageRemaining }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
+            </div>
+          </div>
+
+          <div data-bind="visible: sold()" class="acquisition-success-box">
+            <h4><span data-bind="text: name"></span> Liquidated</h4>
+            <table class="earned-table table">
+              <tbody>
+                <tr>
+                  <td>Total Employees Fired</td>
+                  <td><span data-bind="text: employeesFired()"></span></td>
+                </tr>
+                <tr>
+                  <td>Total Cash Value</td>
+                  <td><span data-bind="text: currentValue.displayVal()"></span></td>
+                </tr>
+                <tr>
+                  <td>Additional Cash Spent</td>
+                  <td><span data-bind="text: cashSpent.displayVal()"></span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="acquisition-earnings-box">
+              <h5>Net Earnings:</h5>
+              <h3>+ <span data-bind="text: netValue.displayVal()"></span> total</h3>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+    </div>
+
+  </div>
+</div>
+<div class="push">&nbsp;</div>
+
+<footer class="footer">
+  <p>The Idle Class v<span data-bind="text: generalStats()[10].displayVal"></span></p> |
+  <a href="index.html">Home</a> |
+  <span id="changelog-footer-link"><a href="the-idle-class.html#changelog" data-toggle="modal" data-target="#changelogModal">Changelog</a> |</span>
+  <a target="_blank" href="https://www.reddit.com/r/theidleclass/">Reddit</a> |
+  <a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a>
+</footer>
+
+<!-- MODALS -->
+<div class="modal fade" id="unitModal" tabindex="-1" role="dialog" aria-labelledby="unitModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true" data-bind="text: selectedUnit.icon"></i>
+        <h3 class="modal-title" id="unitModalLabelLabel" data-bind="text: selectedUnit.name"></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p data-bind="html: selectedUnit.descriptionText"></p>
+        <ul data-bind="visible: selectedUnit.num.val() > 0">
+          <li><b>Share of Total:</b> <span data-bind="text: selectedUnit.shareOfTotal"></span>%</li>
+          <li><b>Cash Per Second (One):</b> $<span data-bind="text: selectedUnit.individualEarnings"></span></li>
+          <li><b>Cash Per Second (All):</b> <span data-bind="text: selectedUnit.cps.displayVal"></span></li>
+          <li><b>Sell Value:</b> <span data-bind="text: selectedUnit.sellPrice.displayVal"></span></li>
+        </ul>
+        <ul data-bind="visible: selectedUnit.num.val() === 0">
+          <li><b>Base Cash Per Second:</b> $<span data-bind="text: selectedUnit.baseClickDisplay"></span></li>
+          <li><b>Expected Cash Per Second (One):</b> $<span data-bind="text: selectedUnit.potentialEarnings"></span></li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <p>"<span data-bind="text: selectedUnit.flavorText"></span>"</p>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="upgradeModal" tabindex="-1" role="dialog" aria-labelledby="upgradeModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true" data-bind="text: selectedUpgrade.icon"></i>
+        <h3 class="modal-title" id="upgradeModalLabel" data-bind="text: selectedUpgrade.name"></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p data-bind="html: selectedUpgrade.descriptionText"></p>
+      </div>
+      <div class="modal-footer">
+        <p><span data-bind="text: selectedUpgrade.flavorText"></span></p>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="acqWorkerModal" tabindex="-1" role="dialog" aria-labelledby="acqWorkerModalLabel">
+  <div data-bind="if: activeAcquisitions().length > 0" class="modal-dialog" role="document">
+    <div data-bind="if: selectedAcquisitionWorker" class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true">person_outline</i>
+        <h3 class="modal-title" id="acqWorkerModalLabel" data-bind="text: selectedAcquisitionWorker().name"></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p data-bind="html: selectedAcquisitionWorker().descriptionText"></p>
+        <ul>
+          <li data-bind="visible: selectedAcquisitionWorker().id === 'w1'"><b>Employees Fired (Per Click):</b>&nbsp;0.5</li>
+          <li data-bind="visible: selectedAcquisitionWorker().id === 'w1'"><b>Chance for Massive Layoffs (Per Click):</b>&nbsp;<span data-bind="text: activeAcquisitions()[0].layoffChance()"></span>%</li>
+          <li data-bind="visible: selectedAcquisitionWorker().id === 'w2'"><b>Employees Fired (Per Second):</b>&nbsp;1</li>
+          <li data-bind="visible: selectedAcquisitionWorker().id === 'w2'"><b>Chance for New Policies (Per Second):</b>&nbsp;<span data-bind="text: activeAcquisitions()[0].mailChance()"></span>%</li>
+          <li data-bind="visible: selectedAcquisitionWorker().id === 'w3'"><b>Additional Bonus to Current Valuation:</b>&nbsp;5%</li>
+          <li data-bind="visible: selectedAcquisitionWorker().id === 'w3'"><b>Chance for Fudged Numbers (Per Click):</b>&nbsp;<span data-bind="text: activeAcquisitions()[0].valBonusChance()"></span>%</li>
+          <li data-bind="visible: selectedAcquisitionWorker().id === 'w4'"><b>Employees Fired (Per Click):</b>&nbsp;0.25</li>
+          <li data-bind="visible: selectedAcquisitionWorker().id === 'w4'"><b>Employees Fired (Per Second):</b>&nbsp;0.5</li>
+          <li data-bind="visible: selectedAcquisitionWorker().id === 'w4'"><b>Chance for Chat Messages (Per Second):</b>&nbsp;<span data-bind="text: activeAcquisitions()[0].chatChance()"></span>%</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exportModalLabel">Export Save</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Your exported save data is below. Copy it somewhere safe to back up your save data.</p>
+        <textarea class="export-data" data-bind="value: exportedSaveData"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="copyToClipboard()">COPY TO CLIPBOARD</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="importModalLabel">Import Save</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Enter your game data in the input below. Keep in mind that this will <b>permanently erase</b> your current game progress and replace it with the data you are importing.</p>
+        <textarea class="import-textarea"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="importGameData();">Import</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="wipeSaveModal" tabindex="-1" role="dialog" aria-labelledby="wipeSaveModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="wipeSaveModalLabel">Wipe Save</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Choosing to wipe your save will <b>permanently erase</b> all of your game progress. Nothing will be retained, and your data cannot be recovered.</p>
+        <p>Are you sure you want to do it?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.wipeSaveFile();">Destroy it all</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="bankruptcyModal" tabindex="-1" role="dialog" aria-labelledby="bankruptcyModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="bankruptcyModalLabel">Bankruptcy</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p style="margin: 15px 0 0 0;" class="mb-0">I've failed over and over and over again in my life.</p>
+          <p style="margin: 0 0 15px 0;" class="mb-0">And that is why I succeed.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Michael "Basket Ball" Jordan</cite></footer>
+        </blockquote>
+        <p>Choosing to declare bankruptcy will put an end to your current business &mdash; <span data-bind="text: businessName().name"></span> &mdash; which you have been faithfully grinding since something like <span data-bind="text: startTime.displayVal"></span>.</p>
+        <p>However, while your employees, your upgrades, and your accumulated cash will all reset, capital never truly dies. You will reemerge from bankruptcy retaining <b>all of your achievements</b>, as well as a powerful sense of boot-strap grit.</p>
+        <p>Also, you'll start your next business with an additional <b data-bind="text: nextBankruptcyBonus.displayVal"></b> added to your <b>Bankruptcy Multiplier</b>, which is currently a total of <b data-bind="text: cashStats()[9].displayVal"></b>.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.restartGame();">Declare Bankruptcy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="investmentModal" tabindex="-1" role="dialog" aria-labelledby="investmentModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="investmentModalLabel">Make a New Investment</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="investmentForm">
+        <div class="modal-body">
+          <blockquote class="blockquote text-right">
+            <p class="mb-0">If you’re not a risk taker, you should get the hell out of business.</p>
+            <footer class="blockquote-footer"><cite title="Source Title">Ray Kroc, Burger King</cite></footer>
+          </blockquote>
+          <p>Divert <b>10%</b> of your current <b>Cash Per Second</b> into an extremely reputable, fully above-board multinational corporation. Your investment will grow at its regular per-second rate, along with an additional <b data-bind="text: interestRate.displayVal()"></b> in interest and a bonus for the length of time invested.</p>
+            <label for="time">Time to mature:</label>
+            <input class="investment-time-input form-control" id="time" name="time" type="number" min="1" oninput="validateInvestment()">
+            <select class="form-control" name="time-unit" onchange="validateInvestment()" title="Unit of Time">
+              <option>Minutes</option>
+              <option>Hours</option>
+            </select>
+        </div>
+        <div class="modal-footer">
+          <p class="validation-msg">Suffocating regulations cap your investments at 1 day</p>
+          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='all'">Invest All</button>
+          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='one'">Invest</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade mailModal" id="mailModal" tabindex="-1" role="dialog" aria-labelledby="mailModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true">mail</i>
+        <h3 class="modal-title" id="mailModalLabel">
+          Mail
+        </h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="payouts"></div>
+
+      <div class="modal-body" data-bind="visible: !awayMailInbox().active() && emailHelpView()">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">My view is there’s no bad time to innovate.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Jeff Bezo</cite></footer>
+        </blockquote>
+        <p>Every great entrepenuer knows that true innovation requires a leader who <b>listens to the wisdom of others</b>. When emails find their way to your inbox, then, it's only good business to answer them with punctuality and professionalism.</p>
+        <p>Some executives find that they profit most from communication by <b>responding as quickly as possible.</b> Others feel that the greatest path to success is taking their time in order to <b>respond thoroughly and constructively.</b> And some, of course, are just too busy <b>rapidly innovating</b> to respond before hours or even days have passed.</p>
+      </div>
+
+      <div class="modal-body" data-bind="visible: composeHelpView()">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">No one who can rise before dawn three hundred sixty days a year fails to make his family rich. </p>
+          <footer class="blockquote-footer"><cite title="Source Title">Malcolm Gladwell, Philosopher</cite></footer>
+        </blockquote>
+        <p>When people refer to <b>direct action</b>, they are generally referring to the ability of business leaders to directly email their subordinates. Whether they are in <b>Investments</b>, <b>R&amp;D</b>, or <b>Acquisitions</b>, a well-crafted email is a great way to speed things up.</p>
+        <p>This kind of hands-on leadership can be taxing to some employees, though, so every email will increase your employees' <b>Stress Level</b>. The more stressed they are, the higher the increase, and eventually, they'll just stop listening. You can always wait for them to relax, or you can see if <b>Human Resources</b> can help nudge them along.</p> 
+      </div>
+
+      <div data-bind="visible: !emailHelpView() && !composeHelpView()" class="modal-body">
+        <ul class="nav nav-tabs nav-justified" role="tablist" style="margin-top:0;">
+          <li role="presentation" class="active">
+            <a id="inboxToggle" href="the-idle-class.html#inbox" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: toggleComposeView.bind(game, false)">
+              <span class="nav-tab-text">Inbox</span>
+              <span class="badge" data-bind="text: mail().length, visible: mail().length"></span>
+            </a>
+          </li>
+
+
+
+<!--     <li role="presentation" data-bind="css: { 'nav-disabled': locked().investments }">
+      <a href="#investments" aria-controls="investments" role="tab" data-bind="attr: { 'data-toggle': locked().investments ? '' : 'tab'}">
+        <i data-bind="visible: locked().investments" class="material-icons padlock-icon" aria-hidden="true">lock</i>
+        <i class="material-icons nav-tab-icon">trending_up</i>
+        <span data-bind="attr: { title:  locked().investments ? 'Unlocks at $100 million in total earnings' : ''}" class="nav-tab-text">Investments</span>
+        <span data-bind="visible: !locked().investments && activeInvestments().length < 1 && investmentStats()[1].val() < 1 && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span> -->
+
+
+
+          <li role="presentation" data-bind="css: { 'nav-disabled': locked().outgoingMail }">
+            <a href="the-idle-class.html#compose" aria-controls="home" role="tab" data-bind="click: toggleComposeView.bind(game, true), attr: { 'data-toggle': locked().outgoingMail ? '' : 'tab'}">
+              <i data-bind="visible: locked().outgoingMail" class="material-icons padlock-icon" aria-hidden="true">lock</i>
+              <span data-bind="attr: { title:  locked().outgoingMail ? 'Unlocks at $1 sextillion in total earnings' : ''}" class="nav-tab-text">Compose</span>
+              <span data-bind="visible: !locked().outgoingMail && composedStats1()[0].val() === 0" class="label label-success">NEW</span>
+            </a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="inbox">
+            <div class="no-mail-message" data-bind="fadeVisible: !mail().length && !awayMailInbox().active()">
+              <h4 class="no-content-message">All Caught Up</h4>
+            </div>
+            <div data-bind="visible: !awayMailInbox().active(), template: {
+                              name: 'mail-template',
+                              foreach: mail,
+                              beforeRemove: hideItem,
+                              afterAdd: showItem }">
+            </div>
+            <div data-bind="visible: awayMailInbox().active()" class="away-record">
+              <input data-bind="textinput: awayMailInbox().message" class="form-control" placeholder="Enter your out of office message..." maxlength="100">
+              <table class="earned-table table">
+                <tr>
+                    <td>Away Since</td>
+                    <td data-bind="text: awayMailInbox().start"></td>
+                </tr>
+                <tr>
+                    <td>Emails Rejected</td>
+                    <td data-bind="text: awayMailInbox().regularEmails.displayVal"></td>
+                </tr>
+                <tr>
+                  <td>Urgent Emails Rejected</td>
+                  <td data-bind="text: awayMailInbox().urgentEmails.displayVal"></td>
+                </tr>
+              </table>
+              <h5 class="away-earned-header">Earned While Away:</h5>
+              <div class="well well-sm">
+                <h4 data-bind="text: awayMailInbox().earned.displayVal"></h4>
+              </div>
+            </div>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="compose" data-bind="visible: !composeHelpView()">
+            <!-- <input data-bind="textinput: awayMailInbox().message" class="form-control" placeholder="Enter your out of office message..." maxlength="100"> -->
+
+            <div data-bind="fadeVisible: composedMail().resting()">
+            <!-- <div data-bind="if: composedMail().resolution"> -->
+              <div data-bind="visible: composedMail().selectedDepartment() !== '3'" class="resolution-box">
+                <table class="earned-table table">
+                  <tr>
+                      <td>Base Time Boost</td>
+                      <td data-bind="text: composedMail().resolution().baseTimeBonus"></td>
+                  </tr>
+                  <tr>
+                      <td>Text Bonus</td>
+                      <td data-bind="text: composedMail().resolution().textBonus"></td>
+                  </tr>
+                  <tr data-bind="visible: composedMail().resolution().patentsSold">
+                      <td>Patents Sold</td>
+                      <td data-bind="text: composedMail().resolution().patentsSold"></td>
+                  </tr>
+                  <tr data-bind="visible: composedMail().resolution().averageBonus">
+                      <td>Total Time Boost</td>
+                      <td data-bind="text: composedMail().resolution().totalTimeBonus"></td>
+                  </tr>
+                  <tr data-bind="visible: composedMail().resolution().employeesFired">
+                      <td>Employees Fired</td>
+                      <td data-bind="text: composedMail().resolution().employeesFired"></td>
+                  </tr>
+                </table>
+                <h3 class="label-success">
+                  <span data-bind="visible: !composedMail().resolution().averageBonus()" class="label-header">Total Time Boost:</span>
+                  <span data-bind="visible: composedMail().resolution().averageBonus" class="label-header">Average Time Boost:</span>
+                  <span data-bind="visible: !composedMail().resolution().averageBonus(), text: composedMail().resolution().totalTimeBonus"></span>
+                  <span data-bind="visible: composedMail().resolution().averageBonus, text: composedMail().resolution().averageBonus"></span>
+                </h3>
+              </div>
+
+              <div data-bind="visible: composedMail().selectedDepartment() === '3'" class="resolution-box">
+                <table class="earned-table table">
+                  <tr>
+                    <td>Base Stress Reduction</td>
+                    <td data-bind="text: composedMail().resolution().baseStressReduction"></td>
+                  </tr>
+                  <tr>
+                    <td>Bonus</td>
+                    <td data-bind="text: composedMail().resolution().textBonus"></td>
+                  </tr>
+                </table>
+                <h3 class="label-success">
+                  <span class="label-header">Total Stress Reduction:</span>
+                  <span data-bind="text: composedMail().resolution().totalStressReduction"></span>
+                </h3>
+              </div>
+
+            </div>
+
+            <div data-bind="fadeVisible: !composedMail().resting()">
+            <!-- <div data-bind="css: { resting: composedMail().resting() }"> -->
+              <div class="row modal-selects">
+                <div style="padding-right:5px;" class="col-md-6">
+                  <select class="form-control" name="email-type" title="Email Type" data-bind="value: composedMail().selectedDepartment">
+                    <option value="" disabled selected hidden>Select Department...</option>
+                    <option value='0'>Investments</option>
+                    <option value='1'>R&amp;D</option>
+                    <option value='2'>Acquisitions</option>
+                    <option value='3'>Human Resources</option>
+                  </select>
+                </div>
+                <div style="padding-left:5px;" class="col-md-6">
+                  <select class="form-control" name="email-urgency" title="Email Urgency" data-bind="value: composedMail().selectedUrgency, attr: { disabled: composedMail().selectedDepartment() === '3'}">
+                    <option value="" disabled selected hidden>Select Urgency...</option>
+                    <option value='0'>Extremely Urgent</option>
+                    <option value='1'>#1 Top Priority</option>
+                    <option value='2'>Mission Critical</option>
+                  </select>
+                </div>
+              </div>
+              <input class="form-control" placeholder="To" maxlength="30" data-bind="textinput: composedMail().to">
+              <input class="form-control" placeholder="Subject" maxlength="60" data-bind="textinput: composedMail().subject">
+              <textarea class="form-control" placeholder="Enter your message" maxlength="200" data-bind="textinput: composedMail().message"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" data-bind="visible: !composeView()">
+        <div data-bind="visible: locked().emailAway" class="left-box well">
+          <input name="email-away" type="checkbox" data-bind="checked: awayMailInbox().active, event: { change: awayMailInbox().handleChange.bind(awayMailInbox()) }">
+          <label for="email-away"><span class="hide-mobile">Toggle</span> Away</label>
+        </div>
+        <button type="button" class="btn btn-primary" data-bind="visible: !awayMailInbox().active(), click: toggleEmailHelpView">Help</button>
+        <button type="button" class="btn btn-primary" data-bind="visible: !awayMailInbox().active()" onclick="markAllAsRead()">
+          <span class="hide-mobile">Mark All As Read</span>
+          <span class="mobile-only-text">Reply All</span>
+        </button>
+      </div>
+      <div class="modal-footer" data-bind="visible: composeView">
+        <div class="left-box well resting-box" data-bind="css: { 'stress-danger': composedMail().stressLevel.val() > 100 }">
+          <p>Stress<span class="hide-mobile"> Level</span>: </p>
+          <span class="stress-percent" data-bind="text: composedMail().stressLevel.displayVal"></span>
+        </div>
+        <button type="button" class="btn btn-primary" data-bind="click: toggleComposeHelpView">Help</button>
+        <button type="button" class="btn btn-primary" data-bind="click: composedMail().send, attr: { disabled: composedMail().unavailable }">
+          <span>Send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade mailModal" id="acquisitionMailModal" tabindex="-1" role="dialog" aria-labelledby="acquisitionMailModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons">mail</i>
+        <h3 class="modal-title" id="acquisitionMailModalLabel">
+          Policy Proposals (<span data-bind="text: viewingAcquisition().mail().length"></span>)
+        </h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="payouts"></div>
+
+      <div class="modal-body" data-bind="visible: !awayPolicyInbox().active()">
+        <div class="no-mail-message" data-bind="fadeVisible: !viewingAcquisition().mail().length">
+          <h4 class="no-content-message">All Caught Up</h4>
+        </div>
+        <div data-bind="template: {
+                          name: 'mail-template',
+                          foreach: viewingAcquisition().mail(),
+                          beforeRemove: hideItem,
+                          afterAdd: showItem }">
+        </div>
+      </div>
+      <div data-bind="visible: awayPolicyInbox().active()" class="modal-body away-record">
+        <input data-bind="textinput: awayPolicyInbox().message" class="form-control" placeholder="Enter your out of office message..." maxlength="100">
+        <table class="earned-table table">
+          <tr>
+              <td>Away Since</td>
+              <td data-bind="text: awayPolicyInbox().start"></td>
+          </tr>
+          <tr>
+              <td>Policy Emails Ignored</td>
+              <td data-bind="text: awayPolicyInbox().policies.displayVal"></td>
+          </tr>
+        </table>
+        <h5 class="away-earned-header">Employees Quit While Away:</h5>
+        <div class="well well-sm">
+          <h4 data-bind="text: awayPolicyInbox().fired.displayVal"></h4>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div data-bind="visible: locked().policyAway" class="left-box well">
+          <input name="policy-away" type="checkbox" data-bind="checked: awayPolicyInbox().active, event: { change: awayPolicyInbox().handleChange.bind(awayPolicyInbox()) }"><label for="policy-away">Toggle Away</label>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="markAllAsRead(true)">
+          <span class="hide-mobile">Accept All Proposals</span>
+          <span class="mobile-only-text">Accept All</span>
+        </button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade mailModal" id="acquisitionHelpModal" tabindex="-1" role="dialog" aria-labelledby="acquisitionHelpModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons">domain</i>
+        <h3 class="modal-title" id="acquisitionHelpModalLabel">Acquiring Companies</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">Never, never, never, never give up.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Winston Churchill, President of England</cite></footer>
+        </blockquote>
+
+        <p>While you could cash out every investment as soon as it's ready and walk away with money in hand, you could also choose to <b>acquire</b> the company instead.</p>
+        <p>When you acquire a company, you won't receive your investment value, and your acquisition won't initially be worth anything at all. Do your best to 
+        minimize expenses through <b>tactical rebalancing of human capital</b>, though, and your acquisition may eventually be worth more than your investment ever was.</p>
+        <p>Keep in mind that any workers you hire to help with your corporate outplacing will be paid from the <b>Net Value</b> of your acquisition, not your <b>Current Cash in Hand</b>. In other words, the leaner you run, the greater your acquisition's value will be in the end.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade mailModal" id="awayEarningsModal" tabindex="-1" role="dialog" aria-labelledby="awayEarningsModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons">add_alarm</i>
+        <h3 class="modal-title" id="awayEarningsModalLabel">Earned While Away</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="well well-sm hide-mobile">While your presence ensures discipline among your subordinates, it sometimes feels almost as if your businesses could run without you being there at all...</p>
+        <h4 class="time-away-header">Time Spent Away</h4>
+        <p class="time-away" data-bind="text: awayEarnings().time"></p>
+<!--         <div class="panel panel-default">
+          <div class="panel-heading">Time Spent Away</div>
+          <div class="panel-body" data-bind="text: awayEarnings().time"></div>
+        </div> -->
+
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">Cash</div>
+            <div class="panel-body" data-bind="text: awayEarnings().cashProgress"></div>
+          </div>
+        </div>
+        <div data-bind="css: { 'away-locked': locked().investments }" class="col-md-4">
+          <i class="material-icons">lock</i>
+          <div class="panel panel-default">
+            <div class="panel-heading">Investments</div>
+            <div class="panel-body" data-bind="text: awayEarnings().investmentProgress"></div>
+          </div>
+        </div>
+        <div data-bind="css: { 'away-locked': locked().acquisitions }" class="col-md-4">
+          <i class="material-icons">lock</i>
+          <div class="panel panel-default">
+            <div class="panel-heading">Acquisitions</div>
+            <div class="panel-body" data-bind="text: awayEarnings().acquisitionProgress"></div>
+          </div>
+        </div>
+
+        <div data-bind="css: { 'away-locked': locked().research }" class="col-md-12">
+          <i class="material-icons">lock</i>
+        <div class="panel panel-default">
+          <!-- Default panel contents -->
+          <div class="panel-heading">Patents</div>
+<!--           <div class="panel-body">
+            <div data-bind="text: awayEarnings().patentsSoldValue"></div>
+          </div> -->
+
+          <!-- Table -->
+          <table class="table earned-table">
+            <tr>
+              <td data-bind="visible: locked().research">???</td>
+              <td data-bind="visible: !locked().research">Earned From Patents</td>
+              <td data-bind="text: awayEarnings().patentsSoldValue"></td>
+            </tr>
+            <tr>
+              <td data-bind="visible: locked().research">???</td>
+              <td data-bind="visible: !locked().research">Patents Stored</td>
+              <td data-bind="text: awayEarnings().patentsStored"></td>
+            </tr>
+            <tr>
+              <td data-bind="visible: locked().research">???</td>
+              <td data-bind="visible: !locked().research">Patents Sold</td>
+              <td data-bind="text: awayEarnings().patentsSold"></td>
+            </tr>
+            <tr>
+              <td data-bind="visible: locked().research">???</td>
+              <td data-bind="visible: !locked().research">Employees Gone</td>
+              <td data-bind="text: awayEarnings().employeesGone"></td>
+            <tr>
+          </table>
+        </div>
+        </div>
+
+        <!-- <div class="col-md-6">
+          <h4>Cash Progress</h4>
+          <table class="table earned-table">
+            <tr>
+              <td>Earned While Away</td>
+              <td data-bind="text: research().risk.displayVal"></td>
+            </tr>
+          </table>
+          <h4 style="margin-top: -12px;">Time Progress</h4>
+          <table class="table earned-table">
+            <tr>
+              <td>Investment Growth</td>
+              <td data-bind="text: research().risk.displayVal"></td>
+            </tr>
+            <tr>
+              <td>Acquisition Firings</td>
+              <td data-bind="text: research().risk.displayVal"></td>
+            </tr>
+          </table>
+        </div>
+        <div class="col-md-6">
+          <h4>Research Progress</h4>
+          <table class="table earned-table">
+            <tr>
+              <td>Employees Gone</td>
+              <td data-bind="text: research().risk.displayVal"></td>
+            <tr>
+              <td>Patents Stored</td>
+              <td data-bind="text: research().risk.displayVal"></td>
+            </tr>
+            <tr>
+              <td>Patents Sold</td>
+              <td data-bind="text: research().risk.displayVal"></td>
+            </tr>
+            <tr>
+              <td>Earned From Patents</td>
+              <td data-bind="text: research().risk.displayVal"></td>
+            </tr>
+          </table>
+        </div> -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade mailModal" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons">supervised_user_circle</i>
+        <h3 class="modal-title hide-mobile" id="productModalLabel">Research & Development</h3>
+        <h3 class="modal-title mobile-only-text" id="productModalLabel">R&amp;D</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div data-bind="visible: research().helpView()" class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">Innovation distinguishes between a leader and a follower</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Steven Job</cite></footer>
+        </blockquote>
+        <p>If you want to be a great entrepenuer, you're going to have to do more than just grind the gears of industry exactly the way they've been grinding for years. The first step to truly innovative success is <b>Research & Development</b>.</p>
+        <p>Assign some of your employees to help you develop new <b>Patents</b> and you'll be disrupting the status quo in no time. Just keep in mind that hard work and minimal stress is more than some less-motivated, low T individuals can take; the more employees you assign, the higher your <b>Catastrophic Risk</b> becomes, which means that every <b>Patent</b> completed may <b>take a professional toll</b> on one of your employees.</p>
+      </div>
+      <div data-bind="visible: !research().helpView()" class="modal-body">
+        <div class="main" data-bind="css: { selling: research().sellValue() }">
+          <div class="research-input">
+            <h4>Interns</h4>
+            <input id="research-0" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : '' }, textinput: research().intern" type="number" class="form-control" oninput="validateResearch('0');" placeholder="#" min="0" max="999">
+          </div>
+          <div class="research-input">
+            <h4>Wage Slaves</h4>
+            <input id="research-1" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : ''  }, textinput: research().wage" type="number" class="form-control" oninput="validateResearch('1');" placeholder="#" min="0" max="999">
+          </div>
+          <div class="research-input">
+            <h4>Sales Hotshots</h4>
+            <input id="research-2" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : ''  }, textinput: research().sales" type="number" class="form-control" oninput="validateResearch('2');" placeholder="#" min="0" max="999">
+          </div>
+          <div class="research-input">
+            <h4>Middle Managers</h4>
+            <input id="research-3" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : ''  }, textinput: research().manager" type="number" class="form-control" oninput="validateResearch('3');" placeholder="#" min="0" max="999">
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6">
+              <table class="table earned-table">
+                <tr>
+                  <td>Catastrophic Risk</td><td data-bind="text: research().risk.displayVal"></td>
+                </tr>
+                <tr>
+                  <td>Speed Boost</td><td data-bind="text: research().speed.displayVal"></td>
+                </tr>
+                <tr>
+                  <td>Chance to Auto Sell</td><td data-bind="text: research().autoSell.displayVal"></td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="table earned-table">
+                <tr>
+                  <td>Value Boost</td><td data-bind="text: research().value.displayVal"></td>
+                </tr>
+                <tr>
+                  <td>Storage Allowed</td><td data-bind="text: research().storage.displayVal"></td>
+                </tr>
+                <tr>
+                  <td>Base Value</td><td data-bind="text: research().baseValue.displayVal"></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <h4 class="progress-header">Researching: <span data-bind="html: research().product"></span></h4>
+              <div class="progress">
+                <div class="progress-bar" role="progressbar" data-bind="style: { width: research().percentageRipe() }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sell-value label-success" data-bind="visible: research().sellValue()">
+          <p class="label"><span data-bind="text: research().sellNumber"></span> Patents Sold</p>
+          <h4>$<span data-bind="text: research().sellValue()"></span></h4>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <div style="float:left;">
+          <button class="btn btn-success" data-bind="click: research().sellPatents.bind(research())">
+            Sell <span class="hide-mobile">Patents</span> 
+            <span data-bind="text: research().patents().length" class="sell-num badge"></span>
+          </button>
+        </div>
+        <button type="button" class="btn btn-primary" data-bind="click: research().toggleHelpView.bind(research())">Help</button>
+        <button data-bind="css: { 'btn-primary': !research().active(), 'btn-danger': research().active(), 'disabled': !research().readyToBegin() }, click: research().toggleProduction.bind(research())" type="button" class="btn">
+          <span data-bind="visible: research().active()">Stop <span class="hide-mobile">Research</span></span>
+          <span data-bind="visible: !research().active()">Begin <span class="hide-mobile">Research</span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="changelogModal" tabindex="-1" role="dialog" aria-labelledby="changelogModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="changelogModalLabel">Changelog</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <ul>
+          <span>3/19/2019 (Version 0.5.4)</span>
+          <li>Add a footer link to the subreddit</li>
+          <li>Add some new email subjects and products</li>
+        </ul>
+        <ul>
+          <span>2/15/2019 (Version 0.5.3)</span>
+          <li>Fix broken achievement</li>
+        </ul>
+        <ul>
+          <span>2/05/2019 (Version 0.5.2)</span>
+          <li>Clear away inboxes &amp; email stress after bankruptcy</li>
+          <li>Make sure away inboxes consume outgoing email responses</li>
+        </ul>
+        <ul>
+          <span>1/28/2019 (Version 0.5.1)</span>
+          <li>Add fix for bankruptcy crash/refresh issue</li>
+          <li>Add more safeguards to prevent negative income scenarios</li>
+          <li>Fix missing email frequency upgrade</li>
+          <li>Adjust thresholds for top-level earnings achievements</li>
+        </ul>
+        <ul>
+          <span>1/14/2019 (Version 0.5.0)</span>
+          <li>Add the "Outgoing Email" feature</li>
+          <li>Add the ability to name current business</li>
+          <li>Add new stats chart tracking previous bankruptcies</li>
+          <li>Boost values of R&amp;D risk reduction upgrades</li>
+          <li>Add 23 new upgrades & 35 new achievements</li>
+          <li>Add setting to pin nav tabs to the header (off by default)</li>
+          <li>Add brief stat explanations for a few stats</li>
+          <li>Add various UI fixes and adjustments, especially for mobile darkmode</li>
+          <li>Fix date format for some non-EN-us users (only for new achievements)</li>
+          <li>Fix bug with away progress research producing too many patents</li>
+          <li>Improve long load times and imports after significant away time</li>
+          <li>Add more dumb text</li>
+        </ul>
+        <ul>
+          <span>12/17/2018 (Version 0.4.4)</span>
+          <li>Update Chart.js to latest version</li>
+          <li>Prevent charts from re-rendering on dark mode switch</li>
+          <li>Improve chart key color changes on dark mode re-render</li>
+          <li>Fix some typos</li>
+        </ul>
+        <ul>
+          <span>12/03/2018 (Version 0.4.3)</span>
+          <li>Subtract employees lost via research from full employee count</li>
+          <li>Fix acquisition button still disabled pre bankruptcy</li>
+        </ul>
+        <ul>
+          <span>11/30/2018 (Version 0.4.2)</span>
+          <li>Fix 'out of office' UI bug for chats on Firefox</li>
+          <li>Add explanatory tooltips to research inputs while active</li>
+          <li>Fix some upgrade description typos</li>
+        </ul>
+        <ul>
+          <span>11/29/2018 (Version 0.4.1)</span>
+          <li>Fix input arrows showing for research on Firefox</li>
+          <li>Prevent negative employee inputs on research</li>
+          <li>Show the 'buy all' button all the time</li>
+        </ul>
+        <ul>
+          <span>11/29/2018 (Version 0.4.0)</span>
+          <li>Add the 'Research & Development' feature</li>
+          <li>Add hovers to Achievements & Upgrades tab</li>
+          <li>Add option to clear all unread achievements</li>
+          <li>Add a 'Max' button for employee purchase rate</li>
+          <li>Increase cash away earnings from 3% to 15% default</li>
+          <li>Increase cash away earning upgrades from 1% to 5%</li>
+          <li>Increase investment/acquisition away earnings from 3% to 30% default
+          <li>Increase investment/acquisition away earning upgrades from 1% to 10%</li>
+          <li>Make away upgrades unlock with away achievements, rather than idle</li>
+          <li>Add away earnings report modal</li>
+          <li>Add unlock tooltips to locked tabs and icons</li>
+          <li>Add 48 new achievements and 28 new upgrades</li> 
+          <li>Rebalance costs of mid to late game employees and their corresponding upgrades</li>
+          <li>Rebalance 'next bankruptcy multiplier' relative to lower-priced employees</li>
+          <li>Add 'out of office' upgrades for Emails, Policies, and Chats</li>
+          <li>Increase email timers to 1 minute default with 30 second upgrades</li>
+          <li>Adjust base email payout and increase payout upgrades from 5% to 10%</li>
+          <li>Improve visual distinction between available and unavailable purchases</li>
+          <li>Prevent stats page charts from retaining old references in memory</li>
+          <li>Add more help text and inspiritional quotes to encourage the entrepenurial spirit</li>
+          <li>Add even more dumb text to everything else</li>
+        </ul>
+        <ul>
+          <span>11/25/2018 (Version 0.3.10)</span>
+          <li>Fix missing acquisition upgrade</li>
+          <li>Add more precautions to bankruptcy process</li>
+        </ul>
+        <ul>
+          <span>11/14/2018 (Version 0.3.9)</span>
+          <li>Fix 'Massive Layoffs' stat not carrying over between bankruptcies</li>
+        </ul>
+        <ul>
+          <span>11/13/2018 (Version 0.3.8)</span>
+          <li>Prevent repeat payouts on the 'all' button for investments</li>
+        </ul>
+        <ul>
+          <span>11/08/2018 (Version 0.3.7)</span>
+          <li>Bug fix and UI adjustments for IE11</li>
+        </ul>
+        <ul>
+          <span>11/08/2018 (Version 0.3.6)</span>
+          <li>Avoid possibility of hiring acquisition workers beyond available net value</li>
+          <li>Increase mobile screen size threshold for hiding hovers</li>
+          <li>Add acquisition worker modal details to improve accessibility and mobile ux</li>
+        </ul>
+        <ul>
+          <span>11/06/2018 (Version 0.3.5)</span>
+          <li>Avoid possibility of bankruptcy rewards adding out of order</li>
+          <li>Prevent firing employees while investments are active</li>
+        </ul>
+        <ul>
+          <span>11/04/2018 (Version 0.3.4)</span>
+          <li>Fix upgrade hovers on Firefox</li>
+          <li>Fix unlock dates on achievements in non-US locales</li>
+        </ul>
+        <ul>
+          <span>11/02/2018 (Version 0.3.3)</span>
+          <li>Stop 'away earnings' notices from piling up</li>
+          <li>Make acquisition worker hovers less prominent</li>
+          <li>Prevent creation of 0-length or empty investments</li>
+          <li>Hide investment 'new' tag even if investments are acquired</li>
+          <li>Add more dumb text to Policies, Emails, and Chats</li>
+        </ul>
+        <ul>
+          <span>10/13/2018 (Version 0.3.2)</span>
+          <li>Fix darkmode UI bug for acquisitions</li>
+          <li>Fix possibility of undefined investment name</li>
+        </ul>
+        <ul>
+          <span>10/12/2018 (Version 0.3.1)</span>
+          <li>Fix various UI bugs (mostly mobile)</li>
+        </ul>
+        <ul>
+          <span>10/12/2018 (Version 0.3.0)</span>
+          <li>Add Acquisitions System</li>
+          <li>Add ability to make and cash out all investments at once</li>
+          <li>Adjust investments UI and add company names</li>
+          <li>Add 20 new upgrades and 49 new achievements</li>
+          <li>Fix clumsy animation in mail inbox</li>
+        </ul>
+        <ul>
+          <span>8/16/2018 (Version 0.2.4)</span>
+          <li>Improve accessibility for keyboard-only and screen readers</li>
+          <li>Clarify language in 'Declare Bankruptcy' modal</li>
+        </ul>
+        <ul>
+          <span>8/10/2018 (Version 0.2.3)</span>
+          <li>Fix load error with high-level intern and wage slave achievements</li>
+          <li>Add cash per second to main employee display</li>
+        </ul>
+        <ul>
+          <span>8/10/2018 (Version 0.2.2)</span>
+          <li>Add Dark Mode</li>
+          <li>Fix excess space around achievements covering items below</li>
+          <li>Add an additional upgrade and achievement</li>
+          <li>Fix offline progress bug for long-term games</li>
+          <li>Add button to buy all upgrades</li>
+        </ul>
+        <ul>
+          <span>8/03/2018 (Version 0.2.1)</span>
+          <li>Fix employee hovers showing outside of the bottom page view</li>
+          <li>Add setting to disable pop-up notifications</li>
+          <li>Add setting to hide blank entries for unearned achievements and unbought upgrades</li>
+        </ul>
+        <ul>
+          <span>8/01/2018 (Version 0.2.0)</span>
+          <li>Add changelog</li>
+          <li>Resized and reorganized employee/upgrade UI</li>
+          <li>Add 'new achievements' section to achievements panel</li>
+          <li>Fix various typos and UI bugs</li>
+          <li>Add new high-level Bankruptcy Achievement</li>
+          <li>Add default offline progress for both earnings and investment progress</li>
+          <li>Show potential earning rate of new units before hiring</li>
+          <li>Add Hover details to upgrades and employees by default</li>
+          <li>Add Settings Modal with options to disable charts and swap hover/modal details</li>
+          <li>Fix timers on background tabs in Safari</li>
+          <li>Add analytics to measure achievements earned and session length</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="settingsModalLabel">Settings</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <fieldset>
+          <legend class="sr-only">Display Options</legend>
+          <ul>
+            <li>
+              <label for="charts">Enable Stats Charts</label><input name="charts" id="charts" type="checkbox" data-bind="checked: enableCharts">
+            </li>
+            <li>
+              <label for="hover">Enable Hover Details (Disable for Modal Details)</label><input name="hover" id="hover" type="checkbox" data-bind="checked: enableHover">
+            </li>
+            <li>
+              <label for="popup">Enable Pop-Up Notifications</label><input name="popup" id="popup" type="checkbox" data-bind="checked: enableNotifications">
+            </li>
+            <li>
+              <label for="blanks">List Blank Upgrades And Achievements</label><input name="blanks" id="blanks" type="checkbox" data-bind="checked: enableEmptyUpgradesAndAchievements">
+            </li>
+            <li>
+              <label for="darkmode">Enable Dark Mode</label><input name="darkmode" id="darkmode" type="checkbox" onclick="setTimeout(function() {reloadCharts()}, 100);" data-bind="checked: enableDarkMode">
+            </li>
+            <li>
+              <label for="darkmode">Enable Fixed Nav Tabs</label><input name="fixednav" id="fixednav" type="checkbox" data-bind="checked: enableFixedNavTabs">
+            </li>
+          </ul>
+        </fieldset>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="chatModal" tabindex="-1" role="dialog" aria-labelledby="chatModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="chatModalLabel">Internal Chat</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body chat-view" data-bind="visible: !awayChatInbox().active()">
+        <ul data-bind="foreach: viewingAcquisition().chats" class="nav nav-pills nav-stacked">
+          <li data-bind="click: select, css: { selected: selected }">
+            <a>
+              <span data-bind="css: { 'empty-circle': fired() && fired() > 0 || finished() }" class="circle">&nbsp;</span>
+              <span class="chat-name" data-bind="text: name"></span>
+            </a>
+            <button class="chat-close" data-bind="visible: !unreadMessages(), click: close"><i class="material-icons">close</i></button>
+            <span class="badge" data-bind="text: unreadMessages, visible: unreadMessages()"></span>
+          </li>
+        </ul>
+        <div class="right-box">
+
+          <ul class="messages-box" data-bind="foreach: viewingChat().messages, visible: viewingChat().messages().length > 0 && !viewingChat().fired()">
+            <li>
+              <b><span data-bind="text: source"></span> (<span data-bind="text: date"></span>):</b>
+              <span data-bind="text: message"></span>
+            </li>
+          </ul>
+
+          <ul class="messages-box" data-bind="visible: viewingChat().fired()">
+            <li class="fired-message-box">
+              <table class="earned-table table">
+                <tbody>
+                  <tr>
+                    <td>Text Bonus</td>
+                    <td><span data-bind="text: viewingChat().textBonusFormatted"></span>%</td>
+                  </tr>
+                  <tr>
+                    <td>Time Spent Waiting</td>
+                    <td><span data-bind="text: viewingChat().timePassedFormatted"></span></td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="fired-message">
+                <span data-bind="text: viewingChat().fired()"></span> Employees Fired
+              </div>
+            </li>
+          </ul>
+
+          <ul class="messages-box" data-bind="visible: viewingChat().messages().length === 0">
+            <li style="text-align: center;">
+              <h4 class="no-content-message">No Chat Selected</h4>
+            </li>
+          </ul>
+
+          <div class="show-typing" data-bind="style: { visibility: viewingChat().showTyping() ? 'visible' : 'hidden' }">
+            <span data-bind="text: viewingChat().firstName"></span> is typing...
+          </div>
+          <form data-bind="submit: viewingChat().respond.bind(viewingChat()), css: { disabled: viewingChat().finished }">
+            <button type="submit" class="chat-submit">
+              <i class="material-icons">add</i>
+            </button>
+            <input id="chat-response" type="text" placeholder="Message" autocomplete="off" maxlength="100" data-bind="event: { input: viewingChat().checkFinalMessage.bind(viewingChat()) }, textInput: viewingChat().inputMessage">
+          </form>
+        </div>
+      </div>
+      <div data-bind="visible: awayChatInbox().active()" class="modal-body away-record">
+        <input data-bind="textinput: awayChatInbox().message" class="form-control" placeholder="Enter your out of office message..." maxlength="100">
+        <table class="earned-table table">
+          <tr>
+              <td>Away Since</td>
+              <td data-bind="text: awayChatInbox().start"></td>
+          </tr>
+          <tr>
+              <td>Chat Messages Rejected</td>
+              <td data-bind="text: awayChatInbox().messages.displayVal"></td>
+          </tr>
+        </table>
+        <h5 class="away-earned-header">Fired While Away:</h5>
+        <div class="well well-sm">
+          <h4 data-bind="text: awayChatInbox().fired.displayVal"></h4>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div data-bind="visible: locked().chatAway" class="left-box well">
+          <input name="chat-away" type="checkbox" data-bind="checked: awayChatInbox().active, event: { change: awayChatInbox().handleChange.bind(awayChatInbox()) }"><label for="chat-away">Toggle Away</label>
+        </div>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- END MODALS -->
+
+<div id="achievement-box"></div>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<!--<script async src="https://www.googletagmanager.com/gtag/js?id=UA-117412788-1"></script>-->
+<!--
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-117412788-1');
+</script>
+-->
+</body>
+
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script type="text/html" id="stat-template">
+    <tr>
+      <td data-bind="css: { 'info-stat': info }">
+        <div style="position:relative;">
+          <span data-bind="text: name"></span>
+          <button data-bind="if: info" class="hide-mobile stat-info icon-button">
+            <i class="material-icons">help</i>
+          </button>
+          <div class="hover stat-hover">
+            <p data-bind="html: info"></p>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span data-bind="text: displayVal">-</span>
+      </td>
+    </tr>
+</script>
+
+<script type="text/html" id="mail-template">
+  <div class="email-message" data-bind="css: { replied: replied, 'special': isSpecial(), 'acquisition': isAcquisition() }" style="border: solid 1px gray">
+    <form data-bind="submit: respond">
+      <span class="timer alert-info" data-bind="text: displayTimeRemaining"></span>
+      <p class="email-info">
+        <b>From:</b> 
+        <span data-bind="text: from"></span>
+        <span data-bind="visible: isSpecial()" class="label label-danger">URGENT</span>
+        <span data-bind="visible: stressLevel === 0" class="label label-primary">LOW PRIORITY</span>
+        <span data-bind="visible: stressLevel === 1" class="label label-warning">HIGH PRIORITY</span>
+      </p>
+      <p class="email-info"><b>Date:</b> <span data-bind="text: date.toLocaleString()"></span></p>
+      <p class="email-info"><b>Subject:</b> <span data-bind="text: subject"></span></p>
+      <p data-bind="text: body"></p>
+      <textarea class="form-control" data-bind="value: inputText, attr: { title: isAcquisition() ? 'Add your notes' : 'Enter your response' }" maxlength="200"></textarea>
+      <button class="btn btn-primary" type="submit">
+        <span data-bind="visible: !isAcquisition()">Reply</span>
+        <span data-bind="visible: isAcquisition()">Accept</span>
+      </button>
+      <div style="clear:both;"></div>
+    </form>
+    <div data-bind="if: !isAcquisition()" class="payout">
+      <table class="earned-table table">
+        <tbody>
+          <tr>
+            <td>Text Bonus</td>
+            <td data-bind="text: payoutBonus"></td>
+          </tr>
+          <tr>
+            <td>Time Bonus</td>
+            <td data-bind="text: timeBonus"></td>
+          </tr>
+        </tbody>
+      </table>
+      <h2 class="label-success">+ $<span data-bind="text: payout"></span></h2>
+    </div>
+    <div data-bind="if: isAcquisition()" class="payout">
+      <table class="earned-table table">
+        <tbody>
+          <tr>
+            <td>Text Bonus</td>
+            <td data-bind="text: payoutBonus"></td>
+          </tr>
+          <tr>
+            <td>Time Bonus</td>
+            <td data-bind="text: timeBonus"></td>
+          </tr>
+        </tbody>
+      </table>
+      <h2 class="label-danger"><span data-bind="text: payout"></span> Employees Quit</h2>
+    </div>
+  </div>
+</script>
+
+</html>
