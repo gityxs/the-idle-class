@@ -2016,14 +2016,14 @@ var game = (function() {
 	
 	Unit.prototype.select = function() {
 	  selectedUnit.id = this.id;
-	  selectedUnit.name(this.name());
+	  selectedUnit.name(cnItem(this.name()));
 	  selectedUnit.num.val(this.num.val());
 	  selectedUnit.mod.val(this.mod.val());
     selectedUnit.numMod.val(this.numMod.val());
 	  selectedUnit.basePrice(this.basePrice());
 	  selectedUnit.baseClick(this.baseClick());
-	  selectedUnit.descriptionText(cnItem(this.descriptionText()));
-	  selectedUnit.flavorText(this.flavorText());
+	  selectedUnit.descriptionText(this.descriptionText());
+	  selectedUnit.flavorText(cnItem(this.flavorText()));
 	  selectedUnit.icon(this.icon());
 	};
 	
@@ -2225,7 +2225,7 @@ var game = (function() {
 	    this.type = 'unit';
 	    this.mod = mod ? mod : 1;
 	    
-	    this.descriptionText = ko.observable(description ? description : 'Squeeze <b>twice</b> as much cash out of every one of your <b>' + getUnit(unit).name() + '</b>.');
+	    this.descriptionText = ko.observable(description ? cnItem(description) : 'Squeeze <b>twice</b> as much cash out of every one of your <b>' + getUnit(unit).name() + '</b>.');
 
 	    this.handlePurchase = function() {
 	      getUnit(unit).mod.add(this.mod);
@@ -2236,7 +2236,7 @@ var game = (function() {
     Upgrade.call(this, id, name, price, flavor, 'people');
     this.type = 'unit';
     var valueText = highValue ? ' a lot ' : ' ';
-    this.descriptionText = ko.observable('Your <b>' + getUnit(unlockingUnit).name() + '</b> wring' + valueText + 'more cash from your <b>Interns</b> and <b>Wage Slaves</b>');
+    this.descriptionText = ko.observable('Your <b>' + cnItem(getUnit(unlockingUnit).name()) + '</b> wring' + valueText + 'more cash from your <b>Interns</b> and <b>Wage Slaves</b>');
 
     this.handlePurchase = function() {
       getUnit(0).mod.add(highValue ? 1.25 : 1);
@@ -2291,7 +2291,7 @@ var game = (function() {
 	      currentDefault = this.percentage > 0 ? percText : multText;
 	    }
 	    
-	    this.descriptionText = ko.observable(description ? description : currentDefault);
+	    this.descriptionText = ko.observable(description ? cnItem(description) : currentDefault);
 	    
 	    this.handlePurchase = function() {
 	      manualClickDPSPercentage.add(this.percentage);
@@ -2308,7 +2308,7 @@ var game = (function() {
 	    var multText = 'TBD';
 	    var percText = 'Inflate your <b>Total Mod to Cash Per Second</b> by an additional <b>' + percentage + '%</b>.';
 	    var currentDefault = this.percentage > 0 ? percText : multText;
-	    this.descriptionText = ko.observable(description ? description : currentDefault);
+	    this.descriptionText = ko.observable(description ? cnItem(description) : currentDefault);
 	    
 	    this.handlePurchase = function() {
 	      overallDPSPercentage.add(this.percentage);
@@ -2321,7 +2321,7 @@ var game = (function() {
 	    this.type = 'investmentsAllowed';
 	   // this.icon = 'access_time';
 	    
-	    this.descriptionText = ko.observable(description ? description : 'Increase the number of <b>Simultaneous Investments</b> permitted by <b>' + investmentsAllowed + '</b>.');
+	    this.descriptionText = ko.observable(description ? cnItem(description) : 'Increase the number of <b>Simultaneous Investments</b> permitted by <b>' + investmentsAllowed + '</b>.');
 	    this.handlePurchase = function() {
 	        simultaneousInvestments.add(investmentsAllowed);  
 	    };
@@ -2332,7 +2332,7 @@ var game = (function() {
 	    this.type = 'investmentInterest';
 	    //this.icon = 'access_time';
 	    
-	    this.descriptionText = ko.observable(description ? description : "Raise the per-second <b>Investment Interest Rate</b> by <b>" + rate + "%</b>.");
+	    this.descriptionText = ko.observable(description ? cnItem(description) : "Raise the per-second <b>Investment Interest Rate</b> by <b>" + rate + "%</b>.");
 	    this.handlePurchase = function() {
 	        interestRate.add(rate);
 	    };

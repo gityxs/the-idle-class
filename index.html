@@ -899,10 +899,10 @@
 
 <footer class="footer">
   <p>The Idle Class v<span data-bind="text: generalStats()[10].displayVal"></span></p> |
-  <a href="index.html">Home</a> |
-  <span id="changelog-footer-link"><a href="index.html#changelog" data-toggle="modal" data-target="#changelogModal">Changelog</a> |</span>
+  <a href="https://www.smallgraygames.com/" target="_blank">作者主页</a> |
+  <span id="changelog-footer-link"><a href="index.html#changelog" data-toggle="modal" data-target="#changelogModal">更新日志</a> |</span>
   <a target="_blank" href="https://www.reddit.com/r/theidleclass/">Reddit</a> |
-  <a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a>
+  <a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">捐赠</a>
        <div id='menu2' style='position: absolute;top:10px;left:10px;height:30px;width: 30px;opacity: 0.01'></div>
 </footer>
 
@@ -920,14 +920,14 @@
       <div class="modal-body">
         <p data-bind="html: selectedUnit.descriptionText"></p>
         <ul data-bind="visible: selectedUnit.num.val() > 0">
-          <li><b>Share of Total:</b> <span data-bind="text: selectedUnit.shareOfTotal"></span>%</li>
+          <li><b>总占比:</b> <span data-bind="text: selectedUnit.shareOfTotal"></span>%</li>
           <li><b>每秒收益 (单个):</b> $<span data-bind="text: selectedUnit.individualEarnings"></span></li>
           <li><b>每秒收益 (全部):</b> <span data-bind="text: selectedUnit.cps.displayVal"></span></li>
           <li><b>销售价值:</b> <span data-bind="text: selectedUnit.sellPrice.displayVal"></span></li>
         </ul>
         <ul data-bind="visible: selectedUnit.num.val() === 0">
-          <li><b>Base Cash Per Second:</b> $<span data-bind="text: selectedUnit.baseClickDisplay"></span></li>
-          <li><b>Expected Cash Per Second (One):</b> $<span data-bind="text: selectedUnit.potentialEarnings"></span></li>
+          <li><b>每秒基础金钱:</b> $<span data-bind="text: selectedUnit.baseClickDisplay"></span></li>
+          <li><b>每秒期望金钱 (单个):</b> $<span data-bind="text: selectedUnit.potentialEarnings"></span></li>
         </ul>
       </div>
       <div class="modal-footer">
