@@ -20,6 +20,7 @@ var cnItems = {
     '': '',
     '---': '———',
     '¯\_(ツ)_/¯': '¯\_(ツ)_/¯',
+    '1111':'1111',
 
     //.待归类
 
@@ -976,6 +977,35 @@ var cnItems = {
     "Whiter Phosphorous": "白色磷",
     "Why We Fire": "我们为什么要开火",
     "Yacht Lobbyists": "游艇游说者",
+    'Choke Their Rivers With Our Bankruptcies':'我们的破产扼杀了他们的河流',
+    'Churning Out Innovation':'推动创新',
+    'CIA-Sponsored Coups':'支持政变',
+    'Circle Back':'循环回流',
+    'Clearer Expectations':'清晰的期望',
+    'Click Mod':'点击模块',
+    'Clicks':'点击',
+    'Client States':'附庸国',
+    'Closed-Door Meetings':'闭门会议',
+    'Coal-Dusted Coins':'煤粉硬币',
+    'Collateral Damage':'附带损害',
+    'Colonial Hegemony':'殖民霸权',
+    'Colonial Sovereignty':'殖民主权',
+    'Committed Crapshooter':'监狱杀手',
+    'Community Policing':'社区治安',
+    'Company Cultural Hegemony':'企业文化霸权',
+    'Company Man':'公司职员',
+    'Company Scrip':'公司票据',
+    'Complete Deregulation':'撤销管制',
+    'Completionist':'担保人',
+    'Complimentary Amphetamines':'免费安非他命',
+    'Comprehensive Outsourcing':'综合外包',
+    'Compulsory Sedation':'强制性镇静',
+    'Congenial Encouragement':'相投鼓励',
+    'Content Creator':'内容创建者',
+    'Cursed Monkey\'s Paw':'被诅咒的猴子爪子',
+    'Did you say, \'Officer, I am not resisting you?\'':'你说过吗，“官员，我不是在拒绝你？”',
+    'Even More of \'Em':'甚至更多的是：嗯..',
+    'Everything\'s Coming Up Milhouse':'一切都是米尔豪斯的主意',
 
 
 

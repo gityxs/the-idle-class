@@ -98,16 +98,16 @@
             <li><a href="index.html#" data-toggle="modal" data-target="#settingsModal">设置</a></li>
             <!-- <li><a href="#" data-toggle="modal" data-target="#welcomeModal">Welcome</a></li> -->
             <li role="separator" class="divider"></li>
-            <li><a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate</a></li>
+            <li><a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">捐赠</a></li>
             <li role="separator" class="divider"></li>
             <li data-bind="css: { 'nav-disabled': locked().bankruptcy }">
               <a href="index.html#" data-bind="attr: {'data-toggle': locked().bankruptcy ? '' : 'modal', 'title': locked().bankruptcy ? 'Unlocks at $1 trillion in total earnings' : ''}" data-target="#bankruptcyModal" onclick="setBankruptcyModalViewed()">
-                <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success">NEW</span>
-                <i data-bind="visible: locked().bankruptcy" class="material-icons padlock-icon">lock</i>Declare Bankruptcy
+                <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success">新</span>
+                <i data-bind="visible: locked().bankruptcy" class="material-icons padlock-icon">lock</i>宣布破产
               </a>
             </li>
           </ul>
-          <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success bankruptcy-new-label">NEW</span>
+          <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success bankruptcy-new-label">新</span>
 
         </div>
         <div id="navbar" class="navbar-collapse collapse">
@@ -1535,7 +1535,7 @@
       </div>
       <div data-bind="visible: research().helpView()" class="modal-body">
         <blockquote class="blockquote text-right">
-          <p class="mb-0">Innovation distinguishes between a leader and a follower</p>
+          <p class="mb-0">创新区分领导者和追随者</p>
           <footer class="blockquote-footer"><cite title="Source Title">Steven Job</cite></footer>
         </blockquote>
         <p>If you want to be a great entrepenuer, you're going to have to do more than just grind the gears of industry exactly the way they've been grinding for years. The first step to truly innovative success is <b>Research & Development</b>.</p>
@@ -1544,19 +1544,19 @@
       <div data-bind="visible: !research().helpView()" class="modal-body">
         <div class="main" data-bind="css: { selling: research().sellValue() }">
           <div class="research-input">
-            <h4>Interns</h4>
+            <h4>实习生</h4>
             <input id="research-0" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : '' }, textinput: research().intern" type="number" class="form-control" oninput="validateResearch('0');" placeholder="#" min="0" max="999">
           </div>
           <div class="research-input">
-            <h4>Wage Slaves</h4>
+            <h4>工资奴隶</h4>
             <input id="research-1" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : ''  }, textinput: research().wage" type="number" class="form-control" oninput="validateResearch('1');" placeholder="#" min="0" max="999">
           </div>
           <div class="research-input">
-            <h4>Sales Hotshots</h4>
+            <h4>销售能人</h4>
             <input id="research-2" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : ''  }, textinput: research().sales" type="number" class="form-control" oninput="validateResearch('2');" placeholder="#" min="0" max="999">
           </div>
           <div class="research-input">
-            <h4>Middle Managers</h4>
+            <h4>中层管理</h4>
             <input id="research-3" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : ''  }, textinput: research().manager" type="number" class="form-control" oninput="validateResearch('3');" placeholder="#" min="0" max="999">
           </div>
 
@@ -1564,26 +1564,26 @@
             <div class="col-md-6">
               <table class="table earned-table">
                 <tr>
-                  <td>Catastrophic Risk</td><td data-bind="text: research().risk.displayVal"></td>
+                  <td>灾难性风险</td><td data-bind="text: research().risk.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>Speed Boost</td><td data-bind="text: research().speed.displayVal"></td>
+                  <td>速度提升</td><td data-bind="text: research().speed.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>Chance to Auto Sell</td><td data-bind="text: research().autoSell.displayVal"></td>
+                  <td>自动销售几率</td><td data-bind="text: research().autoSell.displayVal"></td>
                 </tr>
               </table>
             </div>
             <div class="col-md-6">
               <table class="table earned-table">
                 <tr>
-                  <td>Value Boost</td><td data-bind="text: research().value.displayVal"></td>
+                  <td>价值提升</td><td data-bind="text: research().value.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>Storage Allowed</td><td data-bind="text: research().storage.displayVal"></td>
+                  <td>允许存储</td><td data-bind="text: research().storage.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>Base Value</td><td data-bind="text: research().baseValue.displayVal"></td>
+                  <td>基础价值</td><td data-bind="text: research().baseValue.displayVal"></td>
                 </tr>
               </table>
             </div>
@@ -1591,7 +1591,7 @@
 
           <div class="row">
             <div class="col-md-12">
-              <h4 class="progress-header">Researching: <span data-bind="html: research().product"></span></h4>
+              <h4 class="progress-header">研究: <span data-bind="html: research().product"></span></h4>
               <div class="progress">
                 <div class="progress-bar" role="progressbar" data-bind="style: { width: research().percentageRipe() }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
               </div>
@@ -1600,7 +1600,7 @@
         </div>
 
         <div class="sell-value label-success" data-bind="visible: research().sellValue()">
-          <p class="label"><span data-bind="text: research().sellNumber"></span> Patents Sold</p>
+          <p class="label"><span data-bind="text: research().sellNumber"></span> 专利已售出</p>
           <h4>$<span data-bind="text: research().sellValue()"></span></h4>
         </div>
 
@@ -1608,14 +1608,14 @@
       <div class="modal-footer">
         <div style="float:left;">
           <button class="btn btn-success" data-bind="click: research().sellPatents.bind(research())">
-            Sell <span class="hide-mobile">Patents</span> 
+            出售 <span class="hide-mobile">专利</span> 
             <span data-bind="text: research().patents().length" class="sell-num badge"></span>
           </button>
         </div>
-        <button type="button" class="btn btn-primary" data-bind="click: research().toggleHelpView.bind(research())">Help</button>
+        <button type="button" class="btn btn-primary" data-bind="click: research().toggleHelpView.bind(research())">帮助</button>
         <button data-bind="css: { 'btn-primary': !research().active(), 'btn-danger': research().active(), 'disabled': !research().readyToBegin() }, click: research().toggleProduction.bind(research())" type="button" class="btn">
-          <span data-bind="visible: research().active()">Stop <span class="hide-mobile">Research</span></span>
-          <span data-bind="visible: !research().active()">Begin <span class="hide-mobile">Research</span></span>
+          <span data-bind="visible: research().active()">停止 <span class="hide-mobile">Research</span></span>
+          <span data-bind="visible: !research().active()">开始 <span class="hide-mobile">Research</span></span>
         </button>
       </div>
     </div>
@@ -1626,7 +1626,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="changelogModalLabel">Changelog</h3>
+        <h3 class="modal-title" id="changelogModalLabel">更新日志</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
