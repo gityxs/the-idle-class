@@ -1227,7 +1227,7 @@ var cnItems = {
     'Cancel': '取消',
     'Clear All': '全部清除',
     'Client State': '客户统计',
-    '': '',
+    'Cash': '现金',
     '': '',
     '': '',
     '': '',
