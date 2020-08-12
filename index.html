@@ -5,45 +5,62 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>放置大亨 - The Idle Class</title>
-  <meta name="description" content="The Idle Class is a fast-paced, visually thrilling journey into the never-ending bull market of capitalism. Those who click vigorously will inevitably become wealthy." /> 
+  <title>The Idle Class</title>
+  <meta name="description" content="The Idle Class is an incremental game about the never-ending bull market of capitalism. Those who click vigorously will inevitably become wealthy." /> 
+
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:site" content="@smallgraygames"/>
+  <meta name="twitter:title" content="The Idle Class"/>
+  <meta name="twitter:description" content="An incremental descent into the nightmare of capitalism"/>
+  <meta name="twitter:url" content="https://www.smallgraygames.com/the-idle-class"/>
 
   <!-- http://plaza.dsolver.ca/m/smallgraygames -->
-    <script src="zh.js"></script>
-  <script src="//likexia.gitee.io/game/js/jquery.min.js"></script>
-  <script src="knockout-3.4.2.js"></script>
-  <script src="https://cdn.bootcss.com/Chart.js/2.7.3/Chart.min.js"></script>
-  <!--<script src-"https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>-->
-  <script src="https://cdn.bootcss.com/lz-string/1.4.4/lz-string.min.js"></script>
+
+  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.js"></script>
+  <script defer src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script defer src="business-simulator/game.js"></script>
   <script defer src="business-simulator/main.js"></script>
-  <link rel="stylesheet" type="text/css" href="business-simulator/styles.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <link async rel="stylesheet" type="text/css" href="business-simulator/styles.css">
+  <link async rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link rel="stylesheet" title="dark">
-  <link rel="shortcut icon" href="business-simulator/favicon.ico" type="image/x-icon" />
+  <link async rel="shortcut icon" href="business-simulator/favicon.ico" type="image/x-icon" />
 </head>
 
 <body data-bind="css: { darkmode: enableDarkMode, fixednav: enableFixedNavTabs }">
   <div id="loading-screen" style="position: fixed; height: 100vh; width: 100vw; z-index: 10000; background: white;">
     <div style="text-align: center; margin-top: 50vh;">
-      <p style="border:solid 1px #ddd; display: inline-block; padding: 15px; border-radius: 15px; background: #EEE;">
-        加载中...<br><br>
-        如果您在几秒钟内没有开始游戏，请刷新。
+      <p style="margin: 15px; border:solid 1px #ddd; display: inline-block; padding: 15px; border-radius: 15px; background: #EEE;">
+        Loading...<br><br>
+        If you aren't doing business within a few seconds, please refresh.
       </p>
     </div>
   </div>
    <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
-          <!--<a class="navbar-brand" href="#">Project name</a>-->
-          <p id="top-clickable-box">
-            <button id="top-clickable" data-bind="css: { 'windfall': isWindfall()}" class="btn btn-primary btn-lg main-click" onclick="mainClick()">
-              <span data-bind="visible: !isWindfall()">赚钱 &raquo;</span>
-              <span data-bind="visible: isWindfall()">意外收获 &raquo;</span>
+          <p data-bind="visible: !isTrainingView(), css: { 'windfallGuaranteed': !locked().windfallGuarantee }" id="top-clickable-box" class="top-box">
+            <button title="Progress to guaranteed windfall" data-bind="visible: !locked().windfallGuarantee, click: triggerManualWindfall, css: { 'windfall': isWindfall() }" class="btn btn-primary btn-lg windfall-btn">
+              <span data-bind="visible: windfallProgress.val() < 100 && !isWindfall()"><span data-bind="text: Math.floor(windfallProgress.val())"></span>%</span>
+              <i class="material-icons" data-bind="visible: windfallProgress.val() >= 100 || isWindfall()">monetization_on</i>
+            </button>
+            <button id="top-clickable" data-bind="css: { 'windfall': isWindfall(), 'windfallGuaranteed': !locked().windfallGuarantee }" class="btn btn-primary btn-lg main-click" onclick="mainClick()">
+              <span data-bind="visible: !isWindfall()">Earn Dollars &raquo;</span>
+              <span data-bind="visible: isWindfall()">Earn Windfall &raquo;</span>
             </button>
             <span data-bind="css: { 'windfall': isWindfall()}" class="label label-success click-value-display top-click-value-display">1</span>
           </p>
+          <div data-bind="visible: isTrainingView" class="top-box">
+            <div style="margin-top: 8px;" class="panel panel-default">
+              <div class="panel-body">
+                Training Seminars Available: 
+                <span data-bind="text: trainingSeminars.displayVal" class="badge badge-success"></span>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="mobile-cash-display">
           <div class="panel panel-default">
@@ -51,26 +68,26 @@
               <span data-bind="text: currentCash.displayVal">0</span>
             </div>
           </div>
-          <div class="panel panel-default">
-            <div class="panel-body">
-              <span data-bind="text: accessibleDPS.displayVal">0</span>&nbsp;/s
-              <span class="badge cps-penalty-badge" data-bind="visible: activeInvestments().length - pendingInvestmentCount.val() > 0" title="Current deduction for active investments">
-                - <span data-bind="text: investmentPenaltyPercentage()"></span>%
-              </span>
-            </div>
-          </div>
+
         </div>
         <div class="navbar-right">
-          <span class="badge mail-badge" data-bind="text: mail().length, visible: mail().length"></span>
+          <span class="badge mail-badge" data-bind="text: mail().length, visible: mail().length, css: { 'urgent': containsUrgent, 'cryptic': containsCryptic }"></span>
           <button class="icon-button mail-button" data-toggle="modal" data-bind="click: setViewingInbox, attr: { 'data-target': locked().mail ? '' : '#mailModal', title:  locked().mail ? 'Unlocks at $100 in per-second earnings' : '' }, css: { 'locked-icon': locked().mail }">
             <i data-bind="visible: locked().mail" class="material-icons padlock-icon" aria-hidden="true" style="">lock</i>
             <i class="material-icons mail-icon nav-icon">mail</i>
           </button>
 
           <span class="badge mail-badge research-badge" data-bind="text: research().patents().length, visible: research().patents().length"></span>
-          <button class="icon-button mail-button" data-toggle="modal" data-bind="attr: { 'data-target': locked().research ? '' : '#productModal', title:  locked().research ? 'Unlocks at $100 billion in total earnings' : ''  }, css: { 'locked-icon': locked().research }">
+          <button class="icon-button mail-button" data-toggle="modal" data-bind="attr: { 'data-target': locked().research ? '' : '#productModal', title:  locked().research ? 'Unlocks at $100 billion in total earnings' : ''  }, css: { 'locked-icon': locked().research }, click: function() { viewingModal('r&d') }">
             <i data-bind="visible: locked().research" class="material-icons padlock-icon" aria-hidden="true" style="">lock</i>
             <i class="material-icons mail-icon nav-icon">supervised_user_circle</i>
+          </button>
+
+          <span class="badge mail-badge ballot-badge" data-bind="visible: election().finished()">1</span>
+          <span class="label label-success ballot-badge" data-bind="visible: electionStats2()[2].val() === 0 && !locked().elections && !election().active() && !election().finished()">NEW</span>
+          <button class="icon-button mail-button" data-toggle="modal" data-bind="attr: { 'data-target': locked().elections ? '' : '#electionModal', title:  locked().elections ? 'Unlocks at $1 octillion in total earnings' : ''  }, css: { 'locked-icon': locked().elections }, click: function() { viewingModal('election') }">
+            <i data-bind="visible: locked().elections" class="material-icons padlock-icon" aria-hidden="true" style="">lock</i>
+            <i class="material-icons mail-icon nav-icon">ballot</i>
           </button>
 
           <div class="panel panel-default">
@@ -91,79 +108,132 @@
             <i class="material-icons settings-icon nav-icon dropdown-toggle" id="settingsDropdown" aria-hidden="true">settings</i>
           </button>
           <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="settingsDropdown">
-            <li><a href="index.html#" onclick="game.saveGame();">保存进度</a></li>
-            <li><a href="index.html#" data-toggle="modal" data-target="#exportModal" onclick="game.exportGameData();">导出存档</a></li>
-            <li><a href="index.html#" data-toggle="modal" data-target="#importModal">导入存档</a></li>
-            <li><a href="index.html#" data-toggle="modal" data-target="#wipeSaveModal">硬复位</a></li>
-            <li><a href="index.html#" data-toggle="modal" data-target="#settingsModal">设置</a></li>
-            <!-- <li><a href="#" data-toggle="modal" data-target="#welcomeModal">Welcome</a></li> -->
+            <li><a href="#" onclick="game.saveGame();">Save Progress</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#exportModal" onclick="game.exportGameData();">Export Save</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#importModal">Import Save</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#wipeSaveModal">Wipe Save</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#settingsModal" data-bind="click: function() { viewingModal('settings'); }">Settings</a></li>
             <li role="separator" class="divider"></li>
-            <li><a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">捐赠</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#donateModal" data-bind="click: function() { viewingModal('donate'); }">Donate</a></li>
             <li role="separator" class="divider"></li>
             <li data-bind="css: { 'nav-disabled': locked().bankruptcy }">
-              <a href="index.html#" data-bind="attr: {'data-toggle': locked().bankruptcy ? '' : 'modal', 'title': locked().bankruptcy ? 'Unlocks at $1 trillion in total earnings' : ''}" data-target="#bankruptcyModal" onclick="setBankruptcyModalViewed()">
-                <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success">新</span>
-                <i data-bind="visible: locked().bankruptcy" class="material-icons padlock-icon">lock</i>宣布破产
+              <a href="#" data-bind="attr: {'data-toggle': locked().bankruptcy ? '' : 'modal', 'title': locked().bankruptcy ? 'Unlocks at $1 trillion in total earnings' : ''}" data-target="#bankruptcyModal" onclick="setBankruptcyModalViewed()">
+                <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success">NEW</span>
+                <i data-bind="visible: locked().bankruptcy" class="material-icons padlock-icon">lock</i>Declare Bankruptcy
               </a>
             </li>
           </ul>
-          <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success bankruptcy-new-label">新</span>
+          <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success bankruptcy-new-label">NEW</span>
 
         </div>
         <div id="navbar" class="navbar-collapse collapse">
         </div><!--/.navbar-collapse -->
       </div>
     </nav>
+          <div id="slide-nav" class="navbar-inverse">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <span data-bind="text: accessibleDPS.displayVal">0</span>&nbsp;/s
+            <span class="badge cps-penalty-badge" data-bind="visible: activeInvestments().length - pendingInvestmentCount.val() > 0" title="Current deduction for active investments">
+              - <span data-bind="text: investmentPenaltyPercentage()"></span>%
+            </span>
+          </div>
+        </div>
+      </div>
 
 <div class="container">
   <!-- Nav tabs -->
   <ul class="nav nav-tabs nav-justified main-nav" role="tablist">
     <li role="presentation" class="active">
-      <a href="index.html#store" aria-controls="home" role="tab" data-toggle="tab">
+      <a id="storetab" href="#store" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: function() { viewingTab('store'); }">
         <i class="material-icons nav-tab-icon">shopping_cart</i>
-        <span class="nav-tab-text">商店</span>
+        <span class="nav-tab-text">Store</span>
         <span class="badge" data-bind="visible: newUpgradesCount.val, text: newUpgradesCount.displayVal"></span>
       </a>
     </li>
     <li role="presentation">
-      <a href="index.html#achievements" data-bind="click: incrementViewCount.bind($data, 'achievementTab')" aria-controls="messages" role="tab" data-toggle="tab">
+      <a href="#achievements" data-bind="click: function() { incrementViewCount.bind($data, 'achievementTab'); setTimeout(function() { viewingTab('achievements'); }, 100); }" aria-controls="messages" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">check_circle</i>
-        <span class="nav-tab-text">成就 & 升级</span>
+        <span class="nav-tab-text">Achievements & Upgrades</span>
         <span class="badge" data-bind="visible: newAchievementCount.val, text: newAchievementCount.displayVal"></span>
       </a>
     </li>
     <li role="presentation">
-      <a href="index.html#stats" onclick="reloadCharts()" data-bind="click: incrementViewCount.bind($data, 'statsTab')" aria-controls="settings" role="tab" data-toggle="tab">
+      <a href="#stats" onclick="reloadCharts()" data-bind="click: function() { incrementViewCount.bind($data, 'statsTab'); viewingTab('stats'); }" aria-controls="settings" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">insert_chart</i>
-        <span class="nav-tab-text">统计</span>
+        <span class="nav-tab-text">Stats</span>
       </a>
     </li>
     <li role="presentation" data-bind="css: { 'nav-disabled': locked().investments }">
-      <a href="index.html#investments" aria-controls="investments" role="tab" data-bind="attr: { 'data-toggle': locked().investments ? '' : 'tab'}">
+      <a href="#investments" aria-controls="investments" role="tab" data-bind="attr: { 'data-toggle': locked().investments ? '' : 'tab'}, click: function() { viewingTab('investments'); }">
         <i data-bind="visible: locked().investments" class="material-icons padlock-icon" aria-hidden="true">lock</i>
         <i class="material-icons nav-tab-icon">trending_up</i>
-        <span data-bind="attr: { title:  locked().investments ? 'Unlocks at $100 million in total earnings' : ''}" class="nav-tab-text">投资</span>
-        <span data-bind="visible: !locked().investments && activeInvestments().length < 1 && investmentStats()[1].val() < 1 && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">新</span>
+        <span data-bind="attr: { title:  locked().investments ? 'Unlocks at $100 million in total earnings' : ''}" class="nav-tab-text">Investments</span>
+        <span data-bind="visible: !locked().investments && activeInvestments().length < 1 && investmentStats()[1].val() < 1 && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span>
         <span class="badge" data-bind="visible: pendingInvestmentCount.val() > 0, text: pendingInvestmentCount.displayVal"></span>
       </a>
     </li>
     <li role="presentation" data-bind="css: { 'nav-disabled': locked().acquisitions }">
-      <a id="acquisition-tab" href="index.html#acquisitions" aria-controls="acquisitions" role="tab" data-bind="attr: { 'data-toggle': locked().acquisitions ? '' : 'tab'}">
+      <a id="acquisition-tab" href="#acquisitions" aria-controls="acquisitions" role="tab" data-bind="attr: { 'data-toggle': locked().acquisitions ? '' : 'tab'}, click: function() { viewingTab('acquisitions'); }">
         <i data-bind="visible: locked().acquisitions" class="material-icons padlock-icon">lock</i>
         <i class="material-icons nav-tab-icon">store</i>
-        <span data-bind="attr: { title:  locked().acquisitions ? 'Unlocks at $1 quintillion in total earnings' : ''}" class="nav-tab-text">收购</span>
-        <span data-bind="visible: !locked().acquisitions && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">新</span>
+        <span data-bind="attr: { title:  locked().acquisitions ? 'Unlocks at $1 quintillion in total earnings' : ''}" class="nav-tab-text">Acquisitions</span>
+        <span data-bind="visible: !locked().acquisitions && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span>
         <span class="badge" data-bind="visible: pendingAcquisitionCount.val() > 0, text: pendingAcquisitionCount.displayVal"></span>
       </a>
     </li>
+
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content main-tabs">
     <div role="tabpanel" class="tab-pane active" id="store">
-      <div class="col-md-6">
-  			<h3 class="upgrades-header">升级
-          <button data-bind="click: buyAllUpgrades" class="btn btn-default btn-sm upgrade-all">购买全部</button>
+
+      <div data-bind="if: isTrainingView, visible: isTrainingView, css: { trainingView: isTrainingView }" class="col-md-6">
+        <h3 class="upgrades-header">Career Development
+          <button class="training-toggle" data-toggle="modal" data-target="#trainingHelpModal" data-bind="click: function() { viewingModal('training'); }">
+            <i class="material-icons">help</i>
+          </button>
+        </h3>
+        <ul data-bind="foreach: careerUpgrades" class="upgrade-list">
+          <li data-bind="visible: available">
+            <div class="panel unit" data-bind="css: { 'panel-success': level() > 0, 'panel-default': level() <= 0}">
+            <div class="panel-heading">
+              <i class="material-icons" data-bind="text: icon"></i>
+              <div class="title-box">
+                <button class="wrapper-button panel-title" data-toggle="modal" data-target="#upgradeModal" data-bind="click: select, event: { mouseover: viewDetails, mouseout: leaveDetails }">
+                  <h3 style="color: #333;" class="panel-title" data-bind="text: name"></h3>
+                </button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div style="width: 100%;" class="unit-buttons">
+                <button data-bind="click: levelUp, css: { 'disabled': cantAfford }" style="width: 100%;" class="btn btn-md btn-default">
+                  <span><span data-bind="text: cost.displayVal"></span> <span data-bind="text: cost.val() > 1 ? 'Seminars' : 'Seminar'"></span></span>
+                </button>
+                <div class="badge" data-bind="css: { 'badge-success': level() > 0, 'badge-default': level() <= 0 }">
+                  <span>Lvl.</span><span data-bind="text: level"></span> 
+                </div>
+              </div>
+            </div>
+          </div>
+          <div data-bind="visible: hoverVisible, event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
+            <div class="hover">
+              <p data-bind="html: descriptionText"></p>
+              <ul>
+                <li><b>Corresponding Employee:</b> <span data-bind="text: correspondingEmployee"></span></li>
+                <li><b>Total Trained Bonus:</b> <span data-bind="text: total.displayVal"></span></li>
+              </ul>
+              <p class="flavor">"<span data-bind="html: flavorText"></span>"</p>
+            </div>
+          </div>
+          </li>
+        </ul>
+      </div>
+
+      <div data-bind="visible: !isTrainingView()" class="col-md-6">
+  			<h3 class="upgrades-header">Upgrades
+          <button data-bind="click: buyAllUpgrades" class="btn btn-default btn-sm upgrade-all">Buy All</button>
         </h3>
   			<ul data-bind="foreach: availableUpgrades" class="upgrade-list">
   			  <li data-bind="visible: available">
@@ -180,8 +250,7 @@
     		      <div style="width: 100%;" class="unit-buttons">
       		      <button style="width: 100%;" data-bind="css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default">
                   <span data-bind="text: price.displayVal"></span>
-                  <span data-bind="visible: !read()" class="label label-success">新</span></button>
-      		   <!--    <a class="btn btn-lg btn-default" data-bind="click: select" data-toggle="modal" data-target="#upgradeModal">Details</a> -->
+                  <span data-bind="visible: !read()" class="label label-success">NEW</span></button>
     		      </div>
             </div>
           </div>
@@ -194,56 +263,123 @@
   			  </li>
   			</ul>
   		</div>
-  		<div class="col-md-6">
-    		<h3 class="employee-header">员工</h3>
-    		<div class="buy-rate-selector">
-      		<h4>购买数量:</h4>
+
+  		<div data-bind="css: { twocolumn: twoColumnEmployees() && !isTrainingView() }" class="col-md-6">
+    		<h3 class="employee-header">
+          Employees
+          <button class="training-toggle" data-bind="click: toggleTrainingView, visible: !locked().careerDev">
+            <i data-bind="visible: !isTrainingView()" class="material-icons">school</i>
+            <i data-bind="visible: isTrainingView" class="material-icons">shopping_cart</i>
+            <span class="badge badge-success trainings-badge" data-bind="visible: trainingsComplete() > 0, text: trainingsComplete"></span>
+            <span class="label label-success new-trainings-label" data-bind="visible: seminarsUsed.val() === 0">NEW</span>
+          </button>
+        </h3>
+
+    		<div data-bind="visible: !isTrainingView()" class="buy-rate-selector">
+      		<h4>Rate:</h4>
       		<div class="btn-group" role="group" aria-label="Buy Rate Buttons">
             <button data-bind="click: setBuyRate.bind($data, 1)" type="button" class="btn btn-default active">1</button>
             <button data-bind="click: setBuyRate.bind($data, 10)" type="button" class="btn btn-default">10</button>
             <button data-bind="click: setBuyRate.bind($data, 25)" type="button" class="btn btn-default">25</button>
             <button data-bind="click: setBuyRate.bind($data, 100)" type="button" class="btn btn-default">100</button>
-            <button data-bind="click: setBuyRate.bind($data, 'max')" type="button" class="btn btn-default">最大</button>
+            <button data-bind="click: setBuyRate.bind($data, 'max')" type="button" class="btn btn-default">Max</button>
           </div>
         </div>
+
+        <div data-bind="visible: isTrainingView" class="buy-rate-selector">
+          <h4>Hours:</h4>
+          <input class="form-control" type="number" min="1" max="12" data-bind="textinput: trainingHours, attr: { title: trainingHoursValidation }, css: { error: trainingHoursValidation }" style="width: 65px; display: inline-block; vertical-align: middle; height: 30px;">
+          <div class="btn-group">
+            <button data-bind="css: { disabled: trainingsCanAfford().length === 0 || trainingHoursValidation() }, click: multiTrain" class="btn btn-sm btn-default">Train <span data-bind="text: trainingsCanAfford().length"></span></button>
+            <button data-bind="css: { disabled: trainingsComplete() === 0 }, click: finishAllTrainings " class="btn btn-sm btn-default">Finish All</button>
+          </div>
+        </div>
+
         <ul class="employee-list" data-bind="foreach: units">
-          <li data-bind="visible: available, event: { mouseover: viewDetails, mouseout: leaveDetails }, attr: { id: 'employee' + id }, css: { 'reverse-hover': id !== '0' && id !== '1' && ($parent.lastVisibleUnit() - 1 === parseInt(id) || ($parent.lastVisibleUnit()) === id)}" class="unit-box">
-      		  <div class="panel panel-primary unit">
+          <li data-bind="visible: available, event: { mouseover: viewDetails, mouseout: leaveDetails }, attr: { id: 'employee' + id }, css: { 'reverse-hover': id !== '0' && id !== '1' && ($parent.lastVisibleUnit() - ($parent.twoColumnEmployees() ? 3 : 1) <= parseInt(id) || ($parent.lastVisibleUnit()) === id)}" class="unit-box">
+      		  <div class="panel panel-primary unit" data-bind="css: { 'trainingActive': $parent.isTrainingView }">
               <div class="panel-heading">
                 <i class="material-icons" data-bind="text: icon"></i>
-                <button class="wrapper-button panel-title" data-toggle="modal" data-target="#unitModal" data-bind="click: select">
-                  <h3 data-bind="text: name" class="panel-title" ></h3>
+                <button class="wrapper-button panel-title" data-toggle="modal" data-bind="click: select, attr: { 'data-target': $parent.isTrainingView() ? '#trainingModal' : '#unitModal' }">
+                  <h3 class="panel-title" >
+                    <span data-bind="text: name"></span>
+                    <span data-bind="visible: $parent.isTrainingView">Training</span>
+                  </h3>
                 </button>
-                <span class="badge"><span data-bind="text: price.displayVal"></span></span>
+                <span class="badge" data-bind="text: $parent.isTrainingView() ? trainingCost.displayVal : ($parent.twoColumnEmployees() ? num.displayVal : price.displayVal)"></span>
               </div>
-              <div class="panel-body">
-      		      <h3 class="unit-num"><span data-bind="text: num.displayVal"></span><span style="font-size: 14px; margin-left: 10px; top: -2px; vertical-align: middle;" class="well well-sm"><span data-bind="text: cps.displayVal"></span> /秒</span></h3>
+
+              <div data-bind="if: !$parent.isTrainingView(), visible: !$parent.isTrainingView()" class="panel-body">
+
+      		      <h3 class="unit-num">
+                  <span data-bind="text: num.displayVal"></span>
+                  <span style="font-size: 14px; margin-left: 10px; top: -2px; vertical-align: middle;" class="well well-sm">
+                    <span data-bind="text: cps.displayVal"></span> /s
+                  </span>
+                </h3>
+
       		      <div class="unit-buttons">
-        		      <button data-bind="css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default">
-                    <span>雇佣</span>
-                    <span data-bind="visible: $parent.buyRate() === 'max', text: numCanAfford"></span>
+        		      <button data-bind="css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default unit-button-buy">
+                    <span class="hiretext">Hire</span>
+                    <span data-bind="visible: $parent.buyRate() === 'max', text: (numCanAfford() ? numCanAfford() : minWantToAfford()) + ($parent.twoColumnEmployees() ? ' for ' : '')"></span>
+                    <span data-bind="visible: $parent.twoColumnEmployees(), text: price.displayVal"></span>
                   </button>
         		      <button class="btn btn-md btn-default unit-button-sell" data-bind="click: sell">
-                    <span>解雇</span>
-                    <span data-bind="visible: $parent.buyRate() === 'max'">全部</span>
+                    <span>Fire</span>
+                    <span data-bind="visible: $parent.buyRate() === 'max'">All</span>
                   </button>
       		      </div>
               </div>
+
+              <div data-bind="if: $parent.isTrainingView, visible: $parent.isTrainingView" class="panel-body">
+
+                <div class="progress training-progress">
+                  <h5 class="unit-num progress-timer">
+                    <span data-bind="visible: trainingActive, text: displayTimeRemaining"></span>
+                  </h5>
+                  <div data-bind="style: { width: percentageComplete() }" class="progress-bar" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
+                </div>
+
+                <div class="unit-buttons">
+                  <button data-bind="css: { disabled: cantAffordTraining() || $root.trainingHoursValidation() }, visible: !trainingFinished() && !trainingActive(), click: train" class="btn btn-md btn-default">
+                    <span>Train</span>
+                  </button>
+                  <button data-bind="visible: trainingActive, click: stopTraining" class="btn btn-md btn-danger">
+                    <span>Stop</span>
+                  </button>
+                  <button data-bind="visible: trainingFinished, click: finishTraining" class="btn btn-md btn-success">
+                    <span>Finish</span>
+                  </button>
+                  <div class="well well-sm" data-bind="text: trainingBonus.displayVal"></div>
+                </div>
+              </div>  
+
             </div>
             <div data-bind="visible: hoverVisible, event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
-              <div class="hover">
+
+              <div data-bind="if: !$parent.isTrainingView(), visible: !$parent.isTrainingView()" class="hover">
                 <p data-bind="html: descriptionText"></p>
                 <ul data-bind="visible: num.val() > 0">
-                  <li><b>总占比:</b> <span data-bind="text: shareOfTotal"></span>%</li>
-                  <li><b>每秒收益 (单个):</b> $<span data-bind="text: individualEarnings"></span></li>
-                  <li><b>销售价值:</b> <span data-bind="text: sellPrice.displayVal"></span></li>
+                  <li><b>Share of Total:</b> <span data-bind="text: shareOfTotal"></span>%</li>
+                  <li><b>Cash Per Second (One):</b> $<span data-bind="text: individualEarnings"></span></li>
+                  <li><b>Sell Value:</b> <span data-bind="text: sellPrice.displayVal"></span></li>
                 </ul>
                 <ul data-bind="visible: num.val() === 0">
-                  <li><b>基础每秒收益:</b> $<span data-bind="text: baseClickDisplay"></span></li>
-                  <li><b>预期每秒收益 (单个):</b> $<span data-bind="text: potentialEarnings"></span></li>
+                  <li><b>Base Cash Per Second:</b> $<span data-bind="text: baseClickDisplay"></span></li>
+                  <li><b>Expected Cash Per Second (One):</b> $<span data-bind="text: potentialEarnings"></span></li>
                 </ul>
                 <p class="flavor">"<span data-bind="html: flavorText"></span>"</p>
               </div>
+
+              <div data-bind="visible: $parent.isTrainingView" class="hover">
+                <p data-bind="fadeHtml: trainingText"></p>
+                <ul>
+                  <li>In Progress Training Bonus: <b data-bind="text: inProgressTrainingBonus.displayVal"></b></li>
+                  <li>Next Training Bonus: <b data-bind="text: nextTrainingBonus.displayVal"></b></li>
+                  <li>Time to Train: <b data-bind="text: trainingTime.displayVal"></b></li>
+                </ul>
+              </div> 
+
             </div>
           </li>
     		</ul>
@@ -251,11 +387,52 @@
     </div>
     
     <div role="tabpanel" class="tab-pane" id="achievements">
+
+      <div class="col-md-12">
+        <div data-bind="visible: secretAchievementCount.val() > 0" class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Secret Achievements Unlocked</h3>
+            <button class="wrapper-button secret-achievements-toggle" data-toggle="collapse" data-target="#secretachieves"><i class="material-icons">arrow_drop_down</i></button>
+            <div class="stat-count">
+              <h3 class="panel-title">
+                <span data-bind="visible: newSecretAchievementCount.val() > 0" class="secret-count-label label label-success">NEW</span>
+                <span data-bind="text: secretAchievementCount.displayVal"></span>
+              </h3>
+            </div>
+          </div>
+          <div id="secretachieves" class="collapse">
+            <div class="panel-body">
+              <table class="earned-table table" style="margin-bottom: 0;">
+                <thead>
+                  <tr>
+                    <th style="position:relative;">Name <button class="btn btn-sm btn-primary clear-awards-btn" data-bind="click: clearAllSecretAwards">Clear All</button></th>
+                    <th>Date Awarded</th>
+                    <th class="hide-mobile">Description</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: secretAchievements">
+                  <tr class="select-row" data-bind="if: name != 'trigger' && awarded(), visible: name != 'trigger' && awarded()">
+                    <td>
+                      <button data-target="#upgradeModal" data-bind="click: select, attr: { 'data-toggle': awarded() ? 'modal' : ''}">
+                        <span data-bind="html: awarded() ? name : '-'"></span>
+                        <span data-bind="visible: awarded() && !read()" class="label label-success">NEW</span>
+                      </button>
+                    </td>
+                    <td data-bind="text: awarded() ? new Date(date()).toLocaleString() : '-'"></td>
+                    <td class="hide-mobile" data-bind="html: descriptionText"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <div class="col-md-6 upgrades-owned">
 
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">已拥有升级</h3>
+          <h3 class="panel-title">Upgrades Owned</h3>
           <div class="stat-count">
             <h3 class="panel-title">
               <span data-bind="text: upgradeCount.displayVal"></span> / <span data-bind="text: totalUpgradeCount"></span>
@@ -269,23 +446,18 @@
        <table class="earned-table table">
         <thead>
           <tr>
-            <th>名称</th>
-            <th>价格</th>
+            <th>Name</th>
+            <th>Price</th>
           </tr>
         </thead>
         <tbody data-bind="foreach: upgrades">
           <tr class="select-row" data-bind="visible: $parent.enableEmptyUpgradesAndAchievements() || bought(), event: { mouseover: viewDetails.bind($data, true), mouseout: leaveDetails }">
             <td>
-              <button data-toggle="modal" data-target="#upgradeModal" data-bind="attr: { 'data-toggle': bought() ? 'modal' : ''}, click: select">
-                <span data-bind="visible: !bought()">-</span>
-                <span data-bind="text: name, visible: bought"></span>
+              <button data-toggle="modal" data-target="#upgradeModal" data-bind="attr: { 'data-toggle': bought() ? 'modal' : ''}, click: select, text: bought() ? name : '-'">
               </button>
             </td>
-            <td>
-              <span data-bind="visible: !bought()">-</span>
-              <span data-bind="visible: bought"><span data-bind="text: price.displayVal"></span></span>
-            </td>
-            <td class="hidden-td">
+            <td data-bind="text: bought() ? price.displayVal : '-'"></td>
+            <td class="hidden-td" data-bind="if: hoverVisible">
               <div data-bind="visible: hoverVisible, event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
                 <div class="hover">
                   <p data-bind="html: descriptionText"></p>
@@ -298,12 +470,13 @@
       </table>
         </div>
       </div>
+
 		</div>
 		<div class="col-md-6 achievements-earned">
 
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">已解锁成就</h3>
+          <h3 class="panel-title">Achievements Unlocked</h3>
           <div class="stat-count">
             <h3 class="panel-title">
               <span data-bind="text: achievementCount.displayVal"></span> / <span data-bind="text: totalAchievementCount"></span>
@@ -318,28 +491,26 @@
             <table class="earned-table table" data-bind="visible: newAchievementCount.val() > 0">
               <thead>
                 <tr>
-                  <th style="position:relative;">名称 <button class="btn btn-sm btn-primary clear-awards-btn" data-bind="click: clearAllAwards">全部已读</button></th>
-                  <th>达成时间</th>
+                  <th style="position:relative;">Name <button class="btn btn-sm btn-primary clear-awards-btn" data-bind="click: clearAllAwards">Clear All</button></th>
+                  <th>Date Awarded</th>
                 </tr>
               </thead>
-              <tbody data-bind="foreach: achievements">
+              <tbody data-bind="foreach: newAchievements">
                 <tr class="select-row" data-bind="visible: name != 'trigger' && awarded() && !read(), event: { mouseover: viewDetails.bind($data, true), mouseout: leaveDetails }">
                   <td>
                     <button data-toggle="modal" data-target="#upgradeModal" data-bind="click: select">
-                      <span data-bind="visible: !awarded()">-</span>
-                      <span class="name-text" data-bind="html: name, visible: awarded"></span>
-                      <span data-bind="visible: awarded() && !read()" class="label label-success">新</span>
+                      <span class="name-text" data-bind="html: awarded() ? name : '-'"></span>
+                      <!-- ko if: awarded() && !read() -->
+                          <span class="label label-success">NEW</span>
+                      <!-- /ko -->
                     </button>
                   </td>
-                  <td>
-                    <span data-bind="visible: !awarded()">-</span>
-                    <span data-bind="text: new Date(date()).toLocaleString(), visible: awarded"></span>
-                  </td>
-                  <td class="hidden-td">
+                  <td data-bind="text: awarded() ? new Date(date()).toLocaleString() : '-'"></td>
+                  <td class="hidden-td" data-bind="if: hoverVisible">
                     <div data-bind="visible: hoverVisible, event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
                       <div class="hover">
                         <p data-bind="html: descriptionText"></p>
-                        <p class="flavor"><span data-bind="html: flavorText"></span></p>
+                        <p class="flavor" data-bind="html: flavorText"></p>
                       </div>
                     </div>
                   </td>
@@ -350,27 +521,22 @@
            <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>名称</th>
-                  <th>达成日期</th>
+                  <th>Name</th>
+                  <th>Date Awarded</th>
                 </tr>
               </thead>
               <tbody data-bind="foreach: achievements">
                 <tr class="select-row" data-bind="visible: name != 'trigger' && ($parent.enableEmptyUpgradesAndAchievements() || (awarded() && read())), event: { mouseover: viewDetails.bind($data, true), mouseout: leaveDetails }">
                   <td>
-                    <button data-target="#upgradeModal" data-bind="click: select, attr: { 'data-toggle': awarded() ? 'modal' : ''}">
-                      <span data-bind="visible: !awarded() || !read()">-</span>
-                      <span data-bind="text: name, visible: awarded() && read()"></span>
+                    <button data-target="#upgradeModal" data-bind="click: select, attr: { 'data-toggle': awarded() ? 'modal' : ''}, html: awarded() && read() ? name : '-'">
                     </button>
                   </td>
-                  <td>
-                    <span data-bind="visible: !awarded() || !read()">-</span>
-                    <span data-bind="text: new Date(date()).toLocaleString(), visible: awarded() && read()"></span>
-                  </td>
-                  <td class="hidden-td">
+                  <td data-bind="text: awarded() && read() ? new Date(date()).toLocaleString() : '-'"></td>
+                  <td class="hidden-td" data-bind="if: hoverVisible">
                     <div data-bind="visible: hoverVisible() && read(), event: { mouseover: viewDetails, mouseout: leaveDetails }" class="hover-box">
                       <div class="hover">
                         <p data-bind="html: descriptionText"></p>
-                        <p class="flavor"><span data-bind="html: flavorText"></span></p>
+                        <p class="flavor" data-bind="html: flavorText"></p>
                       </div>
                     </div>
                   </td>
@@ -406,13 +572,13 @@
       <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">一般统计</h3>
+            <h3 class="panel-title">General Stats</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>名称</th>
+                  <th>Name</th>
                   <th>Value</th>
                 </tr>
               </thead>
@@ -453,14 +619,14 @@
       <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">现金统计</h3>
+            <h3 class="panel-title">Cash Stats</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>名称</th>
-                  <th>数量</th>
+                  <th>Name</th>
+                  <th>Value</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: cashStats }">
@@ -471,7 +637,7 @@
 
         <div data-bind="visible: enableCharts" class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">收益类型比较</h3>
+            <h3 class="panel-title">Comparison of Earnings Types</h3>
           </div>
           <div class="panel-body">
             <canvas id="earnedComparisonGraph" width="400" height="400"></canvas>
@@ -480,14 +646,14 @@
 
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">电子邮件统计</h3>
+            <h3 class="panel-title">Email Stats</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>名称</th>
-                  <th>数量</th>
+                  <th>Name</th>
+                  <th>Value</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: emailStats }">
@@ -500,7 +666,7 @@
       <div data-bind="visible: enableCharts" class="col-md-4">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">按类型划分的投资收益</h3>
+            <h3 class="panel-title">Investment Earnings by Type</h3>
           </div>
           <div class="panel-body">
             <div>
@@ -513,7 +679,7 @@
       <div data-bind="visible: enableCharts" class="col-md-4">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">电子邮件收益按类型</h3>
+            <h3 class="panel-title">Email Earnings by Type</h3>
           </div>
           <div class="panel-body">
             <div>
@@ -526,7 +692,7 @@
       <div data-bind="visible: enableCharts" class="col-md-4">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">手动点击收入按类型</h3>
+            <h3 class="panel-title">Manual Click Earnings by Type</h3>
           </div>
           <div class="panel-body">
             <div>
@@ -539,14 +705,14 @@
       <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">点击统计</h3>
+            <h3 class="panel-title">Click Stats</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>名称</th>
-                  <th>数量</th>
+                  <th>Name</th>
+                  <th>Value</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: clickStats }">
@@ -565,8 +731,8 @@
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>名称</th>
-                  <th>数量</th>
+                  <th>Name</th>
+                  <th>Value</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: acquisitionStats }">
@@ -579,7 +745,7 @@
       <div data-bind="visible: enableCharts && pastBusinesses().length > 0" class="col-md-12">
         <div class="panel panel-default name-panel">
           <div class="panel-heading">
-            <h3 class="panel-title">破产的企业</h3>
+            <h3 class="panel-title">Bankrupted Businesses</h3>
               <button data-bind="visible: !bankruptcyListToggled(), click: toggleBankruptcyList">
                 <i class="material-icons">list</i>
               </button>
@@ -595,10 +761,10 @@
               <table class="earned-table table">
                 <thead>
                   <tr>
-                    <th>名称</th>
-                    <th>破产日期</th>
-                    <th class="hide-mobile">业务长度</th>
-                    <th class="hide-mobile">破产收益</th>
+                    <th>Name</th>
+                    <th>Date Bankrupted</th>
+                    <th class="hide-mobile">Length of Business</th>
+                    <th class="hide-mobile">Earnings at Bankruptcy</th>
                   </tr>
                 </thead>
                 <tbody data-bind="foreach: pastBusinessesFormatted">
@@ -618,14 +784,14 @@
       <div class="col-md-6 left-col">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">被动统计</h3>
+            <h3 class="panel-title">Passive Stats</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>名称</th>
-                  <th>数值</th>
+                  <th>Name</th>
+                  <th>Value</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: idleStats }">
@@ -638,14 +804,14 @@
       <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">研究统计</h3>
+            <h3 class="panel-title">Research Stats</h3>
           </div>
           <div class="panel-body">
             <table class="earned-table table">
               <thead>
                 <tr>
-                  <th>名称</th>
-                  <th>数值</th>
+                  <th>Name</th>
+                  <th>Value</th>
                 </tr>
               </thead>
               <tbody data-bind="template: { name: 'stat-template', foreach: researchStats }">
@@ -658,15 +824,15 @@
       <div class="col-md-12">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">传出电子邮件统计信息</h3>
+            <h3 class="panel-title">Outgoing Email Stats</h3>
           </div>
           <div class="panel-body">
             <div class="col-md-6">
               <table class="earned-table table">
                 <thead>
                   <tr>
-                    <th>名称</th>
-                    <th>数值</th>
+                    <th>Name</th>
+                    <th>Value</th>
                   </tr>
                 </thead>
                 <tbody data-bind="template: { name: 'stat-template', foreach: composedStats1 }">
@@ -677,8 +843,8 @@
               <table class="earned-table table">
                 <thead>
                   <tr>
-                    <th>名称</th>
-                    <th>数值</th>
+                    <th>Name</th>
+                    <th>Value</th>
                   </tr>
                 </thead>
                 <tbody data-bind="template: { name: 'stat-template', foreach: composedStats2 }">
@@ -689,18 +855,98 @@
         </div>
       </div>
 
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Career Development Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: careerDevStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Cryptic Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="visible: mysteryBoostResults.crypticEmailsUnlocked, template: { name: 'stat-template', foreach: crypticStats }">
+              </tbody>
+              <tbody data-bind="visible: !mysteryBoostResults.crypticEmailsUnlocked(), foreach: crypticStats">
+                <tr>
+                  <td>???</td>
+                  <td>???</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Election Stats</h3>
+          </div>
+          <div class="panel-body">
+            <div class="col-md-6">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: electionStats1 }">
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: electionStats2 }">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
-    <div role="tabpanel" class="tab-pane" id="investments">      
-      <h3><span class="header-text">进行中的投资 (<span data-bind="text: activeInvestments().length"></span>/<span data-bind="text: simultaneousInvestments.val()"></span>)</span>
-        <button class="btn btn-primary investment-btn" data-toggle="modal" data-target="#investmentModal">
-          <span class="text">进行投资</span><span class="mobile-only-text">投资</span>
+    <div role="tabpanel" class="tab-pane" id="investments" data-bind="if: viewingTab() === 'investments'">      
+      <h3><span class="header-text">Active Investments (<span data-bind="text: activeInvestments().length"></span>/<span data-bind="text: totalSimultaneousInvestmentsAllowed.val()"></span>)</span>
+        <button class="btn btn-primary investment-btn" data-toggle="modal" data-target="#investmentModal" data-bind="click: function() { viewingModal('invest'); }">
+          <span class="text">Make Investment</span><span class="mobile-only-text">Invest</span>
         </button>
         <button style="margin-right: 10px" class="btn btn-primary investment-btn" data-bind="click: cashOutAllInvestments">
-          <span class="text">全部兑现</span><span class="mobile-only-text">全部兑现</span>
+          <span class="text">Cash Out All Completed</span><span class="mobile-only-text">Cash Out All</span>
         </button>
       </h3>
       <div data-bind="fadeVisible: !activeInvestments().length" class="no-investments-box">
-        <h4 class="no-content-message">目前无投资活动</h4>
+        <h4 class="no-content-message">No Investments Active</h4>
       </div>
       <div class="active-investments" data-bind="template: {
                             foreach: activeInvestments,
@@ -717,16 +963,16 @@
             </div>
             <div class="investment-header-right">
               <div data-bind="visible: !active(), css: { 'disabled': $parent.locked().acquisitions || $parent.activeAcquisitions().length > 0 }" class="btn-group">
-                <button data-bind="click: handleAcquisition" class="btn btn-sm btn-success inv-acquisition-btn">收购</button>
+                <button data-bind="click: handleAcquisition" class="btn btn-sm btn-success inv-acquisition-btn">Acquire</button>
                 <button data-bind="click: handleAcquisition, visible: $parent.locked().acquisitions" class="btn btn-sm btn-success inv-acquisition-info-btn">
                   <i class="material-icons inv-acquisition-icon">lock</i>
                 </button>
-                <button data-bind="visible: !$parent.locked().acquisitions" class="btn btn-sm btn-success inv-acquisition-info-btn" data-toggle="modal" data-target="#acquisitionHelpModal">
+                <button data-bind="visible: !$parent.locked().acquisitions, click: function() { $root.viewingModal('acquisition'); }" class="btn btn-sm btn-success inv-acquisition-info-btn" data-toggle="modal" data-target="#acquisitionHelpModal">
                   <i class="material-icons inv-acquisition-icon">help</i>
                 </button>
               </div>
-              <button data-bind="visible: !active(), click: handlePayout" class="btn btn-sm btn-success">提现</button>
-              <button data-bind="visible: active(), click: handlePayout" class="btn btn-sm btn-danger">取消</button>
+              <button data-bind="visible: !active(), click: handlePayout" class="btn btn-sm btn-success">Cash Out</button>
+              <button data-bind="visible: active(), click: handlePayout" class="btn btn-sm btn-danger">Cancel</button>
               <div class="investment-data-box investment-time-remaining">
                 <span data-bind="text: displayTimeRemaining"></span>
               </div>
@@ -745,15 +991,15 @@
       
     </div>
 
-    <div role="tabpanel" class="tab-pane" id="acquisitions">      
-      <h3>进行中的收购 (<span data-bind="text: activeAcquisitions().length"></span>/<span data-bind="text: simultaneousAcquisitions.val()"></span>)
-        <button class="btn btn-primary inv-acquisition-help-btn" data-toggle="modal" data-target="#acquisitionHelpModal">
-          <span>说明</span>
+    <div role="tabpanel" class="tab-pane" id="acquisitions" data-bind="if: viewingTab() === 'acquisitions'">      
+      <h3>Active Acquisitions (<span data-bind="text: activeAcquisitions().length"></span>/<span data-bind="text: simultaneousAcquisitions.val()"></span>)
+        <button class="btn btn-primary inv-acquisition-help-btn" data-toggle="modal" data-target="#acquisitionHelpModal" data-bind="click: function() { viewingModal('acquisition'); }">
+          <span>Instructions</span>
           <i class="material-icons">help</i>
         </button>
       </h3>
       <div data-bind="fadeVisible: !activeAcquisitions().length" class="no-investments-box">
-        <h4 class="no-content-message">目前没有进行中的收购</h4>
+        <h4 class="no-content-message">No Acquisitions Held</h4>
       </div>
       <div class="active-investments" data-bind="template: {
                             foreach: activeAcquisitions,
@@ -765,11 +1011,11 @@
 
             <div class="acquisitions-data-box left">
             <span class="badge mail-badge acquisition-policy-badge" data-bind="text: mail().length, visible: mail().length"></span>
-            <button class="icon-button mail-button" data-toggle="modal" data-bind="click: selectAcquisition" data-target="#acquisitionMailModal">
+            <button class="icon-button mail-button" data-toggle="modal" data-bind="click: function() { selectAcquisition(); $root.viewingModal('acquisitionMail'); }" data-target="#acquisitionMailModal">
               <i class="material-icons mail-icon nav-icon">mail</i>
             </button>
             <span class="badge mail-badge acquisition-chat-badge" data-bind="text: unreadMessages(), visible: unreadMessages()"></span>
-            <button class="icon-button mail-button chat" data-toggle="modal" data-bind="click: selectAcquisition" data-target="#chatModal">
+            <button class="icon-button mail-button chat" data-toggle="modal" data-bind="click: function() { selectAcquisition(); $root.viewingModal('chat'); }" data-target="#chatModal">
               <i class="material-icons mail-icon nav-icon chat-icon">chat</i>
             </button>
           </div>
@@ -822,17 +1068,18 @@
                         </div>
                       </div>
                     </li>
+                  </ul>
                 </div>
               </div>
               <div class="col-md-5">
                  <table class="earned-table table">
                   <tbody>
                     <tr>
-                      <td>初始投资价值</td>
+                      <td>Initial Investment Value</td>
                       <td><span data-bind="text: initialPrice.displayVal()"></span></td>
                     </tr>
                     <tr>
-                      <td>额外支出的现金</td>
+                      <td>Additional Cash Spent</td>
                       <td><span data-bind="text: cashSpent.displayVal()"></span></td>
                     </tr>
                     <tr>
@@ -845,46 +1092,48 @@
                     </tr>
                     <tr>
                       <td>Bonus to Current Valuation</td>
-                      <td><span data-bind="text: valMod.displayVal()"></span>%</td>
+                      <td><span data-bind="text: valMod.displayVal()"></span></td>
                     </tr>
                   </tbody>
                 </table>
                 <button style="width: 100%" class="btn btn-danger" data-bind="click: fire, css: { 'layoffs': activeLayoff(), 'fudged': activeValBonus() }">
-                  <span data-bind="visible: !activeLayoff() && !activeValBonus()">解雇员工</span>
-                  <span data-bind="visible: activeLayoff() && !activeValBonus()">大规模裁员</span>
-                  <span data-bind="visible: activeValBonus() && !activeLayoff()">捏造数字</span>
-                  <span data-bind="visible: activeLayoff() && activeValBonus()">大规模裁员而捏造的数字</span>
+                  <span data-bind="visible: !activeLayoff() && !activeValBonus()">Fire Employees</span>
+                  <span data-bind="visible: activeLayoff() && !activeValBonus()">Massive Layoffs</span>
+                  <span data-bind="visible: activeValBonus() && !activeLayoff()">Fudge the Numbers</span>
+                  <span data-bind="visible: activeLayoff() && activeValBonus()">Massive Layoffs While Fudging Numbers</span>
                 </button>
               </div>
             </div>
             <div class="divider"></div>
-            <h5 class="employees-remaining">剩余员工: <span data-bind="text: currentEmployees.displayVal()"></span></h5>
+            <h5 class="employees-remaining">Employees Remaining: <span data-bind="text: currentEmployees.displayVal()"></span>
+              <span class="fired-label label label-danger" data-bind="quickFadeVisible: fireClicked()">- <span data-bind="text: clickMod.displayVal()"></span></span>
+            </h5>
             <div class="progress">
               <div class="progress-bar" role="progressbar" data-bind="style: { width: employeePercentageRemaining }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
             </div>
           </div>
 
           <div data-bind="visible: sold()" class="acquisition-success-box">
-            <h4><span data-bind="text: name"></span> 违约</h4>
+            <h4><span data-bind="text: name"></span> Liquidated</h4>
             <table class="earned-table table">
               <tbody>
                 <tr>
-                  <td>累计解雇员工</td>
+                  <td>Total Employees Fired</td>
                   <td><span data-bind="text: employeesFired()"></span></td>
                 </tr>
                 <tr>
-                  <td>总现金价值</td>
+                  <td>Total Cash Value</td>
                   <td><span data-bind="text: currentValue.displayVal()"></span></td>
                 </tr>
                 <tr>
-                  <td>额外的现金花费</td>
+                  <td>Additional Cash Spent</td>
                   <td><span data-bind="text: cashSpent.displayVal()"></span></td>
                 </tr>
               </tbody>
             </table>
             <div class="acquisition-earnings-box">
-              <h5>净收益:</h5>
-              <h3>+ <span data-bind="text: netValue.displayVal()"></span> 总共</h3>
+              <h5>Net Earnings:</h5>
+              <h3>+ <span data-bind="text: netValue.displayVal()"></span> total</h3>
             </div>
           </div>
 
@@ -898,40 +1147,63 @@
 <div class="push">&nbsp;</div>
 
 <footer class="footer">
-  <p>放置大亨 v<span data-bind="text: generalStats()[10].displayVal"></span></p> |
-  <a href="https://www.smallgraygames.com/" target="_blank">作者主页</a> |
-  <span id="changelog-footer-link"><a href="index.html#changelog" data-toggle="modal" data-target="#changelogModal">更新日志</a> |</span>
-  <a target="_blank" href="https://www.reddit.com/r/theidleclass/">Reddit</a> |
-  <a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">捐赠</a>
-       <div id='menu2' style='position: absolute;top:10px;left:10px;height:30px;width: 30px;opacity: 0.01'></div>
+  <p>The Idle Class v<span data-bind="text: generalStats()[10].displayVal"></span></p> |
+  <a href="/">Home</a> |
+  <span id="changelog-footer-link"><a href="business-simulator/changelog.html" target="_blank">Changelog</a> |</span>
+  <a href="#" data-toggle="modal" data-target="#socialModal" data-bind="click: function() { viewingModal('social'); }">Social</a> |
+  <a href="#" data-toggle="modal" data-target="#donateModal" data-bind="click: function() { viewingModal('donate'); }">Donate</a>
 </footer>
 
 <!-- MODALS -->
 <div class="modal fade" id="unitModal" tabindex="-1" role="dialog" aria-labelledby="unitModalLabel">
   <div class="modal-dialog" role="document">
-    <div class="modal-content">
+    <div data-bind="if: selectedUnit" class="modal-content">
       <div class="modal-header">
-        <i class="material-icons" aria-hidden="true" data-bind="text: selectedUnit.icon"></i>
-        <h3 class="modal-title" id="unitModalLabelLabel" data-bind="text: selectedUnit.name"></h3>
+        <i class="material-icons" aria-hidden="true" data-bind="text: selectedUnit().icon"></i>
+        <h3 class="modal-title" id="unitModalLabelLabel" data-bind="text: selectedUnit().name"></h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p data-bind="html: selectedUnit.descriptionText"></p>
-        <ul data-bind="visible: selectedUnit.num.val() > 0">
-          <li><b>总占比:</b> <span data-bind="text: selectedUnit.shareOfTotal"></span>%</li>
-          <li><b>每秒收益 (单个):</b> $<span data-bind="text: selectedUnit.individualEarnings"></span></li>
-          <li><b>每秒收益 (全部):</b> <span data-bind="text: selectedUnit.cps.displayVal"></span></li>
-          <li><b>销售价值:</b> <span data-bind="text: selectedUnit.sellPrice.displayVal"></span></li>
+        <p data-bind="html: selectedUnit().descriptionText"></p>
+        <ul data-bind="visible: selectedUnit().num.val() > 0">
+          <li><b>Share of Total:</b> <span data-bind="text: selectedUnit().shareOfTotal"></span>%</li>
+          <li><b>Cash Per Second (One):</b> $<span data-bind="text: selectedUnit().individualEarnings"></span></li>
+          <li><b>Cash Per Second (All):</b> <span data-bind="text: selectedUnit().cps.displayVal"></span></li>
+          <li><b>Sell Value:</b> <span data-bind="text: selectedUnit().sellPrice.displayVal"></span></li>
         </ul>
-        <ul data-bind="visible: selectedUnit.num.val() === 0">
-          <li><b>每秒基础金钱:</b> $<span data-bind="text: selectedUnit.baseClickDisplay"></span></li>
-          <li><b>每秒期望金钱 (单个):</b> $<span data-bind="text: selectedUnit.potentialEarnings"></span></li>
+        <ul data-bind="visible: selectedUnit().num.val() === 0">
+          <li><b>Base Cash Per Second:</b> $<span data-bind="text: selectedUnit().baseClickDisplay"></span></li>
+          <li><b>Expected Cash Per Second (One):</b> $<span data-bind="text: selectedUnit().potentialEarnings"></span></li>
         </ul>
       </div>
       <div class="modal-footer">
-        <p>"<span data-bind="text: selectedUnit.flavorText"></span>"</p>
+        <p>"<span data-bind="text: selectedUnit().flavorText"></span>"</p>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="trainingModal" tabindex="-1" role="dialog" aria-labelledby="trainingModalLabel">
+  <div class="modal-dialog" role="document">
+    <div data-bind="if: selectedUnit" class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true" data-bind="text: selectedUnit().icon"></i>
+        <h3 class="modal-title" id="trainingModalLabel" data-bind="text: selectedUnit().name"></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p data-bind="html: selectedUnit().trainingText"></p>
+        <ul>
+          <li><b>Next Training Bonus:</b> <span data-bind="text: selectedUnit().nextTrainingBonus.displayVal"></span></li>
+          <li><b>Time to Train:</b> <span data-bind="text: selectedUnit().trainingTime.displayVal"></span></li>
+        </ul>
+      </div>
+      <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
       </div>
     </div>
@@ -940,20 +1212,49 @@
 
 <div class="modal fade" id="upgradeModal" tabindex="-1" role="dialog" aria-labelledby="upgradeModalLabel">
   <div class="modal-dialog" role="document">
-    <div class="modal-content">
+    <div data-bind="if: selectedUpgrade" class="modal-content">
       <div class="modal-header">
-        <i class="material-icons" aria-hidden="true" data-bind="text: selectedUpgrade.icon"></i>
-        <h3 class="modal-title" id="upgradeModalLabel" data-bind="text: selectedUpgrade.name"></h3>
+        <i class="material-icons" aria-hidden="true" data-bind="text: selectedUpgrade().icon"></i>
+        <h3 class="modal-title" id="upgradeModalLabel" data-bind="html: selectedUpgrade().name"></h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p data-bind="html: selectedUpgrade.descriptionText"></p>
+        <p data-bind="html: selectedUpgrade().descriptionText"></p>
+        <ul data-bind="if: selectedUpgrade().total">
+          <li><b>Corresponding Employee:</b> <span data-bind="text: selectedUpgrade().correspondingEmployee"></span></li>
+          <li><b>Total Trained Bonus:</b> <span data-bind="text: selectedUpgrade().total.displayVal"></span></li>
+        </ul>
       </div>
       <div class="modal-footer">
-        <p><span data-bind="text: selectedUpgrade.flavorText"></span></p>
-        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+        <p><span data-bind="html: selectedUpgrade().flavorText"></span></p>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="trainingHelpModal" tabindex="-1" role="dialog" aria-labelledby="careerModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'training'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="careerModalLabel">Career Development Help</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p style="margin: 15px 0;" class="mb-0">One of the most fascinating lessons I’ve absorbed about life is that the struggle is good</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Joseph Rogan, Journalist</cite></footer>
+        </blockquote>
+        <p>By introducing <b>Career Development</b> into your organization, you can help employees learn and grow, and even pass on their <b>institutional knowledge</b> to the next business once they have been casually discarded on an at-will basis.</p>
+        <p>Upon declaring bankruptcy, a business owner acquires <b>Training Seminars</b>, which can be funneled into various Career Development projects to create <b>permanent boosts</b> to productivity that persist even after bankruptcy. Those boosts can then be <b>further enhanced in the current business</b> by training the corresponding employees over time.</p>
+        <p>Keep in mind that your employees can only push themselves so much, though. The more an employee has been trained, the less they will benefit from each additional training.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
@@ -984,7 +1285,7 @@
         </ul>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
@@ -994,18 +1295,19 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="exportModalLabel">导出存档</h3>
+        <h3 class="modal-title" id="exportModalLabel">Export Save</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>导出的保存数据如下。将它复制到安全的地方以备份保存的数据。</p>
+        <p>Your exported save data is below. Copy it somewhere safe to back up your save data.</p>
         <textarea class="export-data" data-bind="value: exportedSaveData"></textarea>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="copyToClipboard()">复制到剪切板</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+        <button type="button" class="btn btn-primary" onclick="copyToClipboard()">COPY TO CLIPBOARD</button>
+        <button type="button" class="btn btn-primary" onclick="downloadExport()">DOWNLOAD</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
@@ -1015,18 +1317,18 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="importModalLabel">导入存档</h3>
+        <h3 class="modal-title" id="importModalLabel">Import Save</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>在下面的输入框中粘贴您的游戏存档数据。 请记住，这将<b>永久删除</b>您当前的游戏进度，并将其替换为您导入的数据。</p>
+        <p>Enter your game data in the input below. Keep in mind that this will <b>permanently erase</b> your current game progress and replace it with the data you are importing.</p>
         <textarea class="import-textarea"></textarea>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="importGameData();">导入</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="importGameData();">Import</button>
       </div>
     </div>
   </div>
@@ -1036,45 +1338,45 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="wipeSaveModalLabel">擦除存档</h3>
+        <h3 class="modal-title" id="wipeSaveModalLabel">Wipe Save</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>选择硬复位，将会擦除存档数据，并<b>永久删除</b>您的所有游戏进度。 什么都不会保留，您的数据无法恢复。</p>
-        <p>你确定要这么做吗？</p>
+        <p>Choosing to wipe your save will <b>permanently erase</b> all of your game progress. Nothing will be retained, and your data cannot be recovered.</p>
+        <p>Are you sure you want to do it?</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.wipeSaveFile();">摧毁一切</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.wipeSaveFile();">Destroy it all</button>
       </div>
     </div>
   </div>
 </div>
 
 <div class="modal fade" id="bankruptcyModal" tabindex="-1" role="dialog" aria-labelledby="bankruptcyModalLabel">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'bankruptcy'">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="bankruptcyModalLabel">破产</h3>
+        <h3 class="modal-title" id="bankruptcyModalLabel">Bankruptcy</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <blockquote class="blockquote text-right">
-          <p style="margin: 15px 0 0 0;" class="mb-0">在我的生命中，我一次又一次地失败了。</p>
-          <p style="margin: 0 0 15px 0;" class="mb-0">这就是我成功的原因。</p>
-          <footer class="blockquote-footer"><cite title="Source Title">迈克尔“篮球”乔丹</cite></footer>
+          <p style="margin: 15px 0 0 0;" class="mb-0">I've failed over and over and over again in my life.</p>
+          <p style="margin: 0 0 15px 0;" class="mb-0">And that is why I succeed.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Michael "Basket Ball" Jordan</cite></footer>
         </blockquote>
-        <p>选择宣布破产将结束您当前的业务 &mdash; <span data-bind="text: businessName().name"></span> &mdash; 你一直在忠实地研磨自己的东西<span data-bind="text: startTime.displayVal"></span>.</p>
-        <p>然而，当您的员工，升级和累积的现金全部重置时，资本永远不会真正死亡。 您将重新出现破产保留<b>所有成就</b>，以及强大的启动性勇气。</p>
-        <p>此外，您还可以额外开展下一项业务 <b data-bind="text: nextBankruptcyBonus.displayVal"></b> 添加到你的 <b>破产乘数</b>, 目前共计 <b data-bind="text: cashStats()[9].displayVal"></b>.</p>
+        <p>Choosing to declare bankruptcy will put an end to your current business &mdash; <span data-bind="text: businessName().name"></span> &mdash; which you have been faithfully grinding since something like <span data-bind="text: startTime.displayVal"></span>.</p>
+        <p>However, while your employees, your upgrades, and your accumulated cash will all reset, capital never truly dies. You will reemerge from bankruptcy retaining <b>all of your achievements</b>, as well as a powerful sense of boot-strap grit.</p>
+        <p>You'll also start your next business with an additional <b data-bind="text: nextBankruptcyBonus.displayVal"></b> added to your <b>Bankruptcy Multiplier</b>, which is currently a total of <b data-bind="text: cashStats()[8].displayVal"></b>, as well as an additional <b data-bind="text: nextBankruptcySeminars.displayVal"></b> <b>Training Seminars</b> to help your employees develop their careers.</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.restartGame();">宣布破产</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.restartGame();">Declare Bankruptcy</button>
       </div>
     </div>
   </div>
@@ -1084,7 +1386,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="investmentModalLabel">进行新的投资</h3>
+        <h3 class="modal-title" id="investmentModalLabel">Make a New Investment</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -1092,10 +1394,10 @@
       <form id="investmentForm">
         <div class="modal-body">
           <blockquote class="blockquote text-right">
-            <p class="mb-0">如果你不是风险承担者，你就应该破产。</p>
-            <footer class="blockquote-footer"><cite title="Source Title">雷·克洛克，汉堡王</cite></footer>
+            <p class="mb-0">If you’re not a risk taker, you should get the hell out of business.</p>
+            <footer class="blockquote-footer"><cite title="Source Title">Ray Kroc, Burger King</cite></footer>
           </blockquote>
-          <p>转移 <b>10%</b> of your current <b>Cash Per Second</b> into an extremely reputable, fully above-board multinational corporation. Your investment will grow at its regular per-second rate, along with an additional <b data-bind="text: interestRate.displayVal()"></b> in interest and a bonus for the length of time invested.</p>
+          <p>Divert <b>10%</b> of your current <b>Cash Per Second</b> into an extremely reputable, fully above-board multinational corporation. Your investment will grow at its regular per-second rate, along with an additional <b data-bind="text: interestRate.displayVal()"></b> in interest and a bonus for the length of time invested.</p>
             <label for="time">Time to mature:</label>
             <input class="investment-time-input form-control" id="time" name="time" type="number" min="1" oninput="validateInvestment()">
             <select class="form-control" name="time-unit" onchange="validateInvestment()" title="Unit of Time">
@@ -1104,9 +1406,9 @@
             </select>
         </div>
         <div class="modal-footer">
-          <p class="validation-msg">令人窒息的法规将您的投资限制在1天</p>
-          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='all'">投资全部</button>
-          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='one'">投资</button>
+          <p class="validation-msg">Suffocating regulations cap your investments at 1 day</p>
+          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='all'">Invest All</button>
+          <button type="submit" class="btn btn-primary investment-submit disabled" onclick="investType='one'">Invest</button>
         </div>
       </form>
     </div>
@@ -1114,12 +1416,12 @@
 </div>
 
 <div class="modal fade mailModal" id="mailModal" tabindex="-1" role="dialog" aria-labelledby="mailModalLabel">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'mail'">
     <div class="modal-content">
       <div class="modal-header">
         <i class="material-icons" aria-hidden="true">mail</i>
         <h3 class="modal-title" id="mailModalLabel">
-          邮件
+          Mail
         </h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -1129,8 +1431,8 @@
 
       <div class="modal-body" data-bind="visible: !awayMailInbox().active() && emailHelpView()">
         <blockquote class="blockquote text-right">
-          <p class="mb-0">我的观点是没有任何不好的时候进行创新。</p>
-          <footer class="blockquote-footer"><cite title="Source Title">杰夫贝佐</cite></footer>
+          <p class="mb-0">My view is there’s no bad time to innovate.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Jeff Bezo</cite></footer>
         </blockquote>
         <p>Every great entrepenuer knows that true innovation requires a leader who <b>listens to the wisdom of others</b>. When emails find their way to your inbox, then, it's only good business to answer them with punctuality and professionalism.</p>
         <p>Some executives find that they profit most from communication by <b>responding as quickly as possible.</b> Others feel that the greatest path to success is taking their time in order to <b>respond thoroughly and constructively.</b> And some, of course, are just too busy <b>rapidly innovating</b> to respond before hours or even days have passed.</p>
@@ -1148,35 +1450,24 @@
       <div data-bind="visible: !emailHelpView() && !composeHelpView()" class="modal-body">
         <ul class="nav nav-tabs nav-justified" role="tablist" style="margin-top:0;">
           <li role="presentation" class="active">
-            <a id="inboxToggle" href="index.html#inbox" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: toggleComposeView.bind(game, false)">
-              <span class="nav-tab-text">收件箱</span>
+            <a id="inboxToggle" href="#inbox" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: toggleComposeView.bind(game, false)">
+              <span class="nav-tab-text">Inbox</span>
               <span class="badge" data-bind="text: mail().length, visible: mail().length"></span>
             </a>
           </li>
 
-
-
-<!--     <li role="presentation" data-bind="css: { 'nav-disabled': locked().investments }">
-      <a href="#investments" aria-controls="investments" role="tab" data-bind="attr: { 'data-toggle': locked().investments ? '' : 'tab'}">
-        <i data-bind="visible: locked().investments" class="material-icons padlock-icon" aria-hidden="true">lock</i>
-        <i class="material-icons nav-tab-icon">trending_up</i>
-        <span data-bind="attr: { title:  locked().investments ? 'Unlocks at $100 million in total earnings' : ''}" class="nav-tab-text">Investments</span>
-        <span data-bind="visible: !locked().investments && activeInvestments().length < 1 && investmentStats()[1].val() < 1 && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span> -->
-
-
-
           <li role="presentation" data-bind="css: { 'nav-disabled': locked().outgoingMail }">
-            <a href="index.html#compose" aria-controls="home" role="tab" data-bind="click: toggleComposeView.bind(game, true), attr: { 'data-toggle': locked().outgoingMail ? '' : 'tab'}">
+            <a href="#compose" aria-controls="home" role="tab" data-bind="click: toggleComposeView.bind(game, true), attr: { 'data-toggle': locked().outgoingMail ? '' : 'tab'}">
               <i data-bind="visible: locked().outgoingMail" class="material-icons padlock-icon" aria-hidden="true">lock</i>
-              <span data-bind="attr: { title:  locked().outgoingMail ? 'Unlocks at $1 sextillion in total earnings' : ''}" class="nav-tab-text">撰写</span>
-              <span data-bind="visible: !locked().outgoingMail && composedStats1()[0].val() === 0" class="label label-success">新</span>
+              <span data-bind="attr: { title:  locked().outgoingMail ? 'Unlocks at $1 sextillion in total earnings' : ''}" class="nav-tab-text">Compose</span>
+              <span data-bind="visible: !locked().outgoingMail && composedStats1()[0].val() === 0" class="label label-success">NEW</span>
             </a>
           </li>
         </ul>
         <div class="tab-content">
           <div role="tabpanel" class="tab-pane active" id="inbox">
             <div class="no-mail-message" data-bind="fadeVisible: !mail().length && !awayMailInbox().active()">
-              <h4 class="no-content-message">全部看过了</h4>
+              <h4 class="no-content-message">All Caught Up</h4>
             </div>
             <div data-bind="visible: !awayMailInbox().active(), template: {
                               name: 'mail-template',
@@ -1188,30 +1479,32 @@
               <input data-bind="textinput: awayMailInbox().message" class="form-control" placeholder="Enter your out of office message..." maxlength="100">
               <table class="earned-table table">
                 <tr>
-                    <td>离开时间</td>
+                    <td>Away Since</td>
                     <td data-bind="text: awayMailInbox().start"></td>
                 </tr>
                 <tr>
-                    <td>被拒绝的电子邮件</td>
+                    <td>Emails Rejected</td>
                     <td data-bind="text: awayMailInbox().regularEmails.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>被拒绝的紧急电子邮件</td>
+                  <td>Urgent Emails Rejected</td>
                   <td data-bind="text: awayMailInbox().urgentEmails.displayVal"></td>
                 </tr>
+                <tr data-bind="visible: awayMailInbox().crypticEmails.val() > 0">
+                  <td>Cryptic Emails Rejected</td>
+                  <td data-bind="text: awayMailInbox().crypticEmails.displayVal"></td>
+                </tr>
               </table>
-              <h5 class="away-earned-header">离开时获得:</h5>
+              <h5 class="away-earned-header">Earned While Away:</h5>
               <div class="well well-sm">
                 <h4 data-bind="text: awayMailInbox().earned.displayVal"></h4>
               </div>
             </div>
           </div>
           <div role="tabpanel" class="tab-pane" id="compose" data-bind="visible: !composeHelpView()">
-            <!-- <input data-bind="textinput: awayMailInbox().message" class="form-control" placeholder="Enter your out of office message..." maxlength="100"> -->
 
             <div data-bind="fadeVisible: composedMail().resting()">
-            <!-- <div data-bind="if: composedMail().resolution"> -->
-              <div data-bind="visible: composedMail().selectedDepartment() !== '3'" class="resolution-box">
+              <div data-bind="visible: composedMail().selectedDepartment() !== '4'" class="resolution-box">
                 <table class="earned-table table">
                   <tr>
                       <td>Base Time Boost</td>
@@ -1242,19 +1535,19 @@
                 </h3>
               </div>
 
-              <div data-bind="visible: composedMail().selectedDepartment() === '3'" class="resolution-box">
+              <div data-bind="visible: composedMail().selectedDepartment() === '4'" class="resolution-box">
                 <table class="earned-table table">
                   <tr>
-                    <td>基础压力减少</td>
+                    <td>Base Stress Reduction</td>
                     <td data-bind="text: composedMail().resolution().baseStressReduction"></td>
                   </tr>
                   <tr>
-                    <td>奖励</td>
+                    <td>Bonus</td>
                     <td data-bind="text: composedMail().resolution().textBonus"></td>
                   </tr>
                 </table>
                 <h3 class="label-success">
-                  <span class="label-header">减少总压力:</span>
+                  <span class="label-header">Total Stress Reduction:</span>
                   <span data-bind="text: composedMail().resolution().totalStressReduction"></span>
                 </h3>
               </div>
@@ -1262,19 +1555,19 @@
             </div>
 
             <div data-bind="fadeVisible: !composedMail().resting()">
-            <!-- <div data-bind="css: { resting: composedMail().resting() }"> -->
               <div class="row modal-selects">
                 <div style="padding-right:5px;" class="col-md-6">
                   <select class="form-control" name="email-type" title="Email Type" data-bind="value: composedMail().selectedDepartment">
-                    <option value="" disabled selected hidden>选择部门...</option>
-                    <option value='0'>投资</option>
+                    <option value="" disabled selected hidden>Select Department...</option>
+                    <option value='0'>Investments</option>
                     <option value='1'>R&amp;D</option>
-                    <option value='2'>收购</option>
-                    <option value='3'>人力资源</option>
+                    <option value='2'>Acquisitions</option>
+                    <option data-bind="visible: !locked().careerDev" value='3'>Training</option>
+                    <option value='4'>Human Resources</option>
                   </select>
                 </div>
                 <div style="padding-left:5px;" class="col-md-6">
-                  <select class="form-control" name="email-urgency" title="Email Urgency" data-bind="value: composedMail().selectedUrgency, attr: { disabled: composedMail().selectedDepartment() === '3'}">
+                  <select class="form-control" name="email-urgency" title="Email Urgency" data-bind="value: composedMail().selectedUrgency, attr: { disabled: composedMail().selectedDepartment() === '4'}">
                     <option value="" disabled selected hidden>Select Urgency...</option>
                     <option value='0'>Extremely Urgent</option>
                     <option value='1'>#1 Top Priority</option>
@@ -1295,20 +1588,20 @@
           <input name="email-away" type="checkbox" data-bind="checked: awayMailInbox().active, event: { change: awayMailInbox().handleChange.bind(awayMailInbox()) }">
           <label for="email-away"><span class="hide-mobile">Toggle</span> Away</label>
         </div>
-        <button type="button" class="btn btn-primary" data-bind="visible: !awayMailInbox().active(), click: toggleEmailHelpView">帮助</button>
+        <button type="button" class="btn btn-primary" data-bind="visible: !awayMailInbox().active(), click: toggleEmailHelpView">Help</button>
         <button type="button" class="btn btn-primary" data-bind="visible: !awayMailInbox().active()" onclick="markAllAsRead()">
-          <span class="hide-mobile">全部标为已读</span>
-          <span class="mobile-only-text">回复全部</span>
+          <span class="hide-mobile">Mark All As Read</span>
+          <span class="mobile-only-text">Reply All</span>
         </button>
       </div>
       <div class="modal-footer" data-bind="visible: composeView">
         <div class="left-box well resting-box" data-bind="css: { 'stress-danger': composedMail().stressLevel.val() > 100 }">
-          <p>重要性<span class="hide-mobile"> 级别</span>: </p>
+          <p>Stress<span class="hide-mobile"> Level</span>: </p>
           <span class="stress-percent" data-bind="text: composedMail().stressLevel.displayVal"></span>
         </div>
-        <button type="button" class="btn btn-primary" data-bind="click: toggleComposeHelpView">帮助</button>
+        <button type="button" class="btn btn-primary" data-bind="click: toggleComposeHelpView">Help</button>
         <button type="button" class="btn btn-primary" data-bind="click: composedMail().send, attr: { disabled: composedMail().unavailable }">
-          <span>发送</span>
+          <span>Send</span>
         </button>
       </div>
     </div>
@@ -1316,12 +1609,12 @@
 </div>
 
 <div class="modal fade mailModal" id="acquisitionMailModal" tabindex="-1" role="dialog" aria-labelledby="acquisitionMailModalLabel">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'acquisitionMail'">
     <div class="modal-content">
       <div class="modal-header">
         <i class="material-icons">mail</i>
         <h3 class="modal-title" id="acquisitionMailModalLabel">
-          政策建议 (<span data-bind="text: viewingAcquisition().mail().length"></span>)
+          Policy Proposals (<span data-bind="text: viewingAcquisition().mail().length"></span>)
         </h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -1331,7 +1624,7 @@
 
       <div class="modal-body" data-bind="visible: !awayPolicyInbox().active()">
         <div class="no-mail-message" data-bind="fadeVisible: !viewingAcquisition().mail().length">
-          <h4 class="no-content-message">全部看过了</h4>
+          <h4 class="no-content-message">All Caught Up</h4>
         </div>
         <div data-bind="template: {
                           name: 'mail-template',
@@ -1344,49 +1637,48 @@
         <input data-bind="textinput: awayPolicyInbox().message" class="form-control" placeholder="Enter your out of office message..." maxlength="100">
         <table class="earned-table table">
           <tr>
-              <td>离开以后</td>
+              <td>Away Since</td>
               <td data-bind="text: awayPolicyInbox().start"></td>
           </tr>
           <tr>
-              <td>忽略的政策电子邮件</td>
+              <td>Policy Emails Ignored</td>
               <td data-bind="text: awayPolicyInbox().policies.displayVal"></td>
           </tr>
         </table>
-        <h5 class="away-earned-header">离开后离职的员工:</h5>
+        <h5 class="away-earned-header">Employees Quit While Away:</h5>
         <div class="well well-sm">
           <h4 data-bind="text: awayPolicyInbox().fired.displayVal"></h4>
         </div>
       </div>
       <div class="modal-footer">
         <div data-bind="visible: locked().policyAway" class="left-box well">
-          <input name="policy-away" type="checkbox" data-bind="checked: awayPolicyInbox().active, event: { change: awayPolicyInbox().handleChange.bind(awayPolicyInbox()) }"><label for="policy-away">切换离开</label>
+          <input name="policy-away" type="checkbox" data-bind="checked: awayPolicyInbox().active, event: { change: awayPolicyInbox().handleChange.bind(awayPolicyInbox()) }"><label for="policy-away">Toggle Away</label>
         </div>
         <button type="button" class="btn btn-primary" onclick="markAllAsRead(true)">
-          <span class="hide-mobile">接受所有提案</span>
-          <span class="mobile-only-text">全都接受</span>
+          <span class="hide-mobile">Accept All Proposals</span>
+          <span class="mobile-only-text">Accept All</span>
         </button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
 </div>
 
 <div class="modal fade mailModal" id="acquisitionHelpModal" tabindex="-1" role="dialog" aria-labelledby="acquisitionHelpModalLabel">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'acquisition'">
     <div class="modal-content">
       <div class="modal-header">
         <i class="material-icons">domain</i>
-        <h3 class="modal-title" id="acquisitionHelpModalLabel">收购公司</h3>
+        <h3 class="modal-title" id="acquisitionHelpModalLabel">Acquiring Companies</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <blockquote class="blockquote text-right">
-          <p class="mb-0">永远，永远，永远，永不放弃。</p>
-          <footer class="blockquote-footer"><cite title="Source Title">温斯顿丘吉尔，英格兰总统</cite></footer>
+          <p class="mb-0">Never, never, never, never give up.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Winston Churchill, President of England</cite></footer>
         </blockquote>
-
         <p>While you could cash out every investment as soon as it's ready and walk away with money in hand, you could also choose to <b>acquire</b> the company instead.</p>
         <p>When you acquire a company, you won't receive your investment value, and your acquisition won't initially be worth anything at all. Do your best to 
         minimize expenses through <b>tactical rebalancing of human capital</b>, though, and your acquisition may eventually be worth more than your investment ever was.</p>
@@ -1410,110 +1702,67 @@
         </button>
       </div>
       <div class="modal-body">
-        <p class="well well-sm hide-mobile">虽然您的存在确保了您的下属之间的纪律，但有时感觉您的企业几乎可以在没有您在那里的情况下运行...</p>
-        <h4 class="time-away-header">消磨时间</h4>
+        <h4 class="time-away-header">Time Spent Away</h4>
         <p class="time-away" data-bind="text: awayEarnings().time"></p>
-<!--         <div class="panel panel-default">
-          <div class="panel-heading">Time Spent Away</div>
-          <div class="panel-body" data-bind="text: awayEarnings().time"></div>
-        </div> -->
 
-        <div class="col-md-4">
-          <div class="panel panel-default">
-            <div class="panel-heading">金钱</div>
-            <div class="panel-body" data-bind="text: awayEarnings().cashProgress"></div>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="panel panel-default">
+              <div class="panel-heading">Cash</div>
+              <div class="panel-body" data-bind="text: awayEarnings().cashProgress"></div>
+            </div>
+          </div>
+          <div data-bind="css: { 'away-locked': locked().investments }" class="col-md-4">
+            <i class="material-icons">lock</i>
+            <div class="panel panel-default">
+              <div class="panel-heading">Investments</div>
+              <div class="panel-body" data-bind="text: awayEarnings().investmentProgress"></div>
+            </div>
+          </div>
+          <div data-bind="css: { 'away-locked': locked().acquisitions }" class="col-md-4">
+            <i class="material-icons">lock</i>
+            <div class="panel panel-default">
+              <div class="panel-heading">Acquisitions</div>
+              <div class="panel-body" data-bind="text: awayEarnings().acquisitionProgress"></div>
+            </div>
           </div>
         </div>
-        <div data-bind="css: { 'away-locked': locked().investments }" class="col-md-4">
-          <i class="material-icons">lock</i>
-          <div class="panel panel-default">
-            <div class="panel-heading">投资</div>
-            <div class="panel-body" data-bind="text: awayEarnings().investmentProgress"></div>
+
+        <div class="row">
+          <div data-bind="css: { 'away-locked': locked().research }" class="col-md-12">
+            <i class="material-icons">lock</i>
+            <div class="panel panel-default">
+              <!-- Default panel contents -->
+              <div class="panel-heading">Patents</div>
+
+              <!-- Table -->
+              <table class="table earned-table">
+                <tr>
+                  <td data-bind="visible: locked().research">???</td>
+                  <td data-bind="visible: !locked().research">Earnings</td>
+                  <td>$<span data-bind="text: awayEarnings().patentsSoldValue"></span></td>
+                </tr>
+                <tr>
+                  <td data-bind="visible: locked().research">???</td>
+                  <td data-bind="visible: !locked().research">Patents Stored</td>
+                  <td data-bind="text: awayEarnings().patentsStored"></td>
+                </tr>
+                <tr>
+                  <td data-bind="visible: locked().research">???</td>
+                  <td data-bind="visible: !locked().research">Patents Sold</td>
+                  <td data-bind="text: awayEarnings().patentsSold"></td>
+                </tr>
+                <tr>
+                  <td data-bind="visible: locked().research">???</td>
+                  <td data-bind="visible: !locked().research">Employees Gone</td>
+                  <td data-bind="text: awayEarnings().employeesGone"></td>
+                <tr>
+              </table>
+
+            </div>
           </div>
         </div>
-        <div data-bind="css: { 'away-locked': locked().acquisitions }" class="col-md-4">
-          <i class="material-icons">lock</i>
-          <div class="panel panel-default">
-            <div class="panel-heading">收购</div>
-            <div class="panel-body" data-bind="text: awayEarnings().acquisitionProgress"></div>
-          </div>
-        </div>
 
-        <div data-bind="css: { 'away-locked': locked().research }" class="col-md-12">
-          <i class="material-icons">lock</i>
-        <div class="panel panel-default">
-          <!-- Default panel contents -->
-          <div class="panel-heading">专利</div>
-<!--           <div class="panel-body">
-            <div data-bind="text: awayEarnings().patentsSoldValue"></div>
-          </div> -->
-
-          <!-- Table -->
-          <table class="table earned-table">
-            <tr>
-              <td data-bind="visible: locked().research">???</td>
-              <td data-bind="visible: !locked().research">专利收入</td>
-              <td data-bind="text: awayEarnings().patentsSoldValue"></td>
-            </tr>
-            <tr>
-              <td data-bind="visible: locked().research">???</td>
-              <td data-bind="visible: !locked().research">专利存储</td>
-              <td data-bind="text: awayEarnings().patentsStored"></td>
-            </tr>
-            <tr>
-              <td data-bind="visible: locked().research">???</td>
-              <td data-bind="visible: !locked().research">专利出售</td>
-              <td data-bind="text: awayEarnings().patentsSold"></td>
-            </tr>
-            <tr>
-              <td data-bind="visible: locked().research">???</td>
-              <td data-bind="visible: !locked().research">员工离职</td>
-              <td data-bind="text: awayEarnings().employeesGone"></td>
-            <tr>
-          </table>
-        </div>
-        </div>
-
-        <!-- <div class="col-md-6">
-          <h4>Cash Progress</h4>
-          <table class="table earned-table">
-            <tr>
-              <td>Earned While Away</td>
-              <td data-bind="text: research().risk.displayVal"></td>
-            </tr>
-          </table>
-          <h4 style="margin-top: -12px;">Time Progress</h4>
-          <table class="table earned-table">
-            <tr>
-              <td>Investment Growth</td>
-              <td data-bind="text: research().risk.displayVal"></td>
-            </tr>
-            <tr>
-              <td>Acquisition Firings</td>
-              <td data-bind="text: research().risk.displayVal"></td>
-            </tr>
-          </table>
-        </div>
-        <div class="col-md-6">
-          <h4>Research Progress</h4>
-          <table class="table earned-table">
-            <tr>
-              <td>Employees Gone</td>
-              <td data-bind="text: research().risk.displayVal"></td>
-            <tr>
-              <td>Patents Stored</td>
-              <td data-bind="text: research().risk.displayVal"></td>
-            </tr>
-            <tr>
-              <td>Patents Sold</td>
-              <td data-bind="text: research().risk.displayVal"></td>
-            </tr>
-            <tr>
-              <td>Earned From Patents</td>
-              <td data-bind="text: research().risk.displayVal"></td>
-            </tr>
-          </table>
-        </div> -->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
@@ -1522,8 +1771,207 @@
   </div>
 </div>
 
+<div class="modal fade" id="electionModal" tabindex="-1" role="dialog" aria-labelledby="electionModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'election'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="electionModalLabel">Elections</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div data-bind="fadeVisible: election().view() === 'preparing'" class="modal-body">
+          <div class="row gaffe-risk-box">
+            <div class="col-md-6">
+              Gaffe Risk: <span style="font-weight: bold;" data-bind="text: election().gaffeRisk.displayVal"></span>
+            </div>
+            <div class="col-md-6">
+              Streak Bonus: <span style="font-weight: bold;" data-bind="text: election().streakBonus.displayVal"></span>
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6">
+              <select class="form-control" name="email-type" title="Seeking Office" data-bind="value: election().selectedOffice">
+                <option value="" disabled selected hidden>Seeking Office...</option>
+                <option value='0'>Mayor</option>
+                <option value='1'>Congressperson</option>
+                <option value='2'>Governor</option>
+                <option value='3'>Senator</option>
+                <option value='4'>President</option>
+              </select>
+              <select class="form-control" name="email-type" title="Financial Background" data-bind="value: election().selectedBackground">
+                <option value="" disabled selected hidden>Financial Background...</option>
+                <option value='0'>Very Comfortable</option>
+                <option value='1'>Independently Wealthy</option>
+                <option value='2'>Country Club Elite</option>
+                <option value='3'>Billionaire Executive</option>
+                <option value='4'>Ancient Dynastic Fortune</option>
+              </select>
+              <select class="form-control" name="email-type" title="Personality Type" data-bind="value: election().selectedPersonality">
+                <option value="" disabled selected hidden>Personality Type...</option>
+                <option value='0'>Well-Spoken Leader</option>
+                <option value='1'>Gruff Elder Statesman</option>
+                <option value='2'>Stodgy Empty Suit</option>
+                <option value='3'>Affable Uncle</option>
+                <option value='4'>Soft-Brained Huckster</option>
+              </select>
+              <select class="form-control last-form" name="email-type" title="Backup Plans" data-bind="value: election().selectedBackup">
+                <option value="" disabled selected hidden>Backup Plans...</option>
+                <option value='0'>Retire into Obscurity</option>
+                <option value='1'>Write a Best-Selling Book</option>
+                <option value='2'>Become a Cable News Pundit</option>
+                <option value='3'>Start a Pro-Market Think Tank</option>
+                <option value='4'>Buy a Predatory Media Conglomerate</option>
+              </select>
+            </div>
+            <div class="election-preparation-stats col-md-6">
+              <table class="table earned-table">
+                <tr>
+                  <td>Time Per Election</td><td data-bind="text: election().electionTime.displayVal"></td>
+                </tr>
+                <tr>
+                  <td>Donation Discount</td><td data-bind="text: election().donationDiscount.displayVal"></td>
+                </tr>
+                <tr>
+                  <td>Kickback Bonus</td><td data-bind="text: election().kickbackBonus.displayVal"></td>
+                </tr>
+                <tr>
+                  <td>Time Reduction</td><td data-bind="text: election().timeReduction.displayVal"></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <h4 class="kickback-header">Kickback Value:</h4>
+              <div class="election-left-box col-md-6">
+                <p>
+                  <span class="stat-header">When Candidate Wins</span>
+                  <span class="stat-value" data-bind="text: election().winValue.displayVal">$1 Septillion</span>
+                </p>
+              </div>
+              <div class="election-right-box col-md-6">
+                <p>
+                  <span class="stat-header">When Candidate Loses</span>
+                  <span class="stat-value" data-bind="text: election().lossValue.displayVal">$10 Sextillion</span>
+                </p>
+              </div>
+            </div>
+          </div>
+      </div>
+
+      <div data-bind="fadeVisible: election().view() === 'help'" class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">When people live in freedom, they do not willingly choose leaders who pursue campaigns of terror.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">George H. W. Bush, 39th US President</cite></footer>
+        </blockquote>
+        <p>The hallmark of a free and productive society is the ability of its citizens to choose which particular members of the ruling class will subjugate them. In turn, every civically responsible business leader must <b>participate in the electoral process</b>.</p>
+        <p>Business leaders make connections in the political world, and with the kinds of connections a true visionary maintains, every election produces <b>kickbacks</b>, win or lose. However, savvy leaders monitor the <b>poll numbers</b> as an election proceeds, then make <b>cash donations</b> to ensure that the most lucrative candidate wins.</p> 
+        <p>Unfortunately, given the kinds of <b>gaffes</b> these candidates commit, considerable contributions may be necessary.</p>
+      </div>
+
+      <div data-bind="fadeVisible: election().view() === 'bio'" class="modal-body">
+        <h4 style="text-align: center; border-bottom: solid 1px #eee; padding-bottom: 5px;">
+            Meet <span data-bind="text: election().firstName"></span>
+            <span data-bind="text: election().lastName"></span>
+        </h4>
+        <p class="well well-sm" style="text-align: center;"><em data-bind="text: election().slogan"></em></p>
+        <p id="electionbio" class="election-bio" data-bind="html: election().bio"></p>
+      </div>
+
+      <div data-bind="fadeVisible: election().view() === 'main', css: { 'results-view': election().resultsView() }" class="modal-body">
+
+          <div class="results-box">
+            <h4 data-bind="text: election().resultsMessage" style="text-align: center;"></h4>
+            <table class="table earned-table policy-ideas">
+              <tr>
+                <td>Kickbacks Earned</td>
+                <td data-bind="text: election().totalEarned.displayVal"></td>
+              </tr>
+              <tr>
+                <td>Donations Made</td>
+                <td data-bind="text: election().totalDonations.displayVal"></td>
+              </tr>
+            </table>
+            <h5 style="text-align: center; border-bottom: solid 1px #eee; padding-bottom: 5px;">Net Earnings:</h5>
+            <p class="election-earnings-box" data-bind="css: { 'lost': election().netEarned.val() < 0 }, text: election().netEarned.displayVal"></p>
+          </div>
+
+          <div class="election-box">
+            <h4 style="text-align: center; border-bottom: solid 1px #eee; padding-bottom: 5px;">
+              <span data-bind="text: election().firstName"></span>
+              <span data-bind="text: election().lastName"></span>
+            </h4>
+            <p class="well hide-mobile" data-bind="html: election().miniBio"></p>
+            <p class="well mobile-only-text">
+              Read a <a onclick="game.election().setView('bio');setTimeout(function() {$('#electionbio').scrollTop(0) }, 100);">full biography</a>
+            </p>   
+
+              <table class="table earned-table policy-ideas">
+                <tr>
+                  <td>Kickbacks on Win</td>
+                  <td data-bind="text: election().winValue.displayVal"></td>
+                </tr>
+                <tr>
+                  <td>Donations so Far</td>
+                  <td data-bind="text: election().totalDonations.displayVal"></td>
+                </tr>
+              </table>
+            <div class="polling-box row">
+                <div class="col-md-3">
+                  <div data-bind="css: { 'clicked': election().donateCooldown() }" class="poll-wrapper">
+                    <div class="poll-stats">
+                      <div class="stat-header">Polling At</div>
+                      <div class="stat-value">
+                        <span data-bind="text: election().pollNumber"></span>%
+                      </div>
+                      <span data-bind="quickFadeVisible: election().donateCooldown()" class="badge badge-success donation-add">
+                        +<span data-bind="text: electionSupportRate.displayVal"></span>%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-9">
+                  <div class="poll-wrapper">
+                    <p data-bind="visible: election().gaffes().length === 0" class="no-gaffes">No Gaffes Yet</p>
+                    <!-- ko foreach: election().gaffes -->
+                      <div class="poll-gaffe-entry">
+                        <span class="text" data-bind="text: text"></span>
+                        <span data-bind="visible: mod() < 0" class="badge badge-success">
+                          +<span data-bind="text: Math.abs(mod())"></span>%
+                        </span>
+                        <span data-bind="visible: mod() > 0" class="badge badge-danger">
+                          -<span data-bind="text: mod"></span>%
+                        </span>
+                      </div>
+                    <!-- /ko -->
+                  </div>
+                </div>   
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <div data-bind="visible: election().view() !== 'preparing' && election().view() !== 'help'" class="left-box well">
+          <span class="election-timer" data-bind="text: election().displayTimeRemaining"></span>
+        </div>
+        <button data-bind="visible: election().view() !== 'help', click: election().setView.bind(election(), 'help')" type="button" class="btn btn-primary">Help</button>
+        <button data-bind="visible: election().view() === 'preparing', click: election().start.bind(election()), css: { 'disabled': !election().readyToBegin() }" type="button" class="btn btn-primary">Begin Election</button>
+        <button data-bind="visible: election().view() === 'help', click: election().setView.bind(election(), election().active() || election().finished() ? 'main' : 'preparing')" type="button" class="btn btn-primary">Return</button>
+        <button data-bind="visible: election().view() === 'bio', click: election().setView.bind(election(), 'main')" type="button" class="btn btn-primary">Return</button>
+        <button data-bind="visible: election().view() === 'main', click: election().stopElections.bind(election()), css: { 'disabled': !election().active() }" type="button" class="btn btn-danger">Stop</button>
+        <button data-bind="css: { 'disabled': election().cantAffordDonation() || !election().active() }, visible: election().view() === 'main' && !election().finished(), click: election().donate.bind(election())" type="button" class="donate-btn btn btn-primary">
+          Donate <span data-bind="text: election().donationAmount.displayVal"></span>
+        </button>
+        <button data-bind="css: { 'disabled': election().resultsView() }, visible: election().view() === 'main' && election().finished(), click: election().seeResults.bind(election())" type="button" class="donate-btn btn btn-success">Finish Election</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade mailModal" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'r&d'">
     <div class="modal-content">
       <div class="modal-header">
         <i class="material-icons">supervised_user_circle</i>
@@ -1535,7 +1983,7 @@
       </div>
       <div data-bind="visible: research().helpView()" class="modal-body">
         <blockquote class="blockquote text-right">
-          <p class="mb-0">创新区分领导者和追随者</p>
+          <p class="mb-0">Innovation distinguishes between a leader and a follower</p>
           <footer class="blockquote-footer"><cite title="Source Title">Steven Job</cite></footer>
         </blockquote>
         <p>If you want to be a great entrepenuer, you're going to have to do more than just grind the gears of industry exactly the way they've been grinding for years. The first step to truly innovative success is <b>Research & Development</b>.</p>
@@ -1544,46 +1992,49 @@
       <div data-bind="visible: !research().helpView()" class="modal-body">
         <div class="main" data-bind="css: { selling: research().sellValue() }">
           <div class="research-input">
-            <h4>实习生</h4>
+            <h4>Interns</h4>
             <input id="research-0" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : '' }, textinput: research().intern" type="number" class="form-control" oninput="validateResearch('0');" placeholder="#" min="0" max="999">
           </div>
           <div class="research-input">
-            <h4>工资奴隶</h4>
+            <h4>Wage Slaves</h4>
             <input id="research-1" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : ''  }, textinput: research().wage" type="number" class="form-control" oninput="validateResearch('1');" placeholder="#" min="0" max="999">
           </div>
           <div class="research-input">
-            <h4>销售能人</h4>
+            <h4>Sales Hotshots</h4>
             <input id="research-2" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : ''  }, textinput: research().sales" type="number" class="form-control" oninput="validateResearch('2');" placeholder="#" min="0" max="999">
           </div>
           <div class="research-input">
-            <h4>中层管理</h4>
+            <h4>Middle Managers</h4>
             <input id="research-3" data-bind="attr: { readonly: research().active(), title: research().active() ? 'Cannot assign while research is active' : ''  }, textinput: research().manager" type="number" class="form-control" oninput="validateResearch('3');" placeholder="#" min="0" max="999">
           </div>
+          <button data-bind="css: { 'disabled': research().active() }, click: research().assignMax.bind(research())" type="button" class="btn btn-primary btn-sm mobile-only-text mobile-assign-all">
+            Assign All
+          </button>
 
           <div class="row" style="margin-top:10px;">
             <div class="col-md-6">
               <table class="table earned-table">
                 <tr>
-                  <td>灾难性风险</td><td data-bind="text: research().risk.displayVal"></td>
+                  <td>Catastrophic Risk</td><td data-bind="text: research().risk.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>速度提升</td><td data-bind="text: research().speed.displayVal"></td>
+                  <td>Speed Boost</td><td data-bind="text: research().speed.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>自动销售几率</td><td data-bind="text: research().autoSell.displayVal"></td>
+                  <td>Chance to Auto Sell</td><td data-bind="text: research().autoSell.displayVal"></td>
                 </tr>
               </table>
             </div>
             <div class="col-md-6">
               <table class="table earned-table">
                 <tr>
-                  <td>价值提升</td><td data-bind="text: research().value.displayVal"></td>
+                  <td>Value Boost</td><td data-bind="text: research().value.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>允许存储</td><td data-bind="text: research().storage.displayVal"></td>
+                  <td>Storage Allowed</td><td data-bind="text: research().storage.displayVal"></td>
                 </tr>
                 <tr>
-                  <td>基础价值</td><td data-bind="text: research().baseValue.displayVal"></td>
+                  <td>Base Value</td><td data-bind="text: research().baseValue.displayVal"></td>
                 </tr>
               </table>
             </div>
@@ -1591,7 +2042,7 @@
 
           <div class="row">
             <div class="col-md-12">
-              <h4 class="progress-header">研究: <span data-bind="html: research().product"></span></h4>
+              <h4 class="progress-header">Researching: <span data-bind="html: research().product"></span></h4>
               <div class="progress">
                 <div class="progress-bar" role="progressbar" data-bind="style: { width: research().percentageRipe() }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
               </div>
@@ -1600,7 +2051,7 @@
         </div>
 
         <div class="sell-value label-success" data-bind="visible: research().sellValue()">
-          <p class="label"><span data-bind="text: research().sellNumber"></span> 专利已售出</p>
+          <p class="label"><span data-bind="text: research().sellNumber() + (research().sellNumber() > 1 ? ' Patents Sold' : ' Patent Sold')"></span></p>
           <h4>$<span data-bind="text: research().sellValue()"></span></h4>
         </div>
 
@@ -1608,210 +2059,66 @@
       <div class="modal-footer">
         <div style="float:left;">
           <button class="btn btn-success" data-bind="click: research().sellPatents.bind(research())">
-            出售 <span class="hide-mobile">专利</span> 
+            Sell <span class="hide-mobile">Patents</span> 
             <span data-bind="text: research().patents().length" class="sell-num badge"></span>
           </button>
         </div>
-        <button type="button" class="btn btn-primary" data-bind="click: research().toggleHelpView.bind(research())">帮助</button>
+        <button type="button" class="btn btn-primary" data-bind="click: research().toggleHelpView.bind(research())">Help</button>
+        <button data-bind="css: { 'disabled': research().active() }, click: research().assignMax.bind(research())" type="button" class="btn btn-primary hide-mobile">
+          Assign All
+        </button>
         <button data-bind="css: { 'btn-primary': !research().active(), 'btn-danger': research().active(), 'disabled': !research().readyToBegin() }, click: research().toggleProduction.bind(research())" type="button" class="btn">
-          <span data-bind="visible: research().active()">停止 <span class="hide-mobile">Research</span></span>
-          <span data-bind="visible: !research().active()">开始 <span class="hide-mobile">Research</span></span>
+          <span data-bind="visible: research().active()">Stop <span class="hide-mobile">Research</span></span>
+          <span data-bind="visible: !research().active()">Begin <span class="hide-mobile">Research</span></span>
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="changelogModal" tabindex="-1" role="dialog" aria-labelledby="changelogModalLabel">
-  <div class="modal-dialog" role="document">
+<div class="modal fade" id="socialModal" tabindex="-1" role="dialog" aria-labelledby="socialModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'social'">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="changelogModalLabel">更新日志</h3>
+        <h3 class="modal-title" id="socialModalLabel">Social</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <ul>
-          <span>3/19/2019 (Version 0.5.4)</span>
-          <li>Add a footer link to the subreddit</li>
-          <li>Add some new email subjects and products</li>
-        </ul>
-        <ul>
-          <span>2/15/2019 (Version 0.5.3)</span>
-          <li>Fix broken achievement</li>
-        </ul>
-        <ul>
-          <span>2/05/2019 (Version 0.5.2)</span>
-          <li>Clear away inboxes &amp; email stress after bankruptcy</li>
-          <li>Make sure away inboxes consume outgoing email responses</li>
-        </ul>
-        <ul>
-          <span>1/28/2019 (Version 0.5.1)</span>
-          <li>Add fix for bankruptcy crash/refresh issue</li>
-          <li>Add more safeguards to prevent negative income scenarios</li>
-          <li>Fix missing email frequency upgrade</li>
-          <li>Adjust thresholds for top-level earnings achievements</li>
-        </ul>
-        <ul>
-          <span>1/14/2019 (Version 0.5.0)</span>
-          <li>Add the "Outgoing Email" feature</li>
-          <li>Add the ability to name current business</li>
-          <li>Add new stats chart tracking previous bankruptcies</li>
-          <li>Boost values of R&amp;D risk reduction upgrades</li>
-          <li>Add 23 new upgrades & 35 new achievements</li>
-          <li>Add setting to pin nav tabs to the header (off by default)</li>
-          <li>Add brief stat explanations for a few stats</li>
-          <li>Add various UI fixes and adjustments, especially for mobile darkmode</li>
-          <li>Fix date format for some non-EN-us users (only for new achievements)</li>
-          <li>Fix bug with away progress research producing too many patents</li>
-          <li>Improve long load times and imports after significant away time</li>
-          <li>Add more dumb text</li>
-        </ul>
-        <ul>
-          <span>12/17/2018 (Version 0.4.4)</span>
-          <li>Update Chart.js to latest version</li>
-          <li>Prevent charts from re-rendering on dark mode switch</li>
-          <li>Improve chart key color changes on dark mode re-render</li>
-          <li>Fix some typos</li>
-        </ul>
-        <ul>
-          <span>12/03/2018 (Version 0.4.3)</span>
-          <li>Subtract employees lost via research from full employee count</li>
-          <li>Fix acquisition button still disabled pre bankruptcy</li>
-        </ul>
-        <ul>
-          <span>11/30/2018 (Version 0.4.2)</span>
-          <li>Fix 'out of office' UI bug for chats on Firefox</li>
-          <li>Add explanatory tooltips to research inputs while active</li>
-          <li>Fix some upgrade description typos</li>
-        </ul>
-        <ul>
-          <span>11/29/2018 (Version 0.4.1)</span>
-          <li>Fix input arrows showing for research on Firefox</li>
-          <li>Prevent negative employee inputs on research</li>
-          <li>Show the 'buy all' button all the time</li>
-        </ul>
-        <ul>
-          <span>11/29/2018 (Version 0.4.0)</span>
-          <li>Add the 'Research & Development' feature</li>
-          <li>Add hovers to Achievements & Upgrades tab</li>
-          <li>Add option to clear all unread achievements</li>
-          <li>Add a 'Max' button for employee purchase rate</li>
-          <li>Increase cash away earnings from 3% to 15% default</li>
-          <li>Increase cash away earning upgrades from 1% to 5%</li>
-          <li>Increase investment/acquisition away earnings from 3% to 30% default
-          <li>Increase investment/acquisition away earning upgrades from 1% to 10%</li>
-          <li>Make away upgrades unlock with away achievements, rather than idle</li>
-          <li>Add away earnings report modal</li>
-          <li>Add unlock tooltips to locked tabs and icons</li>
-          <li>Add 48 new achievements and 28 new upgrades</li> 
-          <li>Rebalance costs of mid to late game employees and their corresponding upgrades</li>
-          <li>Rebalance 'next bankruptcy multiplier' relative to lower-priced employees</li>
-          <li>Add 'out of office' upgrades for Emails, Policies, and Chats</li>
-          <li>Increase email timers to 1 minute default with 30 second upgrades</li>
-          <li>Adjust base email payout and increase payout upgrades from 5% to 10%</li>
-          <li>Improve visual distinction between available and unavailable purchases</li>
-          <li>Prevent stats page charts from retaining old references in memory</li>
-          <li>Add more help text and inspiritional quotes to encourage the entrepenurial spirit</li>
-          <li>Add even more dumb text to everything else</li>
-        </ul>
-        <ul>
-          <span>11/25/2018 (Version 0.3.10)</span>
-          <li>Fix missing acquisition upgrade</li>
-          <li>Add more precautions to bankruptcy process</li>
-        </ul>
-        <ul>
-          <span>11/14/2018 (Version 0.3.9)</span>
-          <li>Fix 'Massive Layoffs' stat not carrying over between bankruptcies</li>
-        </ul>
-        <ul>
-          <span>11/13/2018 (Version 0.3.8)</span>
-          <li>Prevent repeat payouts on the 'all' button for investments</li>
-        </ul>
-        <ul>
-          <span>11/08/2018 (Version 0.3.7)</span>
-          <li>Bug fix and UI adjustments for IE11</li>
-        </ul>
-        <ul>
-          <span>11/08/2018 (Version 0.3.6)</span>
-          <li>Avoid possibility of hiring acquisition workers beyond available net value</li>
-          <li>Increase mobile screen size threshold for hiding hovers</li>
-          <li>Add acquisition worker modal details to improve accessibility and mobile ux</li>
-        </ul>
-        <ul>
-          <span>11/06/2018 (Version 0.3.5)</span>
-          <li>Avoid possibility of bankruptcy rewards adding out of order</li>
-          <li>Prevent firing employees while investments are active</li>
-        </ul>
-        <ul>
-          <span>11/04/2018 (Version 0.3.4)</span>
-          <li>Fix upgrade hovers on Firefox</li>
-          <li>Fix unlock dates on achievements in non-US locales</li>
-        </ul>
-        <ul>
-          <span>11/02/2018 (Version 0.3.3)</span>
-          <li>Stop 'away earnings' notices from piling up</li>
-          <li>Make acquisition worker hovers less prominent</li>
-          <li>Prevent creation of 0-length or empty investments</li>
-          <li>Hide investment 'new' tag even if investments are acquired</li>
-          <li>Add more dumb text to Policies, Emails, and Chats</li>
-        </ul>
-        <ul>
-          <span>10/13/2018 (Version 0.3.2)</span>
-          <li>Fix darkmode UI bug for acquisitions</li>
-          <li>Fix possibility of undefined investment name</li>
-        </ul>
-        <ul>
-          <span>10/12/2018 (Version 0.3.1)</span>
-          <li>Fix various UI bugs (mostly mobile)</li>
-        </ul>
-        <ul>
-          <span>10/12/2018 (Version 0.3.0)</span>
-          <li>Add Acquisitions System</li>
-          <li>Add ability to make and cash out all investments at once</li>
-          <li>Adjust investments UI and add company names</li>
-          <li>Add 20 new upgrades and 49 new achievements</li>
-          <li>Fix clumsy animation in mail inbox</li>
-        </ul>
-        <ul>
-          <span>8/16/2018 (Version 0.2.4)</span>
-          <li>Improve accessibility for keyboard-only and screen readers</li>
-          <li>Clarify language in 'Declare Bankruptcy' modal</li>
-        </ul>
-        <ul>
-          <span>8/10/2018 (Version 0.2.3)</span>
-          <li>Fix load error with high-level intern and wage slave achievements</li>
-          <li>Add cash per second to main employee display</li>
-        </ul>
-        <ul>
-          <span>8/10/2018 (Version 0.2.2)</span>
-          <li>Add Dark Mode</li>
-          <li>Fix excess space around achievements covering items below</li>
-          <li>Add an additional upgrade and achievement</li>
-          <li>Fix offline progress bug for long-term games</li>
-          <li>Add button to buy all upgrades</li>
-        </ul>
-        <ul>
-          <span>8/03/2018 (Version 0.2.1)</span>
-          <li>Fix employee hovers showing outside of the bottom page view</li>
-          <li>Add setting to disable pop-up notifications</li>
-          <li>Add setting to hide blank entries for unearned achievements and unbought upgrades</li>
-        </ul>
-        <ul>
-          <span>8/01/2018 (Version 0.2.0)</span>
-          <li>Add changelog</li>
-          <li>Resized and reorganized employee/upgrade UI</li>
-          <li>Add 'new achievements' section to achievements panel</li>
-          <li>Fix various typos and UI bugs</li>
-          <li>Add new high-level Bankruptcy Achievement</li>
-          <li>Add default offline progress for both earnings and investment progress</li>
-          <li>Show potential earning rate of new units before hiring</li>
-          <li>Add Hover details to upgrades and employees by default</li>
-          <li>Add Settings Modal with options to disable charts and swap hover/modal details</li>
-          <li>Fix timers on background tabs in Safari</li>
-          <li>Add analytics to measure achievements earned and session length</li>
-        </ul>
+      <div class="modal-body social-btns">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">Your network is your net worth.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Raymond J. Theon, CEO & President of Raytheon</cite></footer>
+        </blockquote>
+        <p style="text-align:left;">An essential part of <b>corporate leadership</b> is using today's social media networks to expand your inner circle while interacting with the #brands and #products that you love. Subscribe or follow for <b>all the latest updates</b> on how this game continues to get worse, as well as the camaraderie of business-minded visionaries like yourself.</p>
+        <a class="btn btn-success" target="_blank" href="https://www.reddit.com/r/theidleclass/">Reddit</a>
+        <a class="btn btn-success" target="_blank" href="https://discord.gg/ePSX5vu">Discord</a>
+        <a class="btn btn-success" target="_blank" href="https://twitter.com/smallgraygames">Twitter</a>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="donateModal" tabindex="-1" role="dialog" aria-labelledby="donateModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'donate'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="donateModalLabel">Make a Donation</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body donate-btns">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">Happiness doesn’t result from what we get, but from what we give.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Dr. Benjamin Solomon "Ben" Carson Sr., M.D.</cite></footer>
+        </blockquote>
+        <p style="text-align:left;">Is there such a thing as <b>ethical consumption</b> under capitalism? Some would tell you there isn't, but those people are workshy grifters and charlatans, because they're clearly unaware of the opportunity to <b>donate to the continued creation of this game.</b> We need your support to add new features, such as the VR Premium Edition and LinkedIn Integration.</p>
+        <a class="btn btn-success" target="_blank" href="https://www.patreon.com/smallgraygames">Donate on Patreon</a>
+        <a class="btn btn-success" target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate on PayPal</a>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
@@ -1821,7 +2128,7 @@
 </div>
 
 <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'settings'">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="settingsModalLabel">Settings</h3>
@@ -1831,7 +2138,7 @@
       </div>
       <div class="modal-body">
         <fieldset>
-          <legend class="sr-only">Display Options</legend>
+          <legend>General Options</legend>
           <ul>
             <li>
               <label for="charts">Enable Stats Charts</label><input name="charts" id="charts" type="checkbox" data-bind="checked: enableCharts">
@@ -1849,7 +2156,33 @@
               <label for="darkmode">Enable Dark Mode</label><input name="darkmode" id="darkmode" type="checkbox" onclick="setTimeout(function() {reloadCharts()}, 100);" data-bind="checked: enableDarkMode">
             </li>
             <li>
-              <label for="darkmode">Enable Fixed Nav Tabs</label><input name="fixednav" id="fixednav" type="checkbox" data-bind="checked: enableFixedNavTabs">
+              <label for="fixednav">Enable Fixed Nav Tabs</label><input name="fixednav" id="fixednav" type="checkbox" data-bind="checked: enableFixedNavTabs">
+            </li>
+            <li>
+              <label for="guaranteedwindfalls">Enable Guaranteed Windfalls</label>
+              <input name="guaranteedwindfalls" id="guaranteedwindfalls" type="checkbox" data-bind="checked: enableWindfallGuarantee">
+            </li>
+            <li>
+              <label for="twoColumnEmployees">Enable Two Column Employee View</label>
+              <input name="twoColumnEmployees" id="twoColumnEmployees" type="checkbox" data-bind="checked: twoColumnEmployees">
+            </li>
+
+            <li style="margin-top:15px;"><legend>Max Button Options</legend></li>
+            <li>
+              <div>
+                <input type="radio" name="maxgroup" value="default" data-bind="checked: maxType" />
+                <label>Max Button (Default)</label>
+              </div>
+              <div>
+                <input type="radio" name="maxgroup" value="maxIncrement" data-bind="checked: maxType" />
+                <label for="maxincrement">Max Button (Buy In Specified Increments)</label>
+                <input class="form-control" name="maxincrement" id="maxincrement" type="number" min="1" data-bind="textinput: maxIncrement">
+              </div>
+              <div>
+                <input type="radio" name="maxgroup" value="targetIncrement" data-bind="checked: maxType" />
+                <label for="targetincrement">Max Button (Buy Enough to Reach Specified Increment)</label>
+                <input class="form-control" name="targetincrement" id="targetincrement" type="number" min="1" data-bind="textinput: targetIncrement">
+              </div>
             </li>
           </ul>
         </fieldset>
@@ -1862,7 +2195,7 @@
 </div>
 
 <div class="modal fade" id="chatModal" tabindex="-1" role="dialog" aria-labelledby="chatModalLabel">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'chat'">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="chatModalLabel">Internal Chat</h3>
@@ -1900,7 +2233,7 @@
                   </tr>
                   <tr>
                     <td>Time Spent Waiting</td>
-                    <td><span data-bind="text: viewingChat().timePassedFormatted"></span></td>
+                    <td data-bind="text: viewingChat().timePassedFormatted"></td>
                   </tr>
                 </tbody>
               </table>
@@ -1959,57 +2292,51 @@
 <div id="achievement-box"></div>
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<!--<script async src="https://www.googletagmanager.com/gtag/js?id=UA-117412788-1"></script>-->
-<!--
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-117412788-1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', 'UA-117412788-1');
-</script>
--->
-</body>
-
-<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</script></body>
 
 <script type="text/html" id="stat-template">
-    <tr>
+    <tr data-bind="if: $root.viewingTab() === 'stats'">
       <td data-bind="css: { 'info-stat': info }">
         <div style="position:relative;">
           <span data-bind="text: name"></span>
           <button data-bind="if: info" class="hide-mobile stat-info icon-button">
             <i class="material-icons">help</i>
           </button>
-          <div class="hover stat-hover">
+          <div class="hover stat-hover" data-bind="if: info">
             <p data-bind="html: info"></p>
           </div>
         </div>
       </td>
-      <td>
-        <span data-bind="text: displayVal">-</span>
-      </td>
+      <td data-bind="text: displayVal"></td>
     </tr>
 </script>
 
 <script type="text/html" id="mail-template">
-  <div class="email-message" data-bind="css: { replied: replied, 'special': isSpecial(), 'acquisition': isAcquisition() }" style="border: solid 1px gray">
+  <div class="email-message" data-bind="css: { replied: replied, 'special': isSpecial(), 'acquisition': isAcquisition(), 'cryptic': isCryptic() }" style="border: solid 1px gray">
     <form data-bind="submit: respond">
       <span class="timer alert-info" data-bind="text: displayTimeRemaining"></span>
       <p class="email-info">
         <b>From:</b> 
         <span data-bind="text: from"></span>
-        <span data-bind="visible: isSpecial()" class="label label-danger">紧急</span>
-        <span data-bind="visible: stressLevel === 0" class="label label-primary">低优先级</span>
-        <span data-bind="visible: stressLevel === 1" class="label label-warning">高优先级</span>
+        <span data-bind="visible: isCryptic()" class="label label-cryptic">CLASSIFIED</span>
+        <span data-bind="visible: isSpecial()" class="label label-danger">URGENT</span>
+        <span data-bind="visible: stressLevel === 0" class="label label-primary">LOW PRIORITY</span>
+        <span data-bind="visible: stressLevel === 1" class="label label-warning">HIGH PRIORITY</span>
       </p>
-      <p class="email-info"><b>日期:</b> <span data-bind="text: date.toLocaleString()"></span></p>
-      <p class="email-info"><b>主题:</b> <span data-bind="text: subject"></span></p>
+      <p class="email-info"><b>Date:</b> <span data-bind="text: date.toLocaleString()"></span></p>
+      <p class="email-info"><b>Subject:</b> <span data-bind="text: subject"></span></p>
       <p data-bind="text: body"></p>
       <textarea class="form-control" data-bind="value: inputText, attr: { title: isAcquisition() ? 'Add your notes' : 'Enter your response' }" maxlength="200"></textarea>
       <button class="btn btn-primary" type="submit">
-        <span data-bind="visible: !isAcquisition()">回复</span>
-        <span data-bind="visible: isAcquisition()">接受</span>
+        <span data-bind="visible: !isAcquisition()">Reply</span>
+        <span data-bind="visible: isAcquisition()">Accept</span>
       </button>
       <div style="clear:both;"></div>
     </form>
@@ -2017,52 +2344,38 @@
       <table class="earned-table table">
         <tbody>
           <tr>
-            <td>文字奖励</td>
+            <td>Text Bonus</td>
             <td data-bind="text: payoutBonus"></td>
           </tr>
           <tr>
-            <td>时间奖励</td>
+            <td>Time Bonus</td>
             <td data-bind="text: timeBonus"></td>
           </tr>
         </tbody>
       </table>
-      <h2 class="label-success">+ $<span data-bind="text: payout"></span></h2>
+      <h2 data-bind="visible: !isCryptic()" class="label-success">
+        + $<span data-bind="text: payout"></span>
+      </h2>
+      <h2 data-bind="visible: isCryptic()" style="background:purple;">
+        + <span data-bind="text: payout"></span> to Next Bankruptcy
+      </h2>
     </div>
     <div data-bind="if: isAcquisition()" class="payout">
       <table class="earned-table table">
         <tbody>
           <tr>
-            <td>文字奖励</td>
+            <td>Text Bonus</td>
             <td data-bind="text: payoutBonus"></td>
           </tr>
           <tr>
-            <td>时间奖励</td>
+            <td>Time Bonus</td>
             <td data-bind="text: timeBonus"></td>
           </tr>
         </tbody>
       </table>
-      <h2 class="label-danger"><span data-bind="text: payout"></span> 员工辞职</h2>
+      <h2 class="label-danger"><span data-bind="text: payout"></span> Employees Quit</h2>
     </div>
   </div>
 </script>
-<script>
-    var html="";
-    html += "<input type='button' id='kxj2'  value='点击启用助手'><br>";
-//       html += "<span style='color:red;font-size:12px;'><br>* 如果已启用，然后不想用了，请保存游戏,然后刷新游戏，即可。</span><br>";
-    $("#menu2").append(html);
-    var ok = false;
-			$("#kxj2").click(function() {
-				if(ok != true) {
-					$("#kxj2").text("助手已启用")
-					document.body.appendChild(document.createElement('script')).src = 'AutocratV3.js';
-					ok = true;
-				}else{
-					return ;
-				}
-			});
-    </script>
-<!--客服 开始-->
-<link rel="stylesheet" href="//cnh5.gitee.io/game/css/kf.css" type="text/css" media="screen" charset="utf-8">
-<script src="//cnh5.gitee.io/game/js/kf.js"></script>
-<!-- 客服 结束 -->
+
 </html>

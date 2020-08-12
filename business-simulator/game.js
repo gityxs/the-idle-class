@@ -12,9 +12,11 @@ var game = (function() {
 	  var earnedWhileIdle = new Stat('Idle Bonus Cash Earned', 0, '$', null, true);
 	  var currentCash = new Stat('Cash in Hand', 0, '$', null, true);
     var employeeDiscount = new Stat('Employee Discount', 0, null, '%');
-	  
-	  var readCount = new Stat('Achievement Descriptions Read', 0);
 
+    var totalCashSlowed = new Stat('Cash Earned in Total', ko.computed(function() {
+      return totalCash.val();
+    }, this).extend({ rateLimit: 500 }));
+	  
 	  // Manual Click Stats
     var manualClicks = new Stat('Manual Clicks', 0);
     var manualClicksAllTime = new Stat('Manual Clicks (All Time)', 0);
@@ -27,6 +29,12 @@ var game = (function() {
     var earnedFromWindfalls = new Stat('Cash Earned During Windfalls', 0, '$');
     var windfallChance = new Stat('Chance of Windfall', 1);
     var windfallMultiplier = new Stat('Windfall Multiplier', 10);
+    var windfallProgress = new Stat('Windfall Progress', 0, null, '%');
+    var windfallGrowthMultiplier = new Stat('Windfall Growth Rate Multiplier', 1);
+
+    var windfallGuaranteeRate = new Stat('Windfall Guarantee Rate', ko.computed(function() {
+      return 0.2 * windfallGrowthMultiplier.val();
+    }, this));
 
 	  // Overall DPS modifiers
 	  var overallDPSPercentage = new Stat('Base Mod to Cash Per Second', 0, null, '%');
@@ -57,7 +65,7 @@ var game = (function() {
   	var totalEarnedFromEmails = new Stat('Cash Earned From Emails', 0, '$');
     var freshEmailEarned = new Stat('Cash Earned From Fresh Emails', 0, '$');
     var expiredEmailEarned = new Stat('Cash Earned From Expired Emails', 0, '$');
-  	var wordsReplied = new Stat('Smart Words Replied', 0);
+  	var wordsReplied = new Stat('Smart Words Replied (All Businesses)', 0);
   	var inboxMax = new Stat('Inbox Maximum', 10);
     var emailCashBonus = new Stat('Bonus to Email Payout', 0, null, '%');
     var timeBonusMinimum = new Stat('Minimum Email Value', 0.1);
@@ -79,7 +87,7 @@ var game = (function() {
     var timeInvested = new TimeStat('Time Dedicated to Investments', 0); // Actual value is in ms
     var timeInvestedAllTime = new TimeStat('Time Dedicated to Investments (All Businesses)', 0);
     var canceledInvestments = new Stat('Canceled Investments', 0);
-    var timeBonusRate = new Stat('Time Bonus Rate (Hourly)', 30, null, '%');
+    var timeBonusRate = new Stat('Time Bonus Rate (Hourly)', 15, null, '%');
 
     // R&D Stats
     var patentsSold = new Stat('Patents Sold (All Businesses)', 0);
@@ -88,6 +96,19 @@ var game = (function() {
     var riskReduction = new Stat('Risk Reduction', 0, null, '%');
     var speedBoost = new Stat('Speed Bonus', 0, null, '%');
     var valueBoost = new Stat('Value Bonus', 0, null, '%');
+    var researchBonus = new Stat('R&D Bonus', 0, null, '%');
+
+    // Career Dev Stats
+    var crypticEmailsReceived = new Stat('Cryptic Emails Received', 0);
+    var crypticEmailsReceivedAllTime = new Stat('Cryptic Emails Received (All Businesses)', 0);
+    var crypticEmailEarnings = new Stat('Cryptic Email Earnings', 0);
+    var crypticEmailBonus = new Stat('Cryptic Email Bonus', 0, null, '%');
+
+    var timeTraining = new TimeStat('Time Spent Training', 0);
+    var timeTrainingAllBusinesses = new TimeStat('Time Spent Training (All Businesses)', 0);
+    var trainingBonus = new Stat('Training Bonus', 0, null, '%');
+    var seminarsUsed = new Stat('Training Seminars Attended (All Businesses)', 0);
+    // nextBankruptcySeminars
 
     // Outgoing Email stats
     var overallTimeBoosted = new TimeStat('Overall Time Boosted (All Businesses)', 0);
@@ -95,10 +116,12 @@ var game = (function() {
     var investmentTimeBoosted = new TimeStat('Investment Time Boosted', 0);
     var researchTimeBoosted = new TimeStat('R&D Time Boosted', 0);
     var acquisitionTimeBoosted = new TimeStat('Acquisition Time Boosted', 0);
+    var trainingTimeBoosted = new TimeStat('Training Time Boosted', 0);
     var stressReduced = new Stat('Stress Reduced Manually', 0, null, '%');
     var investmentBoostBonus = new Stat('Investment Boost Bonus', 0, null, '%');
     var researchBoostBonus = new Stat('Research Boost Bonus', 0, null, '%');
     var acquisitionBoostBonus = new Stat('Acquisition Boost Bonus', 0, null, '%');
+    var trainingBoostBonus = new Stat('Training Boost Bonus', 0, null, '%');
     var stressReductionMultiplier = new Stat('Stress Reduction Multiplier', 1);
 
     var stressReduction = new Stat('Stress Reduction Bonus', ko.computed(function() {
@@ -120,18 +143,40 @@ var game = (function() {
     var policiesAccepted = new Stat('Policies Accepted (All Businesses)', 0);
     var layoffsConducted = new Stat('Massive Layoffs Conducted (All Businesses)', 0);
     var fudgedNumberSessions = new Stat('Number Fudgings Occurred (All Businesses)', 0);
+
+    // Election Stats
+    var electionsWon = new Stat('Elections Won (All Businesses)', 0); 
+    var electionsLost = new Stat('Elections Lost (All Businesses)', 0);
+    var earnedFromElections = new Stat('Earned from Elections', 0, '$');
+    var donatedToCandidates = new Stat('Donated to Candidates', 0, '$');
+    var netElectionEarnings = new Stat('Net Election Earnings', ko.computed(function() {
+      return earnedFromElections.val() - donatedToCandidates.val();
+    }, this), '$');
+    var gaffesExperienced = new Stat('Gaffes Experienced (All Businesses)', 0);
+    var gaffeBuffer = new Stat('Buffer to Gaffe Risk', 0, null, '%');
+    var prChance = new Stat('Chance for PR Spin', 0, null, '%');
+    var electionPayoutBonus = new Stat('Election Payout Bonus', 0, null, '%');
+    var electionSupportRate = new Stat('Donation Efficacy Rate', 2);
+    var winStreak = new Stat('Win Streak', 0);
+    var winStreakCap = new Stat('Win Streak Cap', 5);
   	
   	// Bankruptcy Stats
   	var bankruptcyBonus = new Stat('Bankruptcy Multiplier', 1, null, null, null, null, 'The <b>Bankruptcy Multiplier</b> is a direct multiplier to your overall per-second cash earnings.');
+    var additionalBankruptcyBonus = new Stat('Additional Bankruptcy Bonus', 0);
   	var bankruptcies = new Stat('Bankruptcies Declared', 0);
+    var trainingSeminars = new Stat('Training Seminars', 0);
   	
   	// Utility Stats
     var emailAway = new Stat('Email Away Unlocked', 0);
     var policyAway = new Stat('Policy Away Unlocked', 0);
     var chatAway = new Stat('Chat Away Unlocked', 0);
+    var windfallGuarantee = new Stat('Windfall Guarantee', 0);
+    var electionNotifications = new Stat('Election Notifications Unlocked', 0);
+
     var policyAwayToggled = ko.observable(false);
     var chatAwayToggled = ko.observable(false);
   	var mediumIntervalCounter = ko.observable(0);
+    var isTrainingView = ko.observable(false);
     var hoursInMilliseconds = 60 * 60 * 1000;
     var hoursPlayed = ko.computed(function() {
       mediumIntervalCounter();
@@ -143,18 +188,21 @@ var game = (function() {
       return startTimeAllTime ? Math.floor((Date.now() - new Date(startTimeAllTime.val())) / 1000 / 60 / 60) : 0;
     }, this);
 
-    var timeAwayEarningRate = new Stat('Time Earning While Away', ko.computed(function() {
-      return awayEarningRate.val() * 2;
-    }, this), null, '%', null, null, 'The <b>Time Earning While Away</b> applies to offline progress for time-based earnings: Investments, Acquisitions, R&D, and Stress Reduction.');
+    // Notifies less frequently to avoid excess computation
+    var currentCashSlowed = ko.computed(function() {
+      return currentCash.val();
+    }, this).extend({ rateLimit: 100 });
 
 	  // Other stats
 	  var startTime = new DateStat('Start Time (This Business)', Date.now());
 	  var startTimeAllTime = new DateStat('Start Time (All Businesses)', Date.now());
 	  var lastClick = new DateStat('Last Time Active', Date.now());
     var saveFileSize = new Stat('Save File Size', 0, null, 'kb');
-	  var version = new Stat('Version', '0.5.4');
-    var statsTabViews = new Stat('Stabs Tab Views', 0);
+	  var version = new Stat('Version', '0.7.8');
+    var statsTabViews = new Stat('Stats Tab Views', 0);
     var achievementTabViews = new Stat('Upgrades/Achievements Tab Views', 0);
+    var viewingTab = ko.observable('store');
+    var viewingModal = ko.observable(null);
     
     var idleLevel = ko.computed(function() {
         mediumIntervalCounter();
@@ -182,6 +230,7 @@ var game = (function() {
 	  
 	  // User-selected variables
 	  var buyRate = ko.observable(1);
+    var trainingHours = ko.observable(1);
 	  var isWindfall = ko.observable(false);
 	  
 	  // Settings
@@ -192,10 +241,15 @@ var game = (function() {
     var enableEmptyUpgradesAndAchievements = ko.observable(true);
     var enableDarkMode = ko.observable(false);
     var enableFixedNavTabs = ko.observable(false);
+    var enableWindfallGuarantee = ko.observable(true);
+    var maxType = ko.observable('default');
+    var maxIncrement = ko.observable(1);
+    var targetIncrement = ko.observable(1);
+    var twoColumnEmployees = ko.observable(false);
 
     var handleDarkMode = ko.computed(function() {
       if (enableDarkMode()) {
-        $('link[title="dark"]').attr('href', 'https://bootswatch.com/3/darkly/bootstrap.css');
+        $('link[title="dark"]').attr('href', 'business-simulator/darkly-bootswatch.css');
       } else {
         $('link[title="dark"]').attr('href', '');
       }
@@ -204,6 +258,7 @@ var game = (function() {
     // Arrays to be filled
     var activeInvestments = ko.observableArray([]);
     var activeAcquisitions = ko.observableArray([]);
+    var units = ko.observableArray([]);
     var mail = ko.observableArray([]);
 
     var regularInbox = ko.observable(true);
@@ -211,15 +266,85 @@ var game = (function() {
       if (regularInbox()) {
         return mail()
       } else {
-        return viewingAcquisition().mail();
+        return viewingAcquisition() && viewingAcquisition().mail();
       }
     }, this);
+
+  var internBoost = new PermStatBoost('i1', 0, 'accessibility', 10, 'Management Shadowing', 'Add a <b>%percent</b> bonus to the earnings of your <b>Interns</b>.', 'I must be loyle to my capo.');
+  var textBoost = new PermStatBoost('i2', 0, 'accessibility', 10, 'Pain Tolerance Training', 'Add a <b>%percent</b> bonus to your <b>Email Text Bonus</b>.', 'Kiri, kiri, kiri...');
+  var wageSlaveBoost = new PermStatBoost('w1', 1, 'work', 10, 'Thrift Reeducation', 'Add a <b>%percent</b> bonus to the earnings of your <b>Wage Slaves</b>.', 'I already am eating from the trash can all the time.');
+  var rdBoost = new PermStatBoost('w2', 1, 'work', 5, 'Risk-Inclination Conditioning', 'Add a <b>%percent</b> bonus to the value of your <b>Research</b>.', 'Desperation sometimes drives innovation.');
+  var salesBoost = new PermStatBoost('s1', 2, 'record_voice_over', 10, 'Creativity Webinars', 'Add a <b>%percent</b> bonus to the earnings of your <b>Sales Hotshots</b>.', 'I love titration, yeah, that’s not a problem.');
+  var emailBoost = new PermStatBoost('s2', 2, 'record_voice_over', 5, 'Inbox Immersion Inculcation', 'Add a <b>%percent</b> bonus to the value of your <b>Emails</b>.', 'Th- This is my hole! It was made for me!');
+  var managerBoost = new PermStatBoost('m1', 3, 'trending_down', 10, 'Dunning-Kruger Seminars', 'Add a <b>%percent</b> bonus to the earnings of your <b>Middle Managers</b>.', 'Every manager is a baffled dictator.');
+  var electionBoost = new PermStatBoost('m2', 3, 'trending_down', 5, 'Leadership Coaching', 'Add a <b>%percent</b> bonus to the value of all <b>Elections</b>, win or lose.', 'Stiffen up, you ornery duffer.');
+  //var acqWorkerBoost = new PermStatBoost('m2', 3, 'trending_down', 5, 'Leadership Coaching', 'Add a <b>%percent</b> bonus to the value of all <b>Elections</b>, win or lose.', 'Stiffen up, you ornery duffer.');
+  var cLevelBoost = new PermStatBoost('c1', 4, 'lightbulb_outline', 10, 'Vision Symposiums', 'Add a <b>%percent</b> bonus to the earnings of your <b>C-Levels</b>.', 'They have worked their way to the top by their own abilities...');
+  var investmentBoost = new PermStatBoost('c2', 4, 'lightbulb_outline', 5, 'Messianic Exercises', 'Add a <b>%percent</b> bonus to the value of your <b>Investments</b>.', 'WHEN COFFEEE MAN RUN!?!?');
+  var blueBloodBost = new PermStatBoost('b1', 5, 'local_bar', 10, 'Inspirational Mentoring', 'Add a <b>%percent</b> bonus to the earnings of your <b>Blue Bloods</b>.', 'Showing average people how to do the work of superior people.');
+  var acquisitionBoost = new PermStatBoost('b2', 5, 'local_bar', 5, 'Elite Supervisory Education', 'Add a <b>%percent</b> bonus to the value of your <b>Acquisitions</b>.', 'I can hire one half of the working class to kill the other half.');
+  var copBoost = new PermStatBoost('cop1', 6, 'security', 10, 'Tueller Drills', 'Add a <b>%percent</b> bonus to the earnings of your <b>Privatized Cops</b>.', 'I support our boots stamping on a human face &mdash; forever.');
+  var outgoingBoost = new PermStatBoost('cop2', 6, 'security', 5, 'Escalation Tactics', 'Add a <b>%percent</b> bonus to the value of your <b>Outgoing Emails</b>.', "I... shot a kid.");
+  var politicianBoost = new PermStatBoost('pol1', 7, 'account_balance', 10, 'Community Outreach', 'Add a <b>%percent</b> bonus to the earnings of your <b>Pocket Politicians</b>.', 'Streets don\'t fail me now.');
+  var achievementBoost = new PermStatBoost('pol2', 7, 'account_balance', 1, 'Relatability Exercises', 'Add a <b>%percent</b> bonus to the value of your <b>Achievements</b>.', 'The amazing thing is, that basketball ring in Indiana...');
+  var mercenaryBoost = new PermStatBoost('merc1', 8, 'my_location', 10, 'Last Stand Tactics', 'Add a <b>%percent</b> bonus to the earnings of your <b>Mercenary Groups</b>.', 'Well, nobody died in Watergate.');
+  var clickBoost = new PermStatBoost('merc2', 8, 'my_location', 5, 'Killology Reorientation', 'Add a <b>%percent</b> bonus to the value of your <b>Manual Clicks</b>.', 'No hope, just folded flags.');
+  var clientStateBoost = new PermStatBoost('cl1', 9, 'location_city', 10, 'Privatization Workshops', 'Add a <b>%percent</b> bonus to the earnings of your <b>Client States</b>.', 'In this way and only this way are new worlds born.');
+  var trainingBoost = new PermStatBoost('cl2', 9, 'location_city', 1, 'American Schooling', 'Add a <b>%percent</b> bonus the <b>Next Training Bonus</b> of every employee.', 'Libertad, Paz y Fraternidad.');
+  var shadowGovernmentBoost = new PermStatBoost('sh1', 10, 'visibility', 10, 'Dark Cosmic Guidance', 'Add a <b>%percent</b> bonus to the earnings of your <b>Shadow Governments</b>.', 'Behold a pale horse...');
+  var nextBankruptcyBoost = new PermStatBoost('sh2', 10, 'visibility', 1, 'New Chronology Instruction', 'Add a <b>%percent</b> bonus to your <b>Next Bankruptcy Bonus</b>.', 'And with stranger aeons, even death may die.');
+  var puppetmasterBoost = new PermStatBoost('pm1', 11, 'whatshot', 10, 'Ominous Mystagogy', 'Add a <b>%percent</b> bonus to the earnings of your <b>Puppetmasters</b>.', 'This is the second death.');
+  var mysteryBoost = new PermStatBoost('pm2', 11, 'whatshot', 10, 'Down the Rabbit Hole', 'Send a <b>%percent</b> bonus straight into an unknowable void.', 'Where we go one, we go all');
+
+  var careerUpgrades = ko.observableArray([
+    internBoost,
+    textBoost,
+    wageSlaveBoost,
+    rdBoost,
+    salesBoost,
+    emailBoost,
+    managerBoost,
+    electionBoost,
+    cLevelBoost,
+    investmentBoost,
+    blueBloodBost,
+    acquisitionBoost,
+    copBoost,
+    outgoingBoost,
+    politicianBoost,
+    achievementBoost,
+    mercenaryBoost,
+    clickBoost,
+    clientStateBoost,
+    trainingBoost,
+    shadowGovernmentBoost,
+    nextBankruptcyBoost,
+    puppetmasterBoost,
+    mysteryBoost
+  ]);
+
+    var mysteryBoostResults = new MysteryBoostHandler();
+
+  function MysteryBoostHandler() {
+    this.crypticEmailsUnlocked = ko.observable(false);
+    this.extraInvestmentUnlocked = ko.observable(false);
+
+    this.results = ko.computed(function() {
+      if (mysteryBoost.level() >= 5) { this.extraInvestmentUnlocked(true); }
+      if (mysteryBoost.level() >= 10) { this.crypticEmailsUnlocked(true); } 
+    }, this);
+  }
+
+  var totalSimultaneousInvestmentsAllowed = new Stat('Simultaneous Investments Allowed', ko.computed(function() {
+      return simultaneousInvestments.val() + (mysteryBoostResults.extraInvestmentUnlocked() ? 1 : 0);
+  }, this));
 	  
 	  var baseDPSMod = new Stat('Total Mod to Cash Per Second', ko.computed(function() {
       var achievementDPSPercentage = (achievementCount ? achievementCount.val() : 0) * achievementBonusRate.val();
+      achievementDPSPercentage += achievementDPSPercentage * (achievementBoost.total.val() / 100);
       var unitCountDPSPercentage = unitCount.val() * unitCountBonusRate.val();
       var timePlayedPercentage = hoursPlayedAllTime() * (timePlayedBonusRate.val());
-      return overallDPSPercentage.val() + achievementDPSPercentage + unitCountDPSPercentage + timePlayedPercentage;
+      return overallDPSPercentage.val() + achievementDPSPercentage + unitCountDPSPercentage + timePlayedPercentage + mysteryBoost.total.val();
     }, this), null, '%');
     
     var pendingInvestmentCount = new Stat('Investments Waiting to Cash Out', ko.computed(function() {
@@ -250,20 +375,19 @@ var game = (function() {
   var clientDescription = "<p>The burgeoning <b>Client State</b> provides the life-blood of your business, supplying labor and resources at prices your own borders could never match.</p><p>There may be death squads in power, but that's the price you have to pay for a business-friendly environment that doesn't frown upon the execution of political agitators</p>";
   var shadowDescription = "<p>The mysterious <b>Shadow Government</b> is the secret benefactor of your business, encouraging social discord and diminishing cultures as they please.</p><p>While not all believe they exist, true leaders such as yourself know that a once-great populace disarmed and hamstrung by political correctness is ripe for exploitation.</p>";
   var puppetDescription = "<p>The omniscient <b>Puppetmaster</b> is the primordial lizard-brain of your business, unspeakably powerful, hailing from a time beyond memory.</p><p>They may look and sound like any of us, but they travel in elite circles: tycoons and magnates, dignitaries and politicians, all gathered in hoods and masks to perform unspeakable horrors in the hidden basements of pizza parlors.</p>";
-  var units = ko.observableArray([
-        new Unit("0", "Interns", "accessibility", 15, 0.1, internDescription, "They have nothing to lose but their chains."),
-        new Unit("1", "Wage Slaves", "work", 100, 1, wageDescription, "Once when I was a child, I almost drowned. It's just like that feeling."),
-        new Unit("2", "Sales Hotshots", "record_voice_over", 1200, 6, salesDescription, "If a man's not a success, he's got no one to blame but himself."),
-        new Unit("3", "Middle Managers", "trending_down", 14400, 36, managerDescription, "More gods, more masters."),
-        new Unit("4", "C-Levels", "lightbulb_outline", 172800, 216, clevelDescription, "A million dollars isn't cool. You know what's cool? A billion dollars."),
-        new Unit("5", "Blue Bloods", "local_bar", 2073600, 1296, blueDescription, "Every war but class war."),
-        new Unit("6", "Privatized Cops", "security", 24883200, 7776, copDescription, "Did you say, 'Officer, I am not resisting you?'"),
-        new Unit("7", "Pocket Politicians", "account_balance", 298598400, 46656, politicianDescription, "It merely required no character."),
-        new Unit("8", "Mercenary Groups", "my_location", 3583180800, 279936, mercDescription, "Q. And Babies? A. And Babies."),
-        new Unit("9", "Client States", "location_city", 42998169600, 1679616, clientDescription, "Nutmeg is not the question."),
-        new Unit("10", "Shadow Governments", "visibility", 515978035200, 10077696, shadowDescription, "Now, we can see a new world coming into view."),
-        new Unit("11", "Puppetmasters", "whatshot", 6191736422400, 60466176, puppetDescription, "Hear ye, the doctor has seen Nautulius.")
-	]);
+  
+  units.push(new Unit("0", "Interns", "accessibility", 15, 0.1, internDescription, "They have nothing to lose but their chains.", internBoost));
+  units.push(new Unit("1", "Wage Slaves", "work", 100, 1, wageDescription, "Once when I was a child, I almost drowned. It's just like that feeling.", wageSlaveBoost));
+  units.push(new Unit("2", "Sales Hotshots", "record_voice_over", 1200, 6, salesDescription, "If a man's not a success, he's got no one to blame but himself.", salesBoost));
+  units.push(new Unit("3", "Middle Managers", "trending_down", 14400, 36, managerDescription, "More gods, more masters.", managerBoost));
+  units.push(new Unit("4", "C-Levels", "lightbulb_outline", 172800, 216, clevelDescription, "A million dollars isn't cool. You know what's cool? A billion dollars.", cLevelBoost));
+  units.push(new Unit("5", "Blue Bloods", "local_bar", 2073600, 1296, blueDescription, "Every war but class war.", blueBloodBost));
+  units.push(new Unit("6", "Privatized Cops", "security", 24883200, 7776, copDescription, "Did you say, 'Officer, I am not resisting you?'", copBoost));
+  units.push(new Unit("7", "Pocket Politicians", "account_balance", 298598400, 46656, politicianDescription, "It merely required no character.", politicianBoost));
+  units.push(new Unit("8", "Mercenary Groups", "my_location", 3583180800, 279936, mercDescription, "Q. And Babies? A. And Babies.", mercenaryBoost));
+  units.push(new Unit("9", "Client States", "location_city", 42998169600, 1679616, clientDescription, "Nutmeg is not the question.", clientStateBoost));
+  units.push( new Unit("10", "Shadow Governments", "visibility", 515978035200, 10077696, shadowDescription, "Now, we can see a new world coming into view.", shadowGovernmentBoost));
+  units.push(new Unit("11", "Puppetmasters", "whatshot", 6191736422400, 60466176, puppetDescription, "Hear ye, the doctor has seen Nautulius.", puppetmasterBoost));
     
     var totalDPS = new Stat('Cash Earned Per Second', ko.computed(function() {
 	    var cps = 0;
@@ -304,7 +428,8 @@ var game = (function() {
     var earnedPerClick = new Stat('Cash Earned Per Click', ko.computed(function() {
       var baseVal = 1 + ((manualClickDPSPercentage.val() / 100) * totalDPS.val());
       var currentWindfallMult = isWindfall() ? windfallMultiplier.val() : 1;
-      return (baseVal * Math.pow(2, manualClickMultiplier.val())) * currentWindfallMult;
+      var total = (baseVal * Math.pow(2, manualClickMultiplier.val())) * currentWindfallMult;
+      return total + (total * (clickBoost.total.val() / 100));
     }, this), '$');
     
     var unitsUnlocked = new Stat('Employee Types Available', ko.computed(function() {
@@ -319,28 +444,86 @@ var game = (function() {
       }).length;
     }, this));
 
+    var trainingsCanAfford = ko.computed(function() {
+      if (viewingTab() === 'store' && isTrainingView()) {
+        var sorted = units.slice().sort(function(left, right) {
+          return left.trainingCost.val() === right.trainingCost.val() ? 0
+            : left.trainingCost.val() < right.trainingCost.val() ? -1
+            : 1;
+        });
+
+        var total = 0;
+        var affordable = [];
+        for (var i = 0; i < sorted.length; i++) {
+          if (!sorted[i].trainingActive() && !sorted[i].trainingFinished() && sorted[i].available()) {
+            total += sorted[i].trainingCost.val();
+            if (total <= currentCashSlowed()) {
+              affordable.push(sorted[i].id);
+            }
+          }
+        }
+
+        return affordable;
+      } else {
+        return 0;
+      }
+    }, this);
+
+    var multiTrain = function() {
+      var list = trainingsCanAfford().slice();
+      for (var i = 0; i < list.length; i++) {
+        getUnit(list[i]).train();
+      }
+    }
+
+    var finishAllTrainings = function() {
+      for (var j = 0; j < units().length; j++) {
+        if (units()[j].trainingFinished()) {
+          units()[j].finishTraining();
+        }
+      }
+    }
+
+    var baseNextBankruptcyBonus = ko.computed(function() {
+      return (Math.pow(totalCashSlowed.val(), (1 / 5)) / 100) - 2.1;
+    }, this);
+
     var nextBankruptcyBonus = new Stat('Next Bankruptcy Multiplier', ko.computed(function() {
-      var val = (Math.pow(totalCash.val(), (1 / 5)) / 100) - 2.1;
-      return val > 0 ? val : 0;
+      var val = baseNextBankruptcyBonus();
+      var total = (val > 0 ? val : 0) + additionalBankruptcyBonus.val();
+      return total + (total * (nextBankruptcyBoost.total.val() / 100));
     }, this), null, null, true, null, 'The <b>Next Bankruptcy Multiplier</b> will be added to your current <b>Bankruptcy Multiplier</b> when you declare bankruptcy.');
+
+    var nextBankruptcySeminars = new Stat('Seminars Earned at Next Bankruptcy', ko.computed(function() {
+      return Math.floor(nextBankruptcyBonus.val() / 100);
+    }, this), null, null, true, null, 'The <b>Seminars Earned at Next Bankruptcy</b> will be added to your current <b>Training Seminars</b> when you declare bankruptcy.');
+
+    var crypticMailChance = new Stat('Cryptic Mail Chance', ko.computed(function() {
+      var base = 2 + mysteryBoost.total.val() / 200;
+      return base < 5 ? base : 5;
+    }, this), null, '%');
 
     var locked = ko.computed(function() {
       return {
         mail: totalDPS.val() < 100,
-        investments: totalCash.val() < 100000000, // 100 million
-        research: totalCash.val() < 100000000000, // 100 billion
-        acquisitions: totalCash.val() < 1000000000000000000, // 1 quintillion
-        bankruptcy: totalCash.val() < 1000000000000, // 1 trillion
-        outgoingMail: totalCash.val() < 1000000000000000000000, // 1 sextillion
+        investments: totalCashSlowed.val() < 100000000, // 100 million
+        research: totalCashSlowed.val() < 100000000000, // 100 billion
+        acquisitions: totalCashSlowed.val() < 1000000000000000000, // 1 quintillion
+        bankruptcy: totalCashSlowed.val() < 1000000000000, // 1 trillion
+        outgoingMail: totalCashSlowed.val() < 1000000000000000000000, // 1 sextillion
+        elections: totalCashSlowed.val() < 1000000000000000000000000000, // 1 octillion
         emailAway: emailAway.val() > 0,
         policyAway: policyAway.val() > 0,
-        chatAway: chatAway.val() > 0
+        chatAway: chatAway.val() > 0,
+        windfallGuarantee: !enableWindfallGuarantee() || windfallGuarantee.val() <= 0,
+        electionNotifications: electionNotifications.val() > 0,
+        careerDev: trainingSeminars.val() === 0 && seminarsUsed.val() === 0
       }
     }, this);
     
     // Empty objects to be populated when opening modals
-    var selectedUnit = new Unit();
-    var selectedUpgrade = new Upgrade();
+    var selectedUnit = ko.observable();
+    var selectedUpgrade = ko.observable();
     var selectedAcquisitionWorker = ko.observable();
 	
     /**
@@ -364,7 +547,11 @@ var game = (function() {
         new UnitUpgrade('u07', 'Out-of-Town Scabs', 0, 415000000000, "And to you, solidarity's a four-letter word."), // 150
         new UnitUpgrade('u08', 'Pinkerton Reinforcements', 0, 16000000000000, "They never sleep."), // 175
         new UnitUpgrade('u09', '168-Hour Work Weeks', 0, 450000000000000, "Think of the economic possibilities for our grandchildren."), // 200
+        new UnitUpgrade('u09.1', 'Burnt Tent Camps', 0, 490000000000000000, "We are getting along friendly enough here in this mine."), // 250
+        new UnitUpgrade('u09.2', 'Execution of Agitators', 0, 5.8e+23, "Don\'t organize, mourn!"), // 350
         new UnitUpgrade('u010', 'The Death Special', 0, 620000000000000000000000000, "Courtesy of the Colorado Fuel & Iron Company."), // 400
+        new UnitUpgrade('u011', 'Improvised Bombs', 0, 6.7e+29, "Thank you to the Logan County Coal Operators Association."), // 450
+        new UnitUpgrade('u012', 'Strong Constitutions', 0, 7.3e+32, "In the end, bayonets always win."), // 500
 
         // WAGE SLAVE
         new UnitUpgrade('u10', 'Family Photos', 1, 1000, "Do it for her."), // 1
@@ -377,7 +564,11 @@ var game = (function() {
         new UnitUpgrade('u17', 'Massive Layoffs', 1, 2750000000000, "I hope your firings go really, really well."), // 150
         new UnitUpgrade('u18', 'Frozen Pensions', 1, 105000000000000, "These phantom stocks are truly ethereal."), // 175
         new UnitUpgrade('u19', 'Suicide Nets', 1, 3000000000000000, "Don't forget the Standard Perpetuity Clause."), // 200
-        new UnitUpgrade('u120', 'The People\'s Stick', 1, 41000000000000000000000000, "A firm reminder to remain gainfully employed."), // 400
+        new UnitUpgrade('u19.1', 'Stress Management', 1, 3200000000000000000, "Management calls this technique 'Karōshi.'"), // 250
+        new UnitUpgrade('u19.2', 'Mental Breakdowns', 1, 3.8e+24, "I got some bad ideas in my head."), // 350
+        new UnitUpgrade('u120', 'The People\'s Stick', 1, 4.1e+27, "A firm reminder to remain gainfully employed."), // 400
+        new UnitUpgrade('u121', 'Diminished Opportunities', 1, 4.5e+30, "...the things are behind the bars, and the man is outside."), // 450
+        new UnitUpgrade('u122', 'Defeated Resignation', 1, 4.9e+33, "See you, either in Hell, or at work."), // 500
 
         // SALES HOTSHOT
         new UnitUpgrade('u20', 'Extra Phones', 2, 30000, "The phone, the phone, where's the fucking phone?"),
@@ -387,6 +578,8 @@ var game = (function() {
         new UnitUpgrade('u24', 'Divorce Papers', 2, 30000000000, "Not great, Bob."),
         new UnitUpgrade('u25', 'Liver Failure', 2, 33000000000000, "I got that grave plot - it's right off the highway."),
         new UnitUpgrade('u26', 'Sincere Condolences', 2, 35000000000000000, "We're free and clear. We're Free."),
+        new UnitUpgrade('u27', 'Life Insurance Payouts', 2, 39000000000000000000, "Hoping for a high CLV."),
+        new UnitUpgrade('u28', 'The Coldest Calls', 2, 4.6e+25, "When all the leads have gone dark."),
 
         // MIDDLE MANAGER
         new UnitUpgrade('u30', "Team-Building Exercises", 3, 360000, "Teamwork. It keeps our employees gruntled."),
@@ -396,6 +589,8 @@ var game = (function() {
         new UnitUpgrade('u34', "Tense & Silent Meetings", 3, 365000000000, "I want people to be afraid of how much they love me."),
         new UnitUpgrade('u35', "Screaming Sessions", 3, 400000000000000, "You call yourselves junior executives?"),
         new UnitUpgrade('u36', "Public Shaming", 3, 430000000000000000, "It's just the work of a few bad apples."),
+        new UnitUpgrade('u37', "Upward Ambition", 3, 470000000000000000000, "Somewhere there was something better for him..."),
+        new UnitUpgrade('u38', "Sharpened Saws", 3, 5.5e+26, "Efficiency in climbing the ladder of success."),
         
         // C-LEVEL
         new UnitUpgrade('u40', "More Vision", 4, 4250000, "Last time, last year - not so good. But now, this is the truth."),
@@ -405,6 +600,8 @@ var game = (function() {
         new UnitUpgrade('u44', "Overcooked Books", 4, 4500000000000, "Straight from the WorldCom School of Record-Keeping."),
         new UnitUpgrade('u45', "Catastrophic Bailouts", 4, 4750000000000000, "It's a TARP!"),
         new UnitUpgrade('u46', "Golden Parachutes", 4, 5200000000000000000, "The captain never goes down with the ship."),
+        new UnitUpgrade('u47', "Reductions in Force", 4, 5.6e+21, "Things have gone south. It won't end well."),
+        new UnitUpgrade('u48', "Corporate Dissolution", 4, 6.6e+27, "An executive rises like a phoenix from the ashes."),
         
         // BLUE BLOOD
         new UnitUpgrade('u50', "Inheritance", 5, 52000000, "What do you mean, 'you didn't build that?'"),
@@ -414,6 +611,8 @@ var game = (function() {
         new UnitUpgrade('u54', "Absentee Landlordism", 5, 5300000000000, "ATTENTION ANTI-RENTERS! AWAKE! AROUSE!"),
         new UnitUpgrade('u55', "Aggressive Debt Collection", 5, 57000000000000000, "Standing strong against the murderous, thieving hordes of peasants."),
         new UnitUpgrade('u56', "Vicious Litigation", 5, 62000000000000000000, "My judgement was that Mr. Hogan deserved to have his day in court."),
+        new UnitUpgrade('u57', "Massive Trust Funds", 5, 6.7e+22, "You can rely on the old man's money."),
+        new UnitUpgrade('u58', "Pure Bloodlines", 5, 7.9e+28, "This is our CEO, Charles the Bewitched."),
         
         // PRIVATIZED COP
         new UnitUpgrade('u60', "Community Policing", 6, 625000000, "Can we all get along?"),
@@ -423,6 +622,8 @@ var game = (function() {
         new UnitUpgrade('u64', "Extra-Judicial Killings", 6, 635000000000000, "...it looks like a demon, that’s how angry he looked."),
         new UnitUpgrade('u65', "All-White Juries", 6, 690000000000000000, "The smell of marijuana made him fear for his life."),
         new UnitUpgrade('u66', "Universal Acquittal", 6, 745000000000000000000, "The guilty don't feel guilty, they learn not to."),
+        new UnitUpgrade('u67', "Rougher Rides", 6, 8.1e+23, "They had him folded up like he was a crab..."),
+        new UnitUpgrade('u68', "Reliable Witnesses", 6, 9.5e+29, "They found a flaw in me and then they made up a nexus."),
         
         // POCKET POLITICIAN
         new UnitUpgrade('u70', "Attack Ads", 7, 75000000000, "Sponsored by the Swift Boat Veterans for Truth."),
@@ -432,6 +633,8 @@ var game = (function() {
         new UnitUpgrade('u74', "Trickle-Down Economics", 7, 7500000000000000, "All boats will be lifted by rapidly rising sea levels."),
         new UnitUpgrade('u75', "Mass Incarceration", 7, 8250000000000000000, "They're trying to build a prison for you and me to live in."),
         new UnitUpgrade('u76', "Complete Deregulation", 7, 9e+21, "A much more urgent problem is to protect the consumer from the government."),
+        new UnitUpgrade('u77', "Flag Lapel Pins", 7, 9.7e+24, "Don't fly those stripes, those stars-and-stripes for me."),
+        new UnitUpgrade('u78', "Teflon-Coated Candidates", 7, 1.15e+31, "He sees to it that nothing sticks to him."),
         
         // MERCENARY GROUP
         new UnitUpgrade('u80', "Postcards Home", 8, 90000000000, "Greetings from Nisour Square!"),
@@ -441,6 +644,8 @@ var game = (function() {
         new UnitUpgrade('u84', "Collateral Damage", 8, 90000000000000000, "Life is plentiful. Life is cheap in the Orient."),
         new UnitUpgrade('u85', "Whiter Phosphorous", 8, 100000000000000000000, "Don't worry, it's only for signaling and smoke screening."),
         new UnitUpgrade('u86', "Scorched Earth Policies", 8, 1.07e+23, "Nuke the site from orbit. It's the only way to be sure."),
+        new UnitUpgrade('u87', "Indiscriminate Firebombing", 8, 1.2e+26, "There are no civilians in Japan."),
+        new UnitUpgrade('u88', "Home Front Support", 8, 1.4e+32, "These mandatory pre-game group rites of submission..."),
         
         // CLIENT STATE 
         new UnitUpgrade('u90', "Sweat Shops", 9, 1100000000000, "The unavoidable cost of Mrs. Gifford's Global Fashion."),
@@ -450,6 +655,8 @@ var game = (function() {
         new UnitUpgrade('u94', "Political Executions", 9, 1100000000000000000, "A resounding PBSUCCESS!"),
         new UnitUpgrade('u95', "Roving Death Squads", 9, 1.2e+21, "Top of their class at the School of the Americas."),
         new UnitUpgrade('u96', "Very Free Markets", 9, 1.3e+24, "Making the world safe for austerity."),
+        new UnitUpgrade('u97', "The Dirtiest Wars", 9, 1.4e+27, "Better dead than red."),
+        new UnitUpgrade('u98', "Operation Condor", 9, 1.65e+33, "It is barely conceivable that there are people who like war."),
         
         // SHADOW GOVERNMENT
         new UnitUpgrade('u100', "Chem Trails", 10, 12900000000000, "Aluminum... ash... like you can smell the psychosphere."),
@@ -459,6 +666,8 @@ var game = (function() {
         new UnitUpgrade('u104', "MKUltra Sleeper Agents", 10, 13170000000000000000, "Slap my salami, the guy's a Commie."),
         new UnitUpgrade('u105', "Mass Gun Confiscation", 10, 1.4e+22, "From my cold, dead hands."),
         new UnitUpgrade('u106', "FEMA Internment Camps", 10, 1.5e+25, "Brownie, you're doing a heck of a job."),
+        new UnitUpgrade('u107', "Increased Soros Funding", 10, 1.7e+28, "Laundered through the Antifa war chest."),
+        new UnitUpgrade('u108', "Weather Control Sites", 10, 2e+34, "Angels Don't Play This HAARP."),
         
         // PUPPETMASTER 
         new UnitUpgrade('u110', "Secret Handshakes", 11, 150000000000000, "Weaving spiders come not here."),
@@ -468,6 +677,8 @@ var game = (function() {
         new UnitUpgrade('u114', "One World Unity Army", 11, 160000000000000000000, "Blood for the blood god! Skulls for the Skull Throne!"),
         new UnitUpgrade('u115', "Supranational Currency", 11, 1.7e+23, "The Euro so cometh as a thief in the night."),
         new UnitUpgrade('u116', "Jahbulon's Dominion", 11, 1.9e+26, "I have tasted the flesh of fallen angels!"),
+        new UnitUpgrade('u117', "Chariots of the Gods", 11, 2e+29, "Tekeli-li! Tekeli-li!"),
+        new UnitUpgrade('u118', "The Ten-Horned Beast", 11, 2.3e+35, "The little horn of capital rises from the sea."),
 
         // ID, Name, unlocking unit, price, flavor - (Math.pow(1.15, NUM) * BASE_PRICE) * 50
         new SpecialUnitUpgrade('su00', false, 'Daily Lunch Pick-Up', 2, 215000000, 'I don\'t like pulp. No pulp. Pulp isn\'t juice. All juice, OK?'),
@@ -493,19 +704,42 @@ var game = (function() {
         new SpecialUnitUpgrade('su19', true, 'Cultural Marxism', 11, 1200000000000000000000, 'As Orwell said: Beware the cuck PC leftist thought police.'), // puppet
         
         // Symbiotic Upgrade (id, name, units, price, flavor) - price is (Math.pow(1.15, NUM) * BASE_PRICE) * 100
-        new SymbioticUpgrade('symb1', 'Closed-Door Meetings', [{ id: 3, mod: 6}, { id: 4, mod: 5}], 668000000000000, 'To determine exactly which hill shit will roll down.'),
-        new SymbioticUpgrade('symb2', 'Additional Buses', [{ id: 3, mod: 6}, { id: 4, mod: 5}], 724000000000000000, 'Under which many will be thrown.'),
-        new SymbioticUpgrade('symb3', 'Hostile Architecture', [{ id: 5, mod: 5}, { id: 6, mod: 5}, { id: 7, mod: 4}], 1200000000000000000, 'I feel safe behind the electric fences around Fiddler\'s Green.'),
-        new SymbioticUpgrade('symb4', 'Militarized Riot Control', [{ id: 5, mod: 5}, { id: 6, mod: 5}, { id: 7, mod: 4}], 1.25e+21, 'The absolute best in less-than-lethal collective punishment.'),
-        new SymbioticUpgrade('symb5', 'Deeper Mass Graves', [{ id: 8, mod: 3}, { id: 9, mod: 2}], 165000000000000000000, 'They\'re not dead, they\'re just los desaparecidos.'),
-        new SymbioticUpgrade('symb6', 'Full Sea Drainage', [{ id: 8, mod: 3}, { id: 9, mod: 2}], 1.8e+23, 'The guerrilla must move amongst the people as a fish swims in the sea.'),
-        new SymbioticUpgrade('symb7', 'Black Helicopters', [{ id: 10, mod: 2}, { id: 11, mod: 1.5}], 2.4e+22, 'I keep M69 cluster bombs and depleted uranium shells for home defense.'),
-        new SymbioticUpgrade('symb8', 'Esoteric Monoliths', [{ id: 10, mod: 2}, { id: 11, mod: 1.5}], 2.6e+25, 'Engraved with instructions on post-apocalyptic small business management.'),
-        new SymbioticUpgrade('symb9', 'Boundless Advertising', [{ id: 2, mod: 18}, { id: 3, mod: 6}], 2.15e+21, 'THIS IS YOUR GOD.'),
-        new SymbioticUpgrade('symb10', 'Divine Mandates', [{ id: 4, mod: 5}, { id: 5, mod: 4}], 3.1e+23, 'L\'état, c\'est nous.'),
-        new SymbioticUpgrade('symb11', 'Late-Night Raids', [{ id: 6, mod: 4}, { id: 7, mod: 3}], 5.35e+26, 'No Quarter for Wild Beasts'),
-        new SymbioticUpgrade('symb12', 'Right-Wing Guerillas', [{ id: 8, mod: 3}, { id: 9, mod: 2}], 7.71e+26, 'They are the moral equal of our Founding Fathers.'),
-        new SymbioticUpgrade('symb13', 'Casus Belli', [{ id: 10, mod: 2}, { id: 11, mod: 1}], 8e+27, 'We must eliminate that threat now, before it is too late.'),
+        new SymbioticUpgrade('nsymb0', 'Inspiring Listicles', [{ id: 2, mod: 4}, { id: 3, mod: 4}], 48000000000000000, '10 Things Rich People Do Every Day.'),
+        new SymbioticUpgrade('nsymb00', 'Tomes of Wisdom', [{ id: 2, mod: 4}, { id: 3, mod: 4}], 52000000000000000, 'Finally I can win friends and influence people.'),
+        new SymbioticUpgrade('nsymb9', 'Boundless Advertising', [{ id: 2, mod: 4}, { id: 3, mod: 4}], 57000000000000000000, 'THIS IS YOUR GOD.'),
+        new SymbioticUpgrade('nsymb9.1', 'Viral Marketing', [{ id: 2, mod: 2}, { id: 3, mod: 2}], 6.2e+22, 'Positively False - Exposing the Myths Around Marketing.'),
+        new SymbioticUpgrade('nsymb15', 'Kaizen Blitzkrieg', [{ id: 2, mod: 2}, { id: 3, mod: 2}], 6.7e+25, 'Improving processes through a battle of annihilation.'),
+        new SymbioticUpgrade('nsymb15.1', 'Cosmic Funnels', [{ id: 2, mod: 2}, { id: 3, mod: 2}], 7.2e+28, 'Converts all matter into leads.'),
+
+        new SymbioticUpgrade('nsymb1', 'Closed-Door Meetings', [{ id: 4, mod: 3.5}, { id: 5, mod: 3.5}], 7000000000000000, 'To determine exactly which hill shit will roll down.'),
+        new SymbioticUpgrade('nsymb2', 'Additional Buses', [{ id: 4, mod: 3.5}, { id: 5, mod: 3.5}], 7600000000000000000, 'Under which many will be thrown.'),
+        new SymbioticUpgrade('nsymb10', 'Divine Mandates', [{ id: 4, mod: 3.5}, { id: 5, mod: 3.5}], 8.2e+21, 'L\'état, c\'est nous.'),
+        new SymbioticUpgrade('nsymb10.1', 'Noblesse Oblige', [{ id: 4, mod: 1.5}, { id: 5, mod: 1.5}], 8.9e+24, '25 cents in the Red Kettle at Christmas.'),
+        new SymbioticUpgrade('nsymb16', 'Silver Spoons', [{ id: 4, mod: 1.5}, { id: 5, mod: 1.5}], 9.6e+27, 'The dignity of work is my measure of success.'),
+        new SymbioticUpgrade('nsymb16.1', 'Corporate Blóts', [{ id: 4, mod: 1.5}, { id: 5, mod: 1.5}], 1.04e+31, 'Sacred leaders require great sacrifices.'),
+        
+        new SymbioticUpgrade('nsymb3', 'Hostile Architecture', [{ id: 6, mod: 3}, { id: 7, mod: 3}], 1200000000000000000, 'I feel safe behind the electric fences around Fiddler\'s Green.'),
+        new SymbioticUpgrade('nsymb4', 'Militarized Riot Control', [{ id: 6, mod: 3}, { id: 7, mod: 3}], 1.25e+21, 'The absolute best in less-than-lethal collective punishment.'),
+        new SymbioticUpgrade('nsymb11', 'Late-Night Raids', [{ id: 6, mod: 3}, { id: 7, mod: 3}], 1.2e+24, 'No Quarter for Wild Beasts'),
+        new SymbioticUpgrade('nsymb11.1', 'Sermons on Mounds', [{ id: 6, mod: 1}, { id: 7, mod: 1}], 1.3e+27, 'If a man will not work, he shall not eat.'),
+        new SymbioticUpgrade('nsymb17', 'Prison-Industrialism', [{ id: 6, mod: 1}, { id: 7, mod: 1}], 1.4e+30, 'Every cop is a job creator!'), 
+        new SymbioticUpgrade('nsymb17.1', 'Ballots or Bullets', [{ id: 6, mod: 1}, { id: 7, mod: 1}], 1.5e+33, 'To land Plymouth Rock on everybody.'), 
+        
+        new SymbioticUpgrade('nsymb5', 'Deeper Mass Graves', [{ id: 8, mod: 2}, { id: 9, mod: 2}], 165000000000000000000, 'They\'re not dead, they\'re just los desaparecidos.'),
+        new SymbioticUpgrade('nsymb6', 'Full Sea Drainage', [{ id: 8, mod: 2}, { id: 9, mod: 2}], 1.8e+23, 'The guerrilla must move amongst the people as a fish swims in the sea.'),
+        new SymbioticUpgrade('nsymb12', 'Right-Wing Guerillas', [{ id: 8, mod: 2}, { id: 9, mod: 2}], 1.7e+26, 'They are the moral equal of our Founding Fathers.'),
+        new SymbioticUpgrade('nsymb12.1', 'Territorial Expansion', [{ id: 8, mod: 1}, { id: 9, mod: 1}], 1.84e+29, 'We have gone there to conquer, not to redeem.'),
+        new SymbioticUpgrade('nsymb18', 'Generalized AUMF', [{ id: 8, mod: 1}, { id: 9, mod: 1}], 2e+32, 'Swing low satellite, hot white chariot.'),
+        new SymbioticUpgrade('nsymb18.1', 'Coalitions of the Willing', [{ id: 8, mod: 1}, { id: 9, mod: 1}], 2.16e+35, 'Well, actually, he forgot Poland.'),
+        
+        new SymbioticUpgrade('nsymb7', 'Black Helicopters', [{ id: 10, mod: 1.5}, { id: 11, mod: 1.5}], 2.4e+22, 'I keep M69 cluster bombs and depleted uranium shells for home defense.'),
+        new SymbioticUpgrade('nsymb8', 'Esoteric Monoliths', [{ id: 10, mod: 1.5}, { id: 11, mod: 1.5}], 2.6e+25, 'Engraved with instructions on post-apocalyptic small business management.'),
+        new SymbioticUpgrade('nsymb13', 'Casus Belli', [{ id: 10, mod: 1.5}, { id: 11, mod: 1.5}], 2.5e+28, 'We must eliminate that threat now, before it is too late.'),
+        new SymbioticUpgrade('nsymb13.1', 'Majestic 12 Meetings', [{ id: 10, mod: 0.5}, { id: 11, mod: 0.5}], 2.7e+31, 'The truth is out there.'),
+        new SymbioticUpgrade('nsymb19', 'Project ARTICHOKE', [{ id: 10, mod: 0.5}, { id: 11, mod: 0.5}], 2.85e+34, 'At least you\'ll never be a vegetable.'),
+        new SymbioticUpgrade('nsymb19.1', 'Greater Tribulations', [{ id: 10, mod: 0.5}, { id: 11, mod: 0.5}], 3.1e+37, 'Little children, it is the last hour.'),
+        
+        new SymbioticUpgrade('nsymb14', 'Worker Solidarity', [{ id: 0, mod: 3}, { id: 1, mod: 3}], 2e+34, 'Without our brain and muscle, not a single wheel can turn.'),
 
         // Lawyer Upgrades
         new OneUnitCountUpgrade('one1', 'Public Defenders', 0, 1, 600000000000000000000, 'The proceedings gradually merge into the judgement.'),
@@ -519,6 +753,7 @@ var game = (function() {
         new OneUnitCountUpgrade('one9', 'Military Defense Attorneys ', 8, 1, 1.5e+29, 'Ensuring that justice is served for the Haditha massacre.'),
         new OneUnitCountUpgrade('one10', 'Extrajudicial Prosecutors', 9, 1, 1.75e+30, 'Most clients work for the Temara interrogation center.'),
         new OneUnitCountUpgrade('one11', 'Bureaucratic Law Clerks', 10, 1, 2e+31, 'Before the law sits a gatekeeper.'),
+        new OneUnitCountUpgrade('one12', 'Infernal Lawyers', 11, 1, 25e+31, 'No, I only set the stage. You pull your own strings.'),
 
         // Earned From Click upgrades - %, X, price
         new MClickUpgrade('m0', 'Bootstraps', 1, 1, 100, "Pull yourself up by them."),
@@ -548,6 +783,13 @@ var game = (function() {
         new StatUpgrade('wfl3', 'Huge Chattery Teeth', 'casino', windfallChance, 0.25, 1000000000000000000000, "Increase your chance of experiencing a <b>Windfall</b> on every <b>Manual Click</b>.", "Always ready to help you out of a tight spot."),
         new StatUpgrade('wfl4', 'A Silver Spoon', 'casino', windfallChance, 0.25, 10000000000000000000000000, "Increase your chance of experiencing a <b>Windfall</b> on every <b>Manual Click</b>.", "My father gave me a small loan of a million dollars."),
         
+        // Guaranteed Windfall Unlock
+        new StatUpgrade('gwf', 'Generational Wealth', 'lock_open', windfallGuarantee, 1, 10000000000000000000000, 'Unlock <b>Guaranteed Windfalls</b> to remove luck as a factor (can be toggled in settings).', 'I make my own luck.'),
+        new StatUpgrade('gwf1', 'Trust Fund Payouts', 'casino', windfallGrowthMultiplier, 0.5, 1000000000000000000000000000000, 'Increase the <b>Windfall Guarantee Rate</b> multiplier by <b>1</b>.', 'A better future for Matt, Tagg, Craig, Ben and Josh.'),
+        new StatUpgrade('gwf2', 'Inherited Job Roles', 'casino', windfallGrowthMultiplier, 0.5, 10000000000000000000000000000000, 'Increase the <b>Windfall Guarantee Rate</b> multiplier by <b>1</b>.', 'After many interviews, I happen to have chosen my son-in-law.'),
+        new StatUpgrade('gwf3', 'Parental Investments', 'casino', windfallGrowthMultiplier, 0.5, 1000000000000000000000000000000000, 'Increase the <b>Windfall Guarantee Rate</b> multiplier by <b>1</b>.', 'Special thanks to Jackie and Mike Bezos.'),
+        new StatUpgrade('gwf4', 'Zambian Emerald Mines', 'casino', windfallGrowthMultiplier, 0.5, 10000000000000000000000000000000000, 'Increase the <b>Windfall Guarantee Rate</b> multiplier by <b>1</b>.', 'Therefore, the money is most likely a simulation, because it exists.'),
+
         // Windfall Duration Upgardes
         new StatUpgrade('wfd1', 'Sacks with Dollar Signs', 'monetization_on', windfallDuration, 2, 10000000000, "Boost the duration of every <b>Windfall</b> by <b>2 seconds</b>.", "Waiting to be filled with shiny gold coins."),
         new StatUpgrade('wfd2', 'Reinforced Bank Vaults', 'monetization_on', windfallDuration, 2, 1000000000000000, "Boost the duration of every <b>Windfall</b> by <b>2 seconds</b>.", "Vulnerable only to dragging by muscle cars."),
@@ -559,7 +801,7 @@ var game = (function() {
         new StatUpgrade('wfm2', 'Baseless Optimism', 'monetization_on', windfallMultiplier, 5, 1000000000000000000, "Pump up your <b>Windfall Multiplier</b> by <b>5</b>.", "All is for the best in the best of all possible worlds."),
         new StatUpgrade('wfm3', 'Naive Resilience', 'monetization_on', windfallMultiplier, 5, 10000000000000000000000, "Pump up your <b>Windfall Multiplier</b> by <b>5</b>.", "If things are not failing, you are not innovating enough."),
         new StatUpgrade('wfm4', 'Protestant Work Ethic', 'monetization_on', windfallMultiplier, 5, 1000000000000000000000000000, "Pump up your <b>Windfall Multiplier</b> by <b>5</b>.", "I was born in a log cabin."),
-        
+
         // Idle Bonus Rate Upgrades
         new StatUpgrade('idle1', 'Executive Assistants', 'weekend', idleBonusRate, 0.001, 10000000, 'Slightly bump up the rate at which your <b>Idle Bonus Multiplier</b> increases.', 'For when you need Executive Outcomes.'),
         new StatUpgrade('idle2', 'Predatory Pricing', 'weekend', idleBonusRate, 0.001, 10000000000, 'Slightly bump up the rate at which your <b>Idle Bonus Multiplier</b> increases.', 'You\'re talking about the American way - survival of the fittest.'),
@@ -576,7 +818,7 @@ var game = (function() {
         new StatUpgrade('away3', 'Monopolized Industries', 'snooze', awayEarningRate, 5, 10000000000000, 'Increase your <b>Earning Rate While Away</b> by <b>5%</b>.', 'God gave me my money.'),
         new StatUpgrade('away4', 'Corporate Espionage', 'snooze', awayEarningRate, 5, 10000000000000000, 'Increase your <b>Earning Rate While Away</b> by <b>5%</b>.', 'It\'s called "The Landlord\'s Game," but if we change the name...'),
         new StatUpgrade('away5', 'Transparent Corruption', 'snooze', awayEarningRate, 5, 10000000000000000000, 'Increase your <b>Earning Rate While Away</b> by <b>5%</b>.', 'How about a juicy oil contract at Teapot Dome?'),
-        new StatUpgrade('away6', 'Colonial Hegemony', 'snooze', awayEarningRate, 5, 10000000000000000000000, 'Increase your <b>Earning Rate While Away</b> by <b>5%</b>.', 'I don\'t to see how maintaining a standing army is anti-competitive.'),
+        new StatUpgrade('away6', 'Colonial Hegemony', 'snooze', awayEarningRate, 5, 10000000000000000000000, 'Increase your <b>Earning Rate While Away</b> by <b>5%</b>.', 'I don\'t see how maintaining a standing army is anti-competitive.'),
         new StatUpgrade('away7', 'Full Global Conquest', 'snooze', awayEarningRate, 5, 10000000000000000000000000, 'Increase your <b>Earning Rate While Away</b> by <b>5%</b>.', 'When the conquest of bread just isn\'t enough.'),
 
         // Count upgrades - %, X, price
@@ -628,10 +870,16 @@ var game = (function() {
         new CountUpgrade('c22', 'Crude Coins', 250, 0, 1000000000000000000000000, "Paid to the Nigerian military to eliminate anti-Chevron protestors."),
         new CountUpgrade('c23', 'Dusty Coins', 250, 0, 10000000000000000000000000, "Left behind by Titan Corp contractors at Abu Ghraib."), 
         new CountUpgrade('c24', 'Bomb-Scorched Coins', 500, 0, 100000000000000000000000000, "Collected from the tunnels at No Gun Ri."), // 1 oct
-        new CountUpgrade('c25', 'Textile Coins', 500, 0, 1000000000000000000000000000, "Grabbed from the wreckage of the Ali Enterprises factory in Pakistan."), // 10 oct
+        new CountUpgrade('c25', 'Textile Coins', 500, 0, 1000000000000000000000000000, "Grabbed from the wreckage of the Ali Enterprises factory."), // 10 oct
         new CountUpgrade('c26', 'Time-Release Coins', 500, 0, 10000000000000000000000000000, "Fines paid by Purdue Pharma for reckless OxyContin marketing."), // 100 oct
         new CountUpgrade('c27', 'Military-Issue Coins', 1000, 0, 100000000000000000000000000000, "Used to fund the AC-130s over Azizabad."), // 1 nonillion
-        new CountUpgrade('c28', 'Declassified Coins', 1000, 0, 1000000000000000000000000000000, "Found between the pages of the KUBARK manual"), // 10 nonillion
+        new CountUpgrade('c28', 'Declassified Coins', 1000, 0, 1000000000000000000000000000000, "Found between the pages of the KUBARK manual."), // 10 nonillion
+        new CountUpgrade('c29', 'Prison Coins', 1000, 0, 10000000000000000000000000000000, "Bribes taken from Mid-Atlantic Youth Services Corp."), // 100 non
+        new CountUpgrade('c30', 'Pulpified Coins', 1500, 0, 100000000000000000000000000000000, "Pulled from the pockets of Dilawar of Yakubi in Bagram."), // 1 dec
+        new CountUpgrade('c31', 'Fashionable Coins', 1500, 0, 1000000000000000000000000000000000, "Savings passed on from H&M's child laborers in Myanmar."), // 10 dec
+        new CountUpgrade('c32', 'Blacklisted Coins', 1500, 0, 10000000000000000000000000000000000, "Payment for the hard work of the Phoenix Program."), // 100 dec
+        new CountUpgrade('c33', 'Disappearing Coins', 2000, 0, 100000000000000000000000000000000000, "Paid to hide the identities of Bush's ghost detainees."), // 1 undec
+        new CountUpgrade('c34', 'Checkpoint Coins', 2000, 0, 1000000000000000000000000000000000000, "Offered as a token apology for the Mahmudiyah killings."), // 10 undec
         
     new CountUpgrade('bk1', 'Seed Money', 50, 0, 500000000000, 'Mom and Dad are proud of the way you\'ve monetized human suffering.', null, 'stars'),
     new CountUpgrade('bk2', 'Venture Capital', 100, 0, 500000000000000, 'Courtesy of Shark Tank Season 25, hosted by Mohammed bin Salman.', null, 'stars'),
@@ -676,7 +924,10 @@ var game = (function() {
 		new UnitCountUpgrade('un6', 'Paramilitary Debt Collectors', 0.4, 25000000000000000, "On loan from Battalion 3-16."),
     new UnitCountUpgrade('un7', 'Black Site Debt Collectors', 0.5, 25000000000000000000, "I mean, these are terrorists for the most part."),
     new UnitCountUpgrade('un8', 'Odious Debt Collectors', 0.6, 25000000000000000000000, "Ensuring that lendees are only crushed by beneficial debts."),
-    new UnitCountUpgrade('un9', 'Righteous Debt Collectors', 1, 25000000000000000000000, "The ACLU's got to take a lot of blame for this."),
+    new UnitCountUpgrade('un9', 'Righteous Debt Collectors', 1, 25000000000000000000000000, "The ACLU's got to take a lot of blame for this."),
+    new UnitCountUpgrade('un10', 'Nuclear Debt Collectors', 2, 25000000000000000000000000000, "Anyway, we delivered the bomb."),
+    new UnitCountUpgrade('un11', 'Mercenary Debt Collectors', 3, 25000000000000000000000000000000, "Regular readers of Debt Collector of Fortune magazine."),
+    new UnitCountUpgrade('un12', 'Veteran Debt Collectors', 5, 25000000000000000000000000000000000, "Retirees from Tiger Force, mostly."),
 
 		// Updates the number of simultaneous investments allowed
     new InvestmentsAllowedUpgrade('ia1', "Semi-Qualified Stock Brokers", 1, 200000000000, "Business-wise, this all seems like appropriate business."),
@@ -692,11 +943,13 @@ var game = (function() {
     new InvestmentInterestUpgrade('ir5', 'Fully Primed Pumps', 10, 10000000000000000000000, 'Have you heard that expression used before? Because I haven\'t heard it.'),
     new InvestmentInterestUpgrade('ir6', '24-Hour Trading Exchanges', 10, 10000000000000000000000000, 'And the sun stood still, and the moon stayed, until the transactions had finished.'),
     new InvestmentInterestUpgrade('ir7', 'Total Financial Ouroboros', 10, 10000000000000000000000000000, 'If you buy all of your own stocks, you\'ll be rich.'),
-    
+    new InvestmentInterestUpgrade('ir8', 'Charts That Go Up', 10, 10000000000000000000000000000000, 'For all the points of the compass, there\'s only one direction.'),
+    new InvestmentInterestUpgrade('ir9', 'Exceptional & Rich Indexes', 10, 10000000000000000000000000000000000, 'Much better than Standard and Poor.'),
+
     // Increases the time bonus of all investments
-    new StatUpgrade('tb1', 'Inhuman Patience', 'access_time', timeBonusRate, 10, 5000000000000, "Increase the <b>Time Bonus Rate</b> of future <b>Investments</b> by <b>10%</b>.", "It's longer than you think, Dad! Longer than you think!"),
-    new StatUpgrade('tb2', 'Sisyphean Perseverance', 'access_time', timeBonusRate, 10, 5000000000000000000, "Increase the <b>Time Bonus Rate</b> of future <b>Investments</b> by <b>10%</b>.", "One must imagine the investors happy."),
-    new StatUpgrade('tb3', 'Novikovian Time Manipulation', 'access_time', timeBonusRate, 10, 5000000000000000000000000, "Increase the <b>Time Bonus Rate</b> of future <b>Investments</b> by <b>10%</b>.", "You are dealing with the oddity of time travel with the greatest of ease."),
+    new StatUpgrade('tb1', 'Inhuman Patience', 'access_time', timeBonusRate, 15, 5000000000000, "Increase the <b>Time Bonus Rate</b> of future <b>Investments</b> by <b>15%</b>.", "It's longer than you think, Dad! Longer than you think!"),
+    new StatUpgrade('tb2', 'Sisyphean Perseverance', 'access_time', timeBonusRate, 15, 5000000000000000000, "Increase the <b>Time Bonus Rate</b> of future <b>Investments</b> by <b>15%</b>.", "One must imagine the investors happy."),
+    new StatUpgrade('tb3', 'Novikovian Time Manipulation', 'access_time', timeBonusRate, 15, 5000000000000000000000000, "Increase the <b>Time Bonus Rate</b> of future <b>Investments</b> by <b>15%</b>.", "You are dealing with the oddity of time travel with the greatest of ease."),
     
     // Increase the payout bonus for very short (10 minute and under )investments
     new StatUpgrade('sb1', 'Insider Tips & Tricks', 'access_time', shortInvestmentBonus, 25, 20000000000, "Add <b>25%</b> to your <b>Short Investment Bonus</b> for investments under <b>10 minutes</b>.", "Like Ken Lay, you have to get out quick."),
@@ -710,18 +963,33 @@ var game = (function() {
     new StatUpgrade('risk4', 'Bihourly Safety Meetings', 'error_outline', riskReduction, 10, 10000000000000000000000, 'Reduce the <b>Catastrophic Risk</b> in your <b>Research</b> by an additional <b>10%</b>.', 'He\'s comin\' in. I feel safer already.'),
     new StatUpgrade('risk5', 'Full-Body Delousing', 'error_outline', riskReduction, 15, 10000000000000000000000000, 'Reduce the <b>Catastrophic Risk</b> in your <b>Research</b> by an additional <b>15%</b>.', 'Generally takes place in the comatorium.'),
     new StatUpgrade('risk6', 'Preventative Dental Extraction', 'error_outline', riskReduction, 15, 10000000000000000000000000000, 'Reduce the <b>Catastrophic Risk</b> in your <b>Research</b> by an additional <b>15%</b>.', 'The procedure includes a free Cinco Food Tube.'),
+    new StatUpgrade('risk7', 'Mandatory Nap Pods', 'error_outline', riskReduction, 15, 10000000000000000000000000000000, 'Reduce the <b>Catastrophic Risk</b> in your <b>Research</b> by an additional <b>15%</b>.', 'I ain\'t afraid of no bed.'),
+    new StatUpgrade('risk8', 'Daily Health Checkups', 'error_outline', riskReduction, 15, 10000000000000000000000000000000000, 'Reduce the <b>Catastrophic Risk</b> in your <b>Research</b> by an additional <b>15%</b>.', 'Birth control is not covered and the copay is $800.'),
+
+    // Increase value of R&D
+    new StatUpgrade('rd1', 'Bigger Ideas', 'new_releases', researchBonus, 25, 100000000000000, 'Increase the overall value of <b>R&D</b> by an additional <b>25%</b>.', 'What if a garbage man was actually smart?'),
+    new StatUpgrade('rd2', 'More Boxes', 'new_releases', researchBonus, 25, 100000000000000000, 'Increase the overall value of <b>R&D</b> by an additional <b>25%</b>.', 'Outside of which to think.'),
+    new StatUpgrade('rd3', 'STEM Education', 'new_releases', researchBonus, 25, 100000000000000000000, 'Increase the overall value of <b>R&D</b> by an additional <b>25%</b>.', 'If you could put the universe into a tube...'),
+    new StatUpgrade('rd4', 'IQ Experiments', 'new_releases', researchBonus, 25, 100000000000000000000000, 'Increase the overall value of <b>R&D</b> by an additional <b>25%</b>.', 'I dint know mice were so smart.'),
+    new StatUpgrade('rd5', 'Weaponized Brains', 'new_releases', researchBonus, 25, 100000000000000000000000000, 'Increase the overall value of <b>R&D</b> by an additional <b>25%</b>.', 'You wanna load it up with little bitty bullets of knowledge.'),
+    new StatUpgrade('rd6', 'Mensa Memberships', 'new_releases', researchBonus, 25, 100000000000000000000000000000, 'Increase the overall value of <b>R&D</b> by an additional <b>25%</b>.', 'Necessary for a true cognitive elite.'),
+    new StatUpgrade('rd7', '100% Neural Capacity', 'new_releases', researchBonus, 25, 100000000000000000000000000000000, 'Increase the overall value of <b>R&D</b> by an additional <b>25%</b>.', 'I AM EVERYWHERE.'),
 
     // Raise Speed Boosts in R&D
     new StatUpgrade('spd1', 'Motivational Work Conditions', 'fast_forward', speedBoost, 25, 500000000000, 'Pump up the <b>Speed Bonus</b> for your <b>Research-Assigned Interns</b> by <b>25%</b>.', 'My concern is not that there are too many sweatshops, but that there are too few.'),
-    new StatUpgrade('spd2', 'Complimentary Amphetamines', 'fast_forward', speedBoost, 25, 500000000000000, 'Pump up the <b>Speed Bonus</b> for your <b>Research-Assigned Interns</b> by <b>25%</b>.', 'Part of the Tuskegee Study of Untreated Amphetamines.'),
+    new StatUpgrade('spd2', 'Courtesy Amphetamines', 'fast_forward', speedBoost, 25, 500000000000000, 'Pump up the <b>Speed Bonus</b> for your <b>Research-Assigned Interns</b> by <b>25%</b>.', 'Part of the Tuskegee Study of Untreated Amphetamines.'),
     new StatUpgrade('spd3', 'Forced HGH Injections', 'fast_forward', speedBoost, 25, 500000000000000000000, 'Pump up the <b>Speed Bonus</b> for your <b>Research-Assigned Interns</b> by <b>25%</b>.', 'The unstoppable rise! It\'s like globalization, it\'s inevitable!'),
     new StatUpgrade('spd4', 'Productivity Mutations', 'fast_forward', speedBoost, 25, 500000000000000000000000, 'Pump up the <b>Speed Bonus</b> for your <b>Research-Assigned Interns</b> by <b>25%</b>.', 'If you beautiful perversions don\'t shut the fuck up, I\'ll turn you into glue!'),
+    new StatUpgrade('spd5', 'Reckless Endangerment', 'fast_forward', speedBoost, 25, 500000000000000000000000000, 'Pump up the <b>Speed Bonus</b> for your <b>Research-Assigned Interns</b> by <b>25%</b>.', 'Can\'t stop the A-Train--!'),
+    new StatUpgrade('spd6', 'Red-Painted Work Spaces', 'fast_forward', speedBoost, 25, 500000000000000000000000000000, 'Pump up the <b>Speed Bonus</b> for your <b>Research-Assigned Interns</b> by <b>25%</b>.', 'WAAAGH!'),
 
     // Raise Value Boosts in R&D
     new StatUpgrade('val1', 'Budget Reductions', 'add_shopping_cart', valueBoost, 25, 500000000000, 'Bloat the <b>Value Bonus</b> for your <b>Research-Assigned Wage Slaves</b> by <b>25%</b>.', 'Beautiful to live in poverty just to spite what they\'re selling.'),
     new StatUpgrade('val2', 'Departmental Insolvency', 'add_shopping_cart', valueBoost, 25, 500000000000000, 'Bloat the <b>Value Bonus</b> for your <b>Research-Assigned Wage Slaves</b> by <b>25%</b>.', 'You\'re 30 cents away from having a quarter.'),
     new StatUpgrade('val3', 'Inverted Salaries', 'add_shopping_cart', valueBoost, 25, 500000000000000000000, 'Bloat the <b>Value Bonus</b> for your <b>Research-Assigned Wage Slaves</b> by <b>25%</b>.', 'Truly dedicated employees are self-motivated and self-funded.'),
     new StatUpgrade('val4', 'Generational Debts', 'add_shopping_cart', valueBoost, 25, 500000000000000000000000, 'Bloat the <b>Value Bonus</b> for your <b>Research-Assigned Wage Slaves</b> by <b>25%</b>.', 'I ain\'t no forgiver forgetter.'),
+    new StatUpgrade('val5', 'Doing More With Less', 'add_shopping_cart', valueBoost, 25, 500000000000000000000000000, 'Bloat the <b>Value Bonus</b> for your <b>Research-Assigned Wage Slaves</b> by <b>25%</b>.', 'Eventually leads to doing everything with nothing.'),
+    new StatUpgrade('val6', 'Increased Gilding', 'add_shopping_cart', valueBoost, 25, 500000000000000000000000000000, 'Bloat the <b>Value Bonus</b> for your <b>Research-Assigned Wage Slaves</b> by <b>25%</b>.', 'It\'s a tale of today.'),
 
     // Time Boosts for Outgoing Investment Mail - inspiring
     new StatUpgrade('ouI1', 'Personal Touches', 'skip_next', investmentBoostBonus, 20, 1000000000000000000000, '<b>Outgoing Emails</b> inspire your <b>Investments</b> department to squeeze out <b>20%</b> extra productivity.', 'Dear Mrs., Mr., Miss, or Mr. and Mrs. Daneeka...'),
@@ -734,7 +1002,7 @@ var game = (function() {
     new StatUpgrade('ouR1', 'Congenial Encouragement', 'skip_next', researchBoostBonus, 20, 1000000000000000000000, '<b>Outgoing Emails</b> persuade your <b>R&D</b> department to squeeze out <b>20%</b> extra productivity.', 'I like Jim Hill, he\'s a good friend of mine'),
     new StatUpgrade('ouR2', 'Playful Threats', 'skip_next', researchBoostBonus, 20, 100000000000000000000000, '<b>Outgoing Emails</b> persuade your <b>R&D</b> department to squeeze out <b>20%</b> extra productivity.', 'I\'ve signed legislation that will outlaw Russia forever.'),
     new StatUpgrade('ouR3', 'Furious Subtext', 'skip_next', researchBoostBonus, 20, 1000000000000000000000000, '<b>Outgoing Emails</b> persuade your <b>R&D</b> department to squeeze out <b>20%</b> extra productivity.', 'I like these calm little moments before the storm.'),
-    new StatUpgrade('ouR4', 'Menacing Word Choice', 'skip_next', researchBoostBonus, 20, 100000000000000000000000000, '<b>Outgoing Emails</b> persuade your <b>R&D</b> department to squeeze out <b>20%</b> extra productivity.', 'I\'m going to count to three. There wil not be a four.'),
+    new StatUpgrade('ouR4', 'Menacing Word Choice', 'skip_next', researchBoostBonus, 20, 100000000000000000000000000, '<b>Outgoing Emails</b> persuade your <b>R&D</b> department to squeeze out <b>20%</b> extra productivity.', 'I\'m going to count to three. There will not be a four.'),
     new StatUpgrade('ouR5', 'The Promise of Death', 'skip_next', researchBoostBonus, 20, 1000000000000000000000000000, '<b>Outgoing Emails</b> persuade your <b>R&D</b> department to squeeze out <b>20%</b> extra productivity.', 'I\'ve frequently not been on boats.'),
 
     // Time Boosts for Outgoing Acquisition Mail (finding people to fire) - assisting
@@ -744,6 +1012,13 @@ var game = (function() {
     new StatUpgrade('ouA4', 'Slanderous Accusations', 'skip_next', acquisitionBoostBonus, 20, 100000000000000000000000000, '<b>Outgoing Emails</b> assist your <b>Acquisitions</b> department in squeezing out <b>20%</b> extra productivity.', 'It is important to root out these Masters of Deceit.'),
     new StatUpgrade('ouA5', 'Why We Fire', 'skip_next', acquisitionBoostBonus, 20, 1000000000000000000000000000, '<b>Outgoing Emails</b> assist your <b>Acquisitions</b> department in squeezing out <b>20%</b> extra productivity.', 'A seven-part documentary series directed by Frank Capra.'),
     
+    // Time Boosts for Employee Training (encouraging)
+    new StatUpgrade('ouT1', 'Company-Wide Competitions', 'skip_next', trainingBoostBonus, 20, 1000000000000000000000, '<b>Outgoing Emails</b> encourage your <b>Career Development</b> department to squeeze out <b>20%</b> extra training productivity.', 'Without further ado, it\'s time to start... running!'),
+    new StatUpgrade('ouT2', 'In-House Counseling', 'skip_next', trainingBoostBonus, 20, 100000000000000000000000, '<b>Outgoing Emails</b> encourage your <b>Career Development</b> department to squeeze out <b>20%</b> extra training productivity.', 'You were born broken. That\'s your birthright.'),
+    new StatUpgrade('ouT3', 'Venting Opportunities', 'skip_next', trainingBoostBonus, 20, 1000000000000000000000000, '<b>Outgoing Emails</b> encourage your <b>Career Development</b> department to squeeze out <b>20%</b> extra training productivity.', 'Nothing is over! Nothing!'),
+    new StatUpgrade('ouT4', 'Behavioral Demerits', 'skip_next', trainingBoostBonus, 20, 100000000000000000000000000, '<b>Outgoing Emails</b> encourage your <b>Career Development</b> department to squeeze out <b>20%</b> extra training productivity.', 'With disdain, I reject your verdict!'),
+    new StatUpgrade('ouT5', 'Punitive Pyre Burnings ', 'skip_next', trainingBoostBonus, 20, 1000000000000000000000000000, '<b>Outgoing Emails</b> encourage your <b>Career Development</b> department to squeeze out <b>20%</b> extra training productivity.', 'Jakob Rohrbach in accounting was the first to go.'),
+
     // Manual Stress Reduction Upgrades
     new StatUpgrade('stb1', 'Clearer Expectations', 'airline_seat_individual_suite', stressReductionMultiplier, 1, 1000000000000000000000, 'Add <b>1</b> to your <b>Stress Reduction Multiplier</b> for HR Emails.', 'Deputy likes dots.'),
     new StatUpgrade('stb2', 'Compulsory Sedation', 'airline_seat_individual_suite', stressReductionMultiplier, 1, 100000000000000000000000, 'Add <b>1</b> to your <b>Stress Reduction Multiplier</b> for HR Emails.', 'Inside me I\'m screaming, nobody pays any attention.'),
@@ -757,7 +1032,9 @@ var game = (function() {
     new StatUpgrade('h150', 'Multinational Moneylenders', 'store', allEmployeeMod, 1, 2.4e+24, "Double the <b>Cash per Second</b> wrenched from every one of your employees.", "The IMF is here to help."),
     new StatUpgrade('h200', 'Death Squad Moneylenders', 'store', allEmployeeMod, 1, 2.6e+27, "Double the <b>Cash per Second</b> wrenched from every one of your employees.", "I probably have a lot of blood on my hands, but that's not all bad."),
     new StatUpgrade('h250', 'Imperialist Moneylenders', 'store', allEmployeeMod, 1, 4e+29, "Double the <b>Cash per Second</b> wrenched from every one of your employees.", "This is a farewell kiss, you dog."),
-    
+    new StatUpgrade('h300', 'Ordained Moneylenders', 'store', allEmployeeMod, 1, 435000000000000000000000000000000, "Double the <b>Cash per Second</b> wrenched from every one of your employees.", "Flee from the peasants as from the devil himself."),
+    new StatUpgrade('h350', 'Primeval Moneylenders', 'store', allEmployeeMod, 1, 470000000000000000000000000000000000, "Double the <b>Cash per Second</b> wrenched from every one of your employees.", "He is calling! He is calling! I hear him! We must go!"),
+
     // Unlocks for away messages
     new StatUpgrade('au1', 'Efficient Stratcom', 'lock_open', emailAway, 1, 500000, 'Unlock the <b>Out of Office</b> toggle for your <b>Email</b> inbox.', 'Being completely unavailable is an effective power move.'),
     new StatUpgrade('au2', 'All Accounts Deleted', 'lock_open', policyAway, 1, 100000000000000000, 'Unlock the <b>Out of Office</b> toggle for your <b>New Policy</b> inbox.', 'Nothing on your phone but the E*TRADE app.'),
@@ -770,9 +1047,15 @@ var game = (function() {
     new StatUpgrade('ef4', 'A Shining Trapezohedron', 'mail', timeToAnswerMail, 30, 25000000000000000000000000000, 'Increase your <b>Email Freshness Timer</b> by <b>30 seconds</b>.', "Providing a dark and unspeakable window into email responsiveness."),
     
     // Increase the base bonus for text entered in email responses
-    new StatUpgrade('et1', 'Incomprehensible Jargon', 'edit', baseEmailTextMultiplier, 0.33, 10000000, 'Increase your <b>Bonus for Email Reply Text</b> by <b>0.5</b>.', "Why use a fifty-cent word when you can use a five-dollar word?"),
-    new StatUpgrade('et2', 'Threatening Diction', 'edit', baseEmailTextMultiplier, 0.33, 1000000000, 'Increase your <b>Email Text Bonus Multiplier</b> by <b>0.5</b>.', "The worst thing one can do with words is to surrender to them."),
-    new StatUpgrade('et3', 'Outright Lies', 'edit', baseEmailTextMultiplier, 0.33, 1000000000000, 'Increase your <b>Email Text Bonus Multiplier</b> by <b>1</b>.', "My belief is we will, in fact, be greeted as liberators."),
+    new StatUpgrade('et1', 'Incomprehensible Jargon', 'edit', baseEmailTextMultiplier, 0.15, 5000000000000, 'Increase your <b>Bonus for Email Reply Text</b> by <b>0.15</b>.', "Why use a fifty-cent word when you can use a five-dollar word?"),
+    new StatUpgrade('et2', 'Threatening Diction', 'edit', baseEmailTextMultiplier, 0.15, 5000000000000000000, 'Increase your <b>Email Text Bonus Multiplier</b> by <b>0.15</b>.', "The worst thing one can do with words is to surrender to them."),
+    new StatUpgrade('et3', 'Outright Lies', 'edit', baseEmailTextMultiplier, 0.15, 5000000000000000000000000, 'Increase your <b>Email Text Bonus Multiplier</b> by <b>0.15</b>.', "My belief is we will, in fact, be greeted as liberators."),
+    new StatUpgrade('et4', 'Masculine Posturing', 'edit', baseEmailTextMultiplier, 0.15, 5000000000000000000000000000000, 'Increase your <b>Email Text Bonus Multiplier</b> by <b>0.15</b>.', "You talkin\' to me?"),
+   
+    new StatUpgrade('et5', 'Blatant Doublespeak', 'edit', baseEmailTextMultiplier, 0.15, 5000000000000, 'Increase your <b>Email Text Bonus Multiplier</b> by <b>0.15</b>.', "When we talk about war, we're really talking about peace."),
+    new StatUpgrade('et6', 'Galloping Fallacies', 'edit', baseEmailTextMultiplier, 0.15, 5000000000000000000, 'Increase your <b>Email Text Bonus Multiplier</b> by <b>0.15</b>.', "Debate me, coward!"),
+    new StatUpgrade('et7', 'Artful Pathos', 'edit', baseEmailTextMultiplier, 0.15, 5000000000000000000000000, 'Increase your <b>Email Text Bonus Multiplier</b> by <b>0.15</b>.', "Please help me budget this. My family is dying."),
+    new StatUpgrade('et8', 'Chilling Portents', 'edit', baseEmailTextMultiplier, 0.15, 5000000000000000000000000000000, 'Increase your <b>Email Text Bonus Multiplier</b> by <b>0.15</b>.', "...there has been a creeping socialism spreading in the United States."),
     
     // Increase the minimum time bonus of emails
     new StatUpgrade('exem1', 'Supplemental Email Assistance Program', 'mail', timeBonusMinimum, 0.025, 25000000000, 'Increase the <b>Minimum Cash Return</b> of expired <b>Emails</b>.', "We don't want to turn the safety net into a hammock."),
@@ -793,7 +1076,7 @@ var game = (function() {
     new StatUpgrade('eem6', 'The Occult Sales Model', 'mail', emailCashBonus, 5, 5000000000000000000000, 'Increase your <b>Bonus to Email Payout</b> by <b>10%</b>.', 'Keep it Simple, be iNvaluable, always Align, and raise Pazuzu.'),
     new StatUpgrade('eem7', 'The Challenger Sales Model', 'mail', emailCashBonus, 5, 5000000000000000000000000, 'Increase your <b>Bonus to Email Payout</b> by <b>10%</b>.', 'Sometimes when we reach for the stars, we fall short.'),
     new StatUpgrade('eem8', 'The Supreme Sales Model', 'mail', emailCashBonus, 5, 5000000000000000000000000000, 'Increase your <b>Bonus to Email Payout</b> by <b>10%</b>.', 'Just follow the Ten Principles for a Monolithic Sales System.'),
-    new StatUpgrade('eem9', 'The Stargate Sales Model', 'mail', emailCashBonus, 5, 500000000000000000000000000000, 'Increase your <b>Bonus to Email Payout</b> by <b>10%</b>.', 'Utilizes military-developed psychotronics for customer relations.'),
+    new StatUpgrade('eem9', 'The Stargate Sales Model', 'mail', emailCashBonus, 5, 5000000000000000000000000000000, 'Increase your <b>Bonus to Email Payout</b> by <b>10%</b>.', 'Utilizes military-developed psychotronics for customer relations.'),
 
     // Increase the likelihood of receiving an urgent email
     new StatUpgrade('smac1', 'Extra Email Addresses', 'error', specialMailChance, 1, 100000000000, 'Slightly Increase your chance of receiving <b>Urgent Emails</b>.', 'Now with full 24-hour availability.'),
@@ -825,11 +1108,12 @@ var game = (function() {
     new StatUpgrade('ace1', 'Pinker Slips', 'healing', acquisitionValueMultiplier, 0.2, 10000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.2</b>.', "They run the risk of splitting into two blue slips."),
     new StatUpgrade('ace2', 'Negative Severance', 'healing', acquisitionValueMultiplier, 0.2, 100000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.2</b>.', "Employees pay you to be fired."),
     new StatUpgrade('ace3', 'Firings in Name Only', 'healing', acquisitionValueMultiplier, 0.2, 1000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.2</b>.', "Fired employees still fulfill their work obligations, only unpaid."),
-    new StatUpgrade('ace4', 'Special Forces Philosophy', 'healing', acquisitionValueMultiplier, 0.2, 10000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.3</b>.', "Launch fired employees into the sun in a SpaceX rocket."),
+    new StatUpgrade('ace4', 'Special Forces Philosophy', 'healing', acquisitionValueMultiplier, 0.2, 10000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.2</b>.', "Launch fired employees into the sun in a SpaceX rocket."),
     new StatUpgrade('ace5', 'Operation Rolling Layoffs', 'healing', acquisitionValueMultiplier, 0.3, 100000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.3</b>.', "Hey! Hey! LBJ! How many employees did you fire today?"),
-    new StatUpgrade('ace6', 'Targeted Drone Firing', 'healing', acquisitionValueMultiplier, 0.3, 1000000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.4</b>.', "We may have fired Abdulrahman al-Awlaki by mistake..."),
-    new StatUpgrade('ace7', 'Bane Capital', 'healing', acquisitionValueMultiplier, 0.3, 10000000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.4</b>.', "You merely adopted private equity; I was born in it, moulded by it..."),
-    new StatUpgrade('ace8', 'The Fourth Woe', 'healing', acquisitionValueMultiplier, 0.3, 100000000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.4</b>.', "If those days had not been cut short, no one would remain employed."),
+    new StatUpgrade('ace6', 'Targeted Drone Firing', 'healing', acquisitionValueMultiplier, 0.3, 1000000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.3</b>.', "We may have fired Abdulrahman al-Awlaki by mistake..."),
+    new StatUpgrade('ace7', 'Bane Capital', 'healing', acquisitionValueMultiplier, 0.3,   10000000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.3</b>.', "You merely adopted private equity; I was born in it, moulded by it..."),
+    new StatUpgrade('ace8', 'The Fourth Woe', 'healing', acquisitionValueMultiplier, 0.3, 100000000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.3</b>.', "If those days had not been cut short, no one would remain employed."),
+    new StatUpgrade('ace9', 'Adults in the Room', 'healing', acquisitionValueMultiplier, 0.3, 1000000000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.3</b>.', "From a kingdom of gold to one of rust and iron."),
 
     new StatUpgrade('exec1', 'Folksy Servility', 'directions_run', defaultExecutives, 1, 250000000000000000000000, 'New <b>Acquisitions</b> begin with <b>1</b> extra <b>Executive Financier</b>.', 'I\'m just a workin\' man. My boss does all the supposin\''),
     new StatUpgrade('exec2', 'Boy\'s Club Comraderie', 'directions_run', defaultExecutives, 1, 25000000000000000000000000, 'New <b>Acquisitions</b> begin with <b>1</b> extra <b>Executive Financier</b>.', 'Let\'s hurt somebody.'),
@@ -845,19 +1129,69 @@ var game = (function() {
     new StatUpgrade('acw7', 'White Shoes', 'person_outline', acquisitionsWorkerDiscount, 5, 1000000000000000000000000000, 'Increase the <b>Discount</b> for <b>Acquisition Workers</b> by <b>5%</b>.', "How could they be antisemitic if they support Israel?"),
     new StatUpgrade('acw8', 'The Art of Acquisition', 'person_outline', acquisitionsWorkerDiscount, 5, 100000000000000000000000000000, 'Increase the <b>Discount</b> for <b>Acquisition Workers</b> by <b>5%</b>.', "In the midst of chaos, there is also opportunity."),
 		
+    // Election upgrades
+
+    new StatUpgrade('dt1', 'Youth Non-Profits', 'how_to_vote', electionSupportRate, 2, 50000000000000000000000000, 'Increase the <b>Donation Efficacy Rate</b> for <b>Elections</b> by <b>2.</b>', 'Maintaining professor watchlists to promote free speech.'),
+    new StatUpgrade('dt2', 'FEC Loopholes', 'how_to_vote', electionSupportRate, 2, 50000000000000000000000000000, 'Increase the <b>Donation Efficacy Rate</b> for <b>Elections</b> by <b>2.</b>', 'Don\'t worry, all expenditures are independent.'),
+    new StatUpgrade('dt3', 'Indirect Advocacy', 'how_to_vote', electionSupportRate, 2, 50000000000000000000000000000000, 'Increase the <b>Donation Efficacy Rate</b> for <b>Elections</b> by <b>2.</b>', 'None of the Eight Magic Words were uttered.'),
+    new StatUpgrade('dt4', 'Ultra PACs', 'how_to_vote', electionSupportRate, 2, 50000000000000000000000000000000000, 'Increase the <b>Donation Efficacy Rate</b> for <b>Elections</b> by <b>2.</b>', '"We the People" refers exclusively to corporate entities.'),
+
+    new StatUpgrade('strk1', 'Campaign Loyalists', 'flash_on', winStreakCap, 5, 250000000000000000000000000, 'Increase the <b>Win Streak Cap</b> for <b>Elections</b> by <b>5</b>.', 'Attack, attack, attack - never defend.'),
+    new StatUpgrade('strk2', 'Repeatable Strategies', 'flash_on', winStreakCap, 5, 25000000000000000000000000000, 'Increase the <b>Win Streak Cap</b> for <b>Elections</b> by <b>5</b>.', 'We are doing away with the racial problem one way or the other.'),
+    new StatUpgrade('strk3', 'Election Rigging', 'flash_on', winStreakCap, 5, 2500000000000000000000000000000, 'Increase the <b>Win Streak Cap</b> for <b>Elections</b> by <b>5</b>.', 'Election integrity guaranteed by Crosscheck.'),
+    new StatUpgrade('strk4', 'Dynastic Candidates', 'flash_on', winStreakCap, 5, 250000000000000000000000000000000, 'Increase the <b>Win Streak Cap</b> for <b>Elections</b> by <b>5</b>.', 'Jeb!'),
+    new StatUpgrade('strk5', 'No Term Limits', 'flash_on', winStreakCap, 5, 25000000000000000000000000000000000, 'Increase the <b>Win Streak Cap</b> for <b>Elections</b> by <b>5</b>.', 'Looking forward to the Enabling Act of 2033.'),
+
+    new StatUpgrade('elu0', 'Casual Skimming', 'ballot', electionPayoutBonus, 25, 500000000000000000000000000, 'Increase the <b>Election Payout Bonus</b> by <b>25%</b>, win or lose.', 'My world is strictly cash and carry.'),
+    new StatUpgrade('elu1', 'Revolving Doors', 'ballot', electionPayoutBonus, 25, 5000000000000000000000000000, 'Increase the <b>Election Payout Bonus</b> by <b>25%</b>, win or lose.', 'It is simply a descent from heaven.'),
+    new StatUpgrade('elu2', 'Targeted Deregulation', 'ballot', electionPayoutBonus, 25, 500000000000000000000000000000, 'Increase the <b>Election Payout Bonus</b> by <b>25%</b>, win or lose.', 'Relaxed laws for the smallest minority on earth.'),
+    new StatUpgrade('elu3', 'Juicy Defense Contracts', 'ballot', electionPayoutBonus, 25, 5000000000000000000000000000000, 'Increase the <b>Election Payout Bonus</b> by <b>25%</b>, win or lose.', 'We must build Schwerer Gustavs for national security.'),
+    new StatUpgrade('elu4', 'Colossal Tax Breaks', 'ballot', electionPayoutBonus, 25, 500000000000000000000000000000000, 'Increase the <b>Election Payout Bonus</b> by <b>25%</b>, win or lose.', 'Robbing Paul to pay Peter.'),
+    new StatUpgrade('elu5', 'Cabinet Positions', 'ballot', electionPayoutBonus, 25, 5000000000000000000000000000000000, 'Increase the <b>Election Payout Bonus</b> by <b>25%</b>, win or lose.', 'My own personal theory is that Joseph built the pyramids to store grain.'),
+
+    new StatUpgrade('gaf0', 'Political Consultants', 'local_hospital', gaffeBuffer, 10, 10000000000000000000000000, 'Increase the <b>Buffer to Gaffe Risk</b> for elections by <b>10%</b>.', 'Now, I resign so I will not become the issue.'),
+    new StatUpgrade('gaf1', 'Elite Speech-Writers', 'local_hospital', gaffeBuffer, 10, 10000000000000000000000000000, 'Increase the <b>Buffer to Gaffe Risk</b> for elections by <b>10%</b>.', 'All of us who advocated for the war have had to do some reckoning.'),
+    new StatUpgrade('gaf2', 'Limitless Teleprompters', 'local_hospital', gaffeBuffer, 15, 10000000000000000000000000000000, 'Increase the <b>Buffer to Gaffe Risk</b> for elections by <b>15%</b>.', 'I\'m Ron Burgundy?'),
+    new StatUpgrade('gaf3', 'Media Characterization', 'local_hospital', gaffeBuffer, 15, 10000000000000000000000000000000000, 'Increase the <b>Buffer to Gaffe Risk</b> for elections by <b>15%</b>.', 'Who would you rather have a Beer Summit with?'),
+    
+    new StatUpgrade('pr0', 'Blame-Shifting Strategies', '360', prChance, 10, 1000000000000000000000000000, 'Increase the <b>Chance for PR Spin</b> for election gaffes by <b>10%</b>.', 'Nixon Sees \'Witch-Hunt,\' Insiders Say'),
+    new StatUpgrade('pr1', 'Friendly Interviewers', '360', prChance, 10, 1000000000000000000000000000000, 'Increase the <b>Chance for PR Spin</b> for election gaffes by <b>10%</b>.', 'Caution: you are about to enter the No-Spin Zone!'),
+    new StatUpgrade('pr2', 'Heartfelt Apologies', '360', prChance, 10, 1000000000000000000000000000000000, 'Increase the <b>Chance for PR Spin</b> for election gaffes by <b>10%</b>.', 'Let me be Frank.'),
+    
+    new StatUpgrade('elem1', 'Etiquette Coaches', 'lock_open', electionNotifications, 1, 2500000000000000000000000000, 'Unlock <b>Thank You Emails</b> from winning <b>Election</b> candidates.', 'Thank you for your service.'),
+
+    // Employee discounts
+
     new StatUpgrade('disc1', 'Cost-of-Living Decreases', 'content_cut', employeeDiscount, 3, 1000000000, 'Increase your overall <b>Employee Discount</b> by <b>3%</b>.', "You're just a step on the boss-man's ladder"),
     new StatUpgrade('disc2', 'Means-Tested Paychecks', 'content_cut', employeeDiscount, 3, 1000000000000, 'Increase your overall <b>Employee Discount</b> by <b>3%</b>.', "That's right, I've got a floor. So what?"),
     new StatUpgrade('disc3', 'Catastrophic Health Plans', 'content_cut', employeeDiscount, 3, 1000000000000000, 'Increase your overall <b>Employee Discount</b> by <b>3%</b>.', "These ones only cover the Death Panels."),
     new StatUpgrade('disc4', 'The Spectre of Reorg', 'content_cut', employeeDiscount, 3, 1000000000000000000, 'Increase your overall <b>Employee Discount</b> by <b>3%</b>.', "Your new position no longer includes payment as a perk."),
     new StatUpgrade('disc5', 'Less Bread, Fewer Roses', 'content_cut', employeeDiscount, 3, 1000000000000000000000, 'Increase your overall <b>Employee Discount</b> by <b>3%</b>.', "Hearts starve as well as bodies."),
     new StatUpgrade('disc6', 'Disciplinary Pay Cuts', 'content_cut', employeeDiscount, 3, 1000000000000000000000000, 'Increase your overall <b>Employee Discount</b> by <b>3%</b>.', "You become part of the unregenerate two per cent."),
-    // TODO one more?
+    new StatUpgrade('disc7', 'Annual Retirement Fees', 'content_cut', employeeDiscount, 3, 1000000000000000000000000000, 'Increase your overall <b>Employee Discount</b> by <b>3%</b>.', "Compensation for lost productivity upon retirement."),
+    new StatUpgrade('disc8', 'Reverse Benefits Packages', 'content_cut', employeeDiscount, 3, 1000000000000000000000000000000, 'Increase your overall <b>Employee Discount</b> by <b>3%</b>.', "Pay cuts cover health expenses for management."),
+    new StatUpgrade('disc9', 'Inflexible Spending Accounts', 'content_cut', employeeDiscount, 3, 1000000000000000000000000000000000, 'Increase your overall <b>Employee Discount</b> by <b>3%</b>.', "Tax-advantaged accounts to be used only for coffins."),
+
+    new StatUpgrade('tc1', 'Untested Brain Drugs', 'fitness_center', trainingBonus, 25, 100000000000000000000000000, 'Increase your employee <b>Training Bonus</b> by <b>25%</b>', 'Oh, isn\'t that the one where the guy becomes limitless?'),
+    new StatUpgrade('tc2', 'Highly Illegal Nootropics', 'fitness_center', trainingBonus, 25, 100000000000000000000000000000, 'Increase your employee <b>Training Bonus</b> by <b>25%</b>', 'I\'ve seen it all. I\'ve seen everything.'),
+   
+    new StatUpgrade('tc3', 'Disruptive Techniques', 'fitness_center', trainingBonus, 10, 50000000000000000000, 'Increase your employee <b>Training Bonus</b> by <b>10%</b>', 'Will you teach me about this - what is it? A new way?'),
+    new StatUpgrade('tc4', 'Grueling Calisthenics', 'fitness_center', trainingBonus, 10, 50000000000000000000000, 'Increase your employee <b>Training Bonus</b> by <b>10%</b>', 'The repetitive strain injuries mean it\'s working.'),
+    new StatUpgrade('tc5', 'Hyperbolic Time Chambers', 'fitness_center', trainingBonus, 10, 50000000000000000000000000, 'Increase your employee <b>Training Bonus</b> by <b>10%</b>', 'Just one day of training! It\'s easy!'),
+
+    new StatUpgrade('cru1', 'Free Thought', 'extension', crypticEmailBonus, 25, 100000000000000000000000000000, 'Increase your <b>Cryptic Email Bonus</b> by <b>25%</b>', 'Prison\'s in your mind. Can\'t you see I\'m free?'),
+    new StatUpgrade('cru2', 'Pattern Recognition', 'extension', crypticEmailBonus, 25, 1000000000000000000000000000000, 'Increase your <b>Cryptic Email Bonus</b> by <b>25%</b>', 'I used to be in a barbershop quartet in Skokie, Illinois.'),
+    new StatUpgrade('cru3', 'Paranoid Skepticism', 'extension', crypticEmailBonus, 25, 10000000000000000000000000000000, 'Increase your <b>Cryptic Email Bonus</b> by <b>25%</b>', 'I want to believe...'),
+    new StatUpgrade('cru4', 'Sealed Indictments', 'extension', crypticEmailBonus, 25, 100000000000000000000000000000000, 'Increase your <b>Cryptic Email Bonus</b> by <b>25%</b>', 'Maybe it\'s the calm before the storm. Could be.'),
+
+    // additionalBankruptcyBonus
 
     new StatUpgrade('tp1', 'Reverse Vacation Accrual', 'alarm_add', timePlayedBonusRate, 0.1, 1000000, "Increase your <b>Bonus for Time Played</b> by <b>0.1%</b>.", "Negative vacation days do roll over."),
     new StatUpgrade('tp2', 'Centenarian Retirement', 'alarm_add', timePlayedBonusRate, 0.1, 100000000000, "Increase your <b>Bonus for Time Played</b> by <b>0.1%</b>.", "At the party, you receive a $15 Chili\'s gift card."),
     new StatUpgrade('tp3', 'Intergenerational Labor', 'alarm_add', timePlayedBonusRate, 0.1, 100000000000000000, "Increase your <b>Bonus for Time Played</b> by <b>0.1%</b>.", "Babies born on company property are company IP."),
-    new StatUpgrade('tp4', 'Permanent Isolation Cubicles', 'alarm_add', timePlayedBonusRate, 0.1, 100000000000000000000, "Increase your <b>Bonus for Time Played</b> by <b>0.1%</b>.", "No monkey has died during isolation."),
-    new StatUpgrade('tp5', 'Quincentennial Celebration', 'alarm_add', timePlayedBonusRate, 0.1, 100000000000000000000000000, "Increase your <b>Bonus for Time Played</b> by <b>0.1%</b>.", "Party hats top the skeletons propped up at their desks.")
+    new StatUpgrade('tp4', 'Permanent Isolation Cubicles', 'alarm_add', timePlayedBonusRate, 0.1, 100000000000000000000000, "Increase your <b>Bonus for Time Played</b> by <b>0.1%</b>.", "No monkey has died during isolation."),
+    new StatUpgrade('tp5', 'Quincentennial Celebration', 'alarm_add', timePlayedBonusRate, 0.1, 100000000000000000000000000000, "Increase your <b>Bonus for Time Played</b> by <b>0.1%</b>.", "Party hats top the skeletons propped up at their desks."),
+    new StatUpgrade('tp6', 'Mid-Sleep Task Management', 'alarm_add', timePlayedBonusRate, 0.1, 100000000000000000000000000000000000, "Increase your <b>Bonus for Time Played</b> by <b>0.1%</b>.", "He told me he's been having long dreams.")
 	]);
 
   var availableUpgrades = ko.computed(function() {
@@ -904,8 +1238,12 @@ var game = (function() {
         new UnitAward('ua18', 'Lumpenproletariat', 0, 150, ['u07']),
         new UnitAward('ua19', 'trigger', 0, 175, ['u08']),
         new UnitAward('ua120', 'Bewildered Herd', 0, 200, ['u09', 'lob12']),
+        new UnitAward('ua120-5', 'The Underclass', 0, 250, ['u09.1']),
         new UnitAward('ua1-21', 'Work Will Set You Free', 0, 300, ['one1']),
+        new UnitAward('ua1-21-5', 'Untouchable', 0, 350, ['u09.2']),
         new UnitAward('ua1-22', 'The Surplus Valuable', 0, 400, ['u010']),
+        new UnitAward('ua1-22-5', 'Materially Conditioned', 0, 450, ['u011']),
+        new UnitAward('ua1-23', 'The Alienated Essence', 0, 500, ['u012']),
 
         // WAGE SLAVE ACHIEVEMENTS
         new UnitAward('ua21', 'Office Drone', 1, 1, ['u10']),
@@ -918,8 +1256,12 @@ var game = (function() {
         new UnitAward('ua28', 'Employee of the Month', 1, 150, ['u17']),
         new UnitAward('ua29', 'trigger', 1, 175, ['u18']),
         new UnitAward('ua210', 'Weekend Warrior', 1, 200, ['u19', 'lob13']),
+        new UnitAward('ua210-5', 'Burning Both Ends', 1, 250, ['u19.1']),
         new UnitAward('ua2-11', 'Salaryman', 1, 300, ['one2']),
+        new UnitAward('ua211-5', 'Quietly Desperate', 1, 350, ['u19.2']),
         new UnitAward('ua2-12', 'Withering Serf', 1, 400, ['u120']),
+        new UnitAward('ua2-12-5', 'The Organization Man', 1, 450, ['u121']),
+        new UnitAward('ua2-13', 'I\'m Henry Dubb!', 1, 500, ['u122']),
         
         // SALES HOTSHOT ACHIEVEMENTS
         new UnitAward('ua31', 'Struggling Sadsack', 2, 1, ['u20']),
@@ -931,7 +1273,10 @@ var game = (function() {
         new UnitAward('ua3s2', 'trigger', 2, 125, ['su10']),
         new UnitAward('ua37', 'Telephone Terrorist', 2, 150, ['u25']),
         new UnitAward('ua38', 'Master of the Pipeline', 2, 200, ['u26', 'lob14']),
+        new UnitAward('ua38-5', 'Creator of Demand', 2, 250, ['u27']),
         new UnitAward('ua39', 'Good Quarterly Numbers', 2, 300, ['one3']),
+        new UnitAward('ua39-5', 'Landed and Expanded', 2, 350, ['u28']),
+        new UnitAward('ua3-10', 'Silver Tongued', 2, 400, []),
         
         // MIDDLE MANAGER ACHIEVEMENTS
         new UnitAward('ua41', 'Fun Boss', 3, 1, ['u30']),
@@ -943,7 +1288,10 @@ var game = (function() {
         new UnitAward('ua4s2', 'trigger', 3, 125, ['su11']),
         new UnitAward('ua47', 'A Team Player', 3, 150, ['u35']),
         new UnitAward('ua48', 'True Believer', 3, 200, ['u36', 'lob15']),
+        new UnitAward('ua48-5', 'Upwardly Mobile', 3, 250, ['u37']),
         new UnitAward('ua49', 'Lifer', 3, 300, ['one4']),
+        new UnitAward('ua49-5', 'Ladder Climber', 3, 350, ['u38']),
+        new UnitAward('ua4-10', 'Petite Bourgeoisie', 3, 400, []),
         
         // C-LEVEL ACHIEVEMENTS
         new UnitAward('ua51', 'Thought Leader', 4, 1, ['u40']),
@@ -955,7 +1303,10 @@ var game = (function() {
         new UnitAward('ua5s2', 'trigger', 4, 125, ['su12']),
         new UnitAward('ua57', 'The Name on the Door', 4, 150, ['u45']),
         new UnitAward('ua58', 'Sub-Prime Leader', 4, 200, ['u46', 'lob16']),
+        new UnitAward('ua58-5', 'Job Creator', 4, 250, ['u47']),
         new UnitAward('ua59', 'Too Big to Fail', 4, 300, ['one5']),
+        new UnitAward('ua59-5', 'Fearless Leader', 4, 350, ['u48']),
+        new UnitAward('ua5-10', 'The Corner Office', 4, 400, []),
         
         // BLUE BLOOD ACHIEVEMENTS
         new UnitAward('ua61', 'Privileged', 5, 1, ['u50'], 'What could go wrong?'),
@@ -967,7 +1318,10 @@ var game = (function() {
         new UnitAward('ua6s2', 'trigger', 5, 125, ['su13']),
         new UnitAward('ua67', 'Plutocrat', 5, 150, ['u55']),
         new UnitAward('ua68', 'The Ruling Class', 5, 200, ['u56', 'lob17']),
+        new UnitAward('ua68-5', 'Haute Bourgeoisie', 5, 250, ['u57']),
         new UnitAward('ua69', 'Neo-Feudal Lord', 5, 300, ['one6']),
+        new UnitAward('ua69-5', 'Peak Rentier', 5, 350, ['u58']),
+        new UnitAward('ua6-10', 'Manorialist', 5, 400, []),
         
         // PRIVATE COPS ACHIEVEMENTS
         new UnitAward('ua71', 'Officer Friendly', 6, 1, ['u60'], 'What could go wrong?'),
@@ -979,7 +1333,10 @@ var game = (function() {
         new UnitAward('ua7s2', 'trigger', 6, 125, ['su14']),
         new UnitAward('ua77', 'Thin Blue Line', 6, 150, ['u65']),
         new UnitAward('ua78', 'Blue Lives Matter', 6, 200, ['u66', 'lob18']),
+        new UnitAward('ua78-5', 'User of Force', 6, 250, ['u67']),
         new UnitAward('ua79', 'We Love Our Cops', 6, 300, ['one7']),
+        new UnitAward('ua79-5', 'Stopped and Frisked', 6, 350, ['u68']),
+        new UnitAward('ua7-10', 'Qualifiedly Immune', 6, 400, []),
         
         // POCKET POLITICIAN ACHIEVEMENTS
         new UnitAward('ua81', 'Fresh-Faced Candidate', 7, 1, ['u70'], 'What could go wrong?'),
@@ -991,7 +1348,10 @@ var game = (function() {
         new UnitAward('ua8s2', 'trigger', 7, 125, ['su15']),
         new UnitAward('ua87', 'Crony Capitalist', 7, 150, ['u75']),
         new UnitAward('ua88', 'Maverick', 7, 200, ['u76', 'lob19']),
+        new UnitAward('ua88-5', 'The General Will', 7, 250, ['u77']),
         new UnitAward('ua89', 'Contracted with America', 7, 300, ['one8']),
+        new UnitAward('ua89-5', 'Lord of the Swamp', 7, 350, ['u78']),
+        new UnitAward('ua8-10', 'True Patriot', 7, 400, []),
         
         // MERCENARY ACHIEVEMENTS
         new UnitAward('ua91', 'Peacekeeper', 8, 1, ['u80']),
@@ -1003,7 +1363,10 @@ var game = (function() {
         new UnitAward('ua9s2', 'trigger', 8, 125, ['su16']),
         new UnitAward('ua97', 'Les Enfants Terrible', 8, 150, ['u85']),
         new UnitAward('ua98', 'Mission Accomplished', 8, 200, ['u86', 'lob20']),
+        new UnitAward('ua98-5', 'Esquadrão da Morte', 8, 250, ['u87']),
         new UnitAward('ua99', 'The Absence of Alternatives', 8, 300, ['one9']),
+        new UnitAward('ua99-5', 'Mutually Assured Destroyer', 8, 350, ['u88']),
+        new UnitAward('ua9-10', 'Shocked and Awed', 8, 400, []),
         
         // CLIENT STATES ACHIEVEMENTS
         new UnitAward('ua101', 'Globalizer', 9, 1, ['u90']),
@@ -1015,7 +1378,10 @@ var game = (function() {
         new UnitAward('ua10s2', 'trigger', 9, 125, ['su17']),
         new UnitAward('ua107', 'International Monetary Fun!', 9, 150, ['u95']),
         new UnitAward('ua108', 'Destiny Manifested', 9, 200, ['u96', 'lob21']),
+        new UnitAward('ua108-5', 'Roosevelt Correlated', 9, 250, ['u97']),
         new UnitAward('ua109', 'Mission Civilisatrice', 9, 300, ['one10']),
+        new UnitAward('ua109-5', 'The Most Urgent Fury', 9, 350, ['u98']),
+        new UnitAward('ua10-10', 'We Came, We Saw, He Died', 9, 400, []),
         
         // SHADOW GOVERNMENT ACHIEVEMENTS
         new UnitAward('ua111', 'Deep State', 10, 1, ['u100']),
@@ -1027,7 +1393,10 @@ var game = (function() {
         new UnitAward('ua11s2', 'trigger', 10, 125, ['su18']),
         new UnitAward('ua117', 'New World Order', 10, 150, ['u105']),
         new UnitAward('ua118', 'La-li-lu-le-lo', 10, 200, ['u106', 'lob22']),
+        new UnitAward('ua118-5', 'Consent Engineer', 10, 250, ['u107']),
         new UnitAward('ua119', 'The Fifth Column', 10, 300, ['one11']),
+        new UnitAward('ua119-5', 'I Am Part of the Resistance', 10, 350, ['u108']),
+        new UnitAward('ua11-10', 'The Powers That Be', 10, 400, []),
         
         // PUPPETMASTER ACHIEVEMENTS
         new UnitAward('ua121', 'All-Seeing', 11, 1, ['u110']),
@@ -1039,7 +1408,10 @@ var game = (function() {
         new UnitAward('ua12s2', 'trigger', 11, 125, ['su19']),
         new UnitAward('ua127', 'Babylonian Brother', 11, 150, ['u115']),
         new UnitAward('ua128', 'G.A.O.T.U.', 11, 200, ['u116', 'lob23']),
-        new UnitAward('ua129', 'The Primordial Baʿal', 11, 300, []),
+        new UnitAward('ua128-5', 'The Anunnaki of Nibiru', 11, 250, ['u117']),
+        new UnitAward('ua129', 'The Primordial Ba\'al', 11, 300, ['one12']),
+        new UnitAward('ua129-5', 'Thoth the Atlantean Priest-King', 11, 350, ['u118']),
+        new UnitAward('ua12-10', 'The Esoteric Order of Dagon', 11, 400, []),
         
         /* Cash Awards */
         
@@ -1052,6 +1424,10 @@ var game = (function() {
         new Award('uc7', 'Dystopian Imperial Cartel', 2000, ['un7'], unitCount),
         new Award('uc8', 'Timeless Secret Cabal', 2500, ['un8'], unitCount),
         new Award('uc9', 'Primordial Global Conspiracy', 3000, ['un9'], unitCount),
+        new Award('uc10', 'Ancient Byzantine Institution', 3500, ['un10'], unitCount),
+        new Award('uc11', 'Unstoppable World-Spanning Horde', 4000, ['un11'], unitCount),
+        new Award('uc12', 'Gibbering Corporate Mass', 4500, ['un12'], unitCount),
+        new Award('uc13', 'Antediluvian Hive-Mind', 5000, [], unitCount),
 	   
         new Award('td1', 'In the Black', 1, ['cps1'], accessibleDPS),
         new Award('td2', 'Ramen Profitable', 100, ['cps2'], accessibleDPS),
@@ -1077,35 +1453,42 @@ var game = (function() {
         new Award('td22', 'Gravimetric Revenue Displacement', 100000000000000000000000, ['cps22'], accessibleDPS), // 100 sext
         new Award('td23', 'Mandeville Pointed', 1000000000000000000000000, ['cps23'], accessibleDPS), // 1 sept
 	    	
-        new Award('tc1', 'Monetized', 100, ['c0'], totalCash),
-        new Award('tc2', 'Piggy Banker', 10000, ['c1'], totalCash),
-        new Award('tc3', 'Flush with Cash', 100000, ['c2'], totalCash),
-        new Award('tc4', 'Self-Made Millionaire', 1000000, ['c3', 'tp1'], totalCash), // 1 million
-        new Award('tc5', 'The 1%', 10000000, ['c4'], totalCash), // 10 million
-        new Award('tc6', 'Fat Cat', 100000000, ['c5'], totalCash), // 100 million
-        new Award('tc7', 'Unicorn', 1000000000, ['c6'], totalCash), // 1 billion
-        new Award('tc8', 'Off-Shore Accountant', 10000000000, ['c7'], totalCash), // 10 billion
-        new Award('tc9', 'Industrialist', 100000000000, ['c8'], totalCash), // 100 billion
-        new Award('tc10', 'Old Moneybags', 1000000000000, ['c9', 'tp2'], totalCash), // 1 trillion
-        new Award('tc11', 'Robber Baron', 10000000000000, ['c10'], totalCash), // 10 trillion
-        new Award('tc12', 'The .0001%', 100000000000000, ['c11'], totalCash), // 100 trillion
-        new Award('tc13', 'Teracorn', 1000000000000000, ['c12'], totalCash), // 1 quadrillion
-        new Award('tc14', 'Landed Gentry', 10000000000000000, ['c13'], totalCash), // 10 quadrillion
-        new Award('tc15', 'Daddy Warbucks', 100000000000000000, ['c14'], totalCash), // 100 quadrillion
-        new Award('tc16', 'Titan of Industry', 1000000000000000000, ['c15', 'tp3'], totalCash), // 1 quintillion
-        new Award('tc17', 'Randian Hero', 10000000000000000000, ['c16'], totalCash), // 10 quintillion
-        new Award('tc18', 'The 0.0000001%', 100000000000000000000, ['c17'], totalCash), // 100 quintillion
-        new Award('tc19', 'Preternatually Wealthy', 1000000000000000000000, ['c18'], totalCash), // 1 sextillion
-        new Award('tc20', 'Four-Dimensional Capitalist', 10000000000000000000000, ['c19'], totalCash), // 10 sextillion
-        new Award('tc21', 'Supernatural Magnate', 100000000000000000000000, ['c20'], totalCash), // 100 sextillion
-        new Award('tc22', 'Cosmic Tycoon', 1000000000000000000000000, ['c21', 'tp4'], totalCash), // 1 septillion
-        new Award('tc23', 'Trilateral Commissioner', 10000000000000000000000000, ['c22'], totalCash), // 10 septillion
-        new Award('tc24', 'Lord of the Round Table', 100000000000000000000000000, ['c23'], totalCash), // 100 septillion
-        new Award('tc25', 'Malthusian Trapper', 1000000000000000000000000000, ['c24'], totalCash), // 1 octillion
-        new Award('tc26', 'Destroyer of Worlds', 10000000000000000000000000000, ['c25'], totalCash), // 10 octillion
-        new Award('tc27', 'The Sum Total of the Universe', 100000000000000000000000000000, ['c26'], totalCash), // 100 octillion
-        new Award('tc28', 'Alpha and Omega', 1000000000000000000000000000000, ['c27', 'tp5'], totalCash), // 1 nonillion
-        new Award('tc29', 'Annuit Cœptis', 10000000000000000000000000000000, ['c28'], totalCash), // 10 nonillion
+        new Award('tc1', 'Monetized', 100, ['c0'], totalCashSlowed),
+        new Award('tc2', 'Piggy Banker', 10000, ['c1'], totalCashSlowed),
+        new Award('tc3', 'Flush with Cash', 100000, ['c2'], totalCashSlowed),
+        new Award('tc4', 'Self-Made Millionaire', 1000000, ['c3', 'tp1'], totalCashSlowed), // 1 million
+        new Award('tc5', 'The 1%', 10000000, ['c4'], totalCashSlowed), // 10 million
+        new Award('tc6', 'Fat Cat', 100000000, ['c5'], totalCashSlowed), // 100 million
+        new Award('tc7', 'Unicorn', 1000000000, ['c6'], totalCashSlowed), // 1 billion
+        new Award('tc8', 'Off-Shore Accountant', 10000000000, ['c7'], totalCashSlowed), // 10 billion
+        new Award('tc9', 'Industrialist', 100000000000, ['c8'], totalCashSlowed), // 100 billion
+        new Award('tc10', 'Old Moneybags', 1000000000000, ['c9', 'tp2'], totalCashSlowed), // 1 trillion
+        new Award('tc11', 'Robber Baron', 10000000000000, ['c10'], totalCashSlowed), // 10 trillion
+        new Award('tc12', 'The .0001%', 100000000000000, ['c11'], totalCashSlowed), // 100 trillion
+        new Award('tc13', 'Teracorn', 1000000000000000, ['c12'], totalCashSlowed), // 1 quadrillion
+        new Award('tc14', 'Landed Gentry', 10000000000000000, ['c13'], totalCashSlowed), // 10 quadrillion
+        new Award('tc15', 'Daddy Warbucks', 100000000000000000, ['c14'], totalCashSlowed), // 100 quadrillion
+        new Award('tc16', 'Titan of Industry', 1000000000000000000, ['c15', 'tp3'], totalCashSlowed), // 1 quintillion
+        new Award('tc17', 'Randian Hero', 10000000000000000000, ['c16'], totalCashSlowed), // 10 quintillion
+        new Award('tc18', 'The 0.0000001%', 100000000000000000000, ['c17'], totalCashSlowed), // 100 quintillion
+        new Award('tc19', 'Preternaturally Wealthy', 1000000000000000000000, ['c18'], totalCashSlowed), // 1 sextillion
+        new Award('tc20', 'Four-Dimensional Capitalist', 10000000000000000000000, ['c19'], totalCashSlowed), // 10 sextillion
+        new Award('tc21', 'Supernatural Magnate', 100000000000000000000000, ['c20'], totalCashSlowed), // 100 sextillion
+        new Award('tc22', 'Cosmic Tycoon', 1000000000000000000000000, ['c21', 'tp4'], totalCashSlowed), // 1 septillion
+        new Award('tc23', 'Trilateral Commissioner', 10000000000000000000000000, ['c22'], totalCashSlowed), // 10 septillion
+        new Award('tc24', 'Lord of the Round Table', 100000000000000000000000000, ['c23'], totalCashSlowed), // 100 septillion
+        new Award('tc25', 'Malthusian Trapper', 1000000000000000000000000000, ['c24'], totalCashSlowed), // 1 octillion
+        new Award('tc26', 'Destroyer of Worlds', 10000000000000000000000000000, ['c25'], totalCashSlowed), // 10 octillion
+        new Award('tc27', 'The Sum Total of the Universe', 100000000000000000000000000000, ['c26'], totalCashSlowed), // 100 octillion
+        new Award('tc28', 'Alpha and Omega', 1000000000000000000000000000000, ['c27', 'tp5'], totalCashSlowed), // 1 nonillion
+        new Award('tc29', 'Annuit Cœptis', 10000000000000000000000000000000, ['c28'], totalCashSlowed), // 10 nonillion
+        new Award('tc30', 'Universal Dominion', 100000000000000000000000000000000, ['c29'], totalCashSlowed), // 100 nonillion
+        new Award('tc31', 'Immanentized Eschaton', 1000000000000000000000000000000000, ['c30'], totalCashSlowed), // 1 decillion
+        new Award('tc32', 'The Abomination of Desolation', 10000000000000000000000000000000000, ['c31'], totalCashSlowed), // 10 decillion
+        new Award('tc33', 'The 0.000000000000000001%', 100000000000000000000000000000000000, ['c32'], totalCashSlowed), // 100 dec
+        new Award('tc34', 'Grande Bourgeoisie', 100000000000000000000000000000000000, ['c33', 'tp6'], totalCashSlowed), // 1 undecillion
+        new Award('tc35', 'Mansa Musa', 1000000000000000000000000000000000000, ['c34'], totalCashSlowed), // 10 undecillion
+        new Award('tc36', 'The Whole Heaven is Mine', 10000000000000000000000000000000000000, [], totalCashSlowed), // 100 undecillion
 
         /* Upgrade Awards */
 	   
@@ -1115,8 +1498,11 @@ var game = (function() {
 	    	new Award('upc4', 'Paradigm Shifter', 150, ['disc3'], upgradeCount), 
 	    	new Award('upc5', 'Bleeding Edge Visionary', 200, ['disc4'], upgradeCount), 
         new Award('upc6', 'Reshaper of Worlds', 250, ['disc5'], upgradeCount),
-        new Award('upc7', 'Universal Flux', 300, ['disc6'], upgradeCount), 
-	    	new Award('upc8', 'Completionist', 404, [], upgradeCount, 'Buy every single <b>Upgrade</b>.'), // TODO - Remember, this needs to be 1 less than the total # of upgrades
+        new Award('upc7', 'Universal Flux', 300, ['disc6'], upgradeCount),
+        new Award('upc7b', 'The Lord of Change', 350, ['disc7'], upgradeCount), 
+        new Award('upc7c', 'Unlimited Vicissitude', 400, ['disc8'], upgradeCount), 
+        new Award('upc7d', 'Fully Metamorphosed', 450, ['disc9'], upgradeCount), 
+	    	new Award('upc8', 'Completionist', 530, [], upgradeCount, 'Buy every single <b>Upgrade</b>.'), // TODO make sure it's updated
 	    		    	
 	    	/* Click Awards */
 	    	
@@ -1133,11 +1519,15 @@ var game = (function() {
       new Award('ec11', 'Wearer of Multiple Hats', 100000000000000000, ['mc3'], earnedFromManualClicks), // 100 quad
       new Award('ec12', 'Full-Stack', 1000000000000000000, ['m7'], earnedFromManualClicks), // 1 quintillion
       new Award('ec13', 'Rockstar', 100000000000000000000, ['mc4'], earnedFromManualClicks), // 100 quint
-      new Award('ec14', 'Wearer of All Hats', 1000000000000000000000, ['m8'], earnedFromManualClicks), // 1 sext
+      new Award('ec14', 'Wearer of All Hats', 1000000000000000000000, ['m8', 'gwf'], earnedFromManualClicks), // 1 sext
       new Award('ec15', 'The Roarkian Ideal', 100000000000000000000000, ['mc5'], earnedFromManualClicks), // 100 sext
       new Award('ec16', 'Low-Functioning Sociopath', 1000000000000000000000000, ['m9'], earnedFromManualClicks), // 1 sept
       new Award('ec17', 'Lisan al Gaib', 100000000000000000000000000, ['mc6'], earnedFromManualClicks), // 100 sept
       new Award('ec18', 'Ubermensch', 1000000000000000000000000000, ['m10'], earnedFromManualClicks), // 1 oct
+      new Award('ec19', 'Midas Touch', 100000000000000000000000000000, ['gwf1'], earnedFromManualClicks), // 100 oct
+      new Award('ec20', 'The Master of Mankind', 1000000000000000000000000000000, ['gwf2'], earnedFromManualClicks), // 1 non
+      new Award('ec21', 'The Finger on the Button', 100000000000000000000000000000000, ['gwf3'], earnedFromManualClicks), // 100 non
+      new Award('ec22', 'The Clicking of Adam', 1000000000000000000000000000000000, ['gwf4'], earnedFromManualClicks), // 1 dec
 
         new Award('ewf1', 'Pretty Much Just Lucky', 1000000000, ['wfd1'], earnedFromWindfalls), // 1 bil
         new Award('ewf2', 'Committed Crapshooter', 100000000000, ['wfl1'], earnedFromWindfalls), // 100 bil
@@ -1208,20 +1598,22 @@ var game = (function() {
 	    	new Award('numEmail8', 'Let\'s Take This Offline', 10000, [], mailAnsweredAllTime, 'Answer <b>10,000</b> total <b>Emails</b> across all of your businesses.'),
 
         new Award('exEm1', 'No Rush', 1000000000, ['exem1'], expiredEmailEarned), // 1 bil
-        new Award('exEm2', 'Just Checking In...', 1000000000000, [], expiredEmailEarned), 
+        new Award('exEm2', 'Just Checking In...', 1000000000000, ['et1'], expiredEmailEarned), 
         new Award('exEm3', 'Any Update Here?', 1000000000000000, ['exem2'], expiredEmailEarned), // 1 quad
-        new Award('exEm4', 'Haven\'t Heard Back...', 1000000000000000000, [], expiredEmailEarned), 
+        new Award('exEm4', 'Haven\'t Heard Back...', 1000000000000000000, ['et2'], expiredEmailEarned), 
         new Award('exEm5', 'Please Answer, Please',  1000000000000000000000, ['exem3'], expiredEmailEarned), // 1 sext
-        new Award('exEm6', 'Are You Getting These?', 1000000000000000000000000, [], expiredEmailEarned), // 1 sept
+        new Award('exEm6', 'Are You Getting These?', 1000000000000000000000000, ['et3'], expiredEmailEarned), // 1 sept
         new Award('exEm7', 'Screaming into the Void', 1000000000000000000000000000, ['exem4'], expiredEmailEarned), // 1 oct
+        new Award('exEm8', 'Must Have Missed This', 1000000000000000000000000000000, ['et4'], expiredEmailEarned), // 1 non
 
         new Award('frEm1', 'Haver of Bandwidth', 1000000000, ['ef1'], freshEmailEarned), // 1 bil
-        new Award('frEm2', 'On the Ball', 1000000000000, [], freshEmailEarned),
+        new Award('frEm2', 'On the Ball', 1000000000000, ['et5'], freshEmailEarned),
         new Award('frEm3', 'Lightning Reflexes', 1000000000000000, ['ef2'], freshEmailEarned), // 1 quad
-        new Award('frEm4', 'Quickest Draw', 1000000000000000000, [], freshEmailEarned),
+        new Award('frEm4', 'Quickest Draw', 1000000000000000000, ['et6'], freshEmailEarned),
         new Award('frEm5', 'Ever Vigilant', 1000000000000000000000, ['ef3'], freshEmailEarned), // 1 sext
-        new Award('frEm6', 'Highest-Strung', 1000000000000000000000000, [], freshEmailEarned), // 1 sept
+        new Award('frEm6', 'Highest-Strung', 1000000000000000000000000, ['et7'], freshEmailEarned), // 1 sept
         new Award('frEm7', 'Finger on the Button', 1000000000000000000000000000, ['ef4'], freshEmailEarned), // 1 oct
+        new Award('frEm8', 'Ready to Strike', 1000000000000000000000000000000, ['et8'], freshEmailEarned), // 1 non
 
         new Award('eEm1', 'Lead Magnet', 1000000, ['eem1'], totalEarnedFromEmails),
         new Award('eEm2', 'Low-Hanging Fruitarian', 100000000, ['em1'], totalEarnedFromEmails), // 100 mil
@@ -1238,12 +1630,18 @@ var game = (function() {
         new Award('eEm13', 'Customer Relationship Master', 1000000000000000000000000, ['eem7'], totalEarnedFromEmails), // 1 sept
         new Award('eEm14', 'Imperial Lord of Leads', 100000000000000000000000000, ['em7'], totalEarnedFromEmails), // 100 sept
         new Award('eEm15', 'The Divine Right of Sales', 1000000000000000000000000000, ['eem8'], totalEarnedFromEmails), // 1 oct
-        new Award('eEm16', 'The Odic Sales Force', 100000000000000000000000000000, ['eem9'], totalEarnedFromEmails), // 100 oct
-        new Award('eEm17', 'The Inbox of the Covenant', 1000000000000000000000000000000, ['em8'], totalEarnedFromEmails), // 1 non
+        new Award('eEm16', 'The Odic Sales Force', 100000000000000000000000000000, ['em8'], totalEarnedFromEmails), // 100 oct
+        new Award('eEm17', 'The Inbox of the Covenant', 1000000000000000000000000000000, ['eem9'], totalEarnedFromEmails), // 1 non
+        new Award('eEm18', 'Where There\'s Leads, I Will Follow', 100000000000000000000000000000000, [], totalEarnedFromEmails), // 100 non
+        new Award('eEm19', 'Salesman of the Epoch', 1000000000000000000000000000000000, [], totalEarnedFromEmails), // 1 dec
+        new Award('eEm20', 'Fully Churned', 100000000000000000000000000000000000, [], totalEarnedFromEmails), // 100 dec
 	    	
-	    	new Award('words1', 'Functionally Literate', 500, ['et1'], wordsReplied, 'Feverishly type <b>500</b> smart words in the replies to your <b>Emails</b>.'),
-	    	new Award('words2', 'Prolific Writer', 2500, ['et2'], wordsReplied, 'Feverishly type <b>2,500</b> smart words in the replies to your <b>Emails</b>.'),
-	    	new Award('words3', 'Warrior Poet', 10000, ['et3'], wordsReplied, 'Feverishly type <b>10,000</b> smart words in the replies to your <b>Emails</b>.'),
+	    	new Award('words1', 'Functionally Literate', 500, [], wordsReplied, 'Feverishly type <b>500</b> smart words in the replies to your <b>Emails</b>.'),
+	    	new Award('words2', 'Prolific Writer', 2500, [], wordsReplied, 'Feverishly type <b>2,500</b> smart words in the replies to your <b>Emails</b>.'),
+	    	new Award('words3', 'Warrior Poet', 10000, [], wordsReplied, 'Feverishly type <b>10,000</b> smart words in the replies to your <b>Emails</b>.'),
+        new Award('words4', 'Literary Giant', 25000, [], wordsReplied, 'Feverishly type <b>25,000</b> smart words in the replies to your <b>Emails</b>.'),
+        new Award('words5', 'Bound in Blood', 50000, [], wordsReplied, 'Feverishly type <b>50,000</b> smart words in the replies to your <b>Emails</b>.'),
+        new Award('words6', 'Mavis Beacon', 100000, [], wordsReplied, 'Feverishly type <b>100,000</b> smart words in the replies to your <b>Emails</b>.'),
 
         new ManualAward('etime1', 'Procrastinator', [], 'Answer an <b>Email</b> with <b>1</b> second remaining on the timer.'),
         new ManualAward('etime2', 'Prompt Responder', [], 'Answer an <b>Email</b> within <b>1</b> second of receiving it.'),
@@ -1287,6 +1685,8 @@ var game = (function() {
     	new Award('invest3', 'Angel Investor', (100 * hoursInMilliseconds), [], timeInvestedAllTime, 'Cash out a total of <b>100 hours</b> in <b>Investments</b> across all of your businesses.'),
       new Award('invest4', 'Venture Capitalist', (250 * hoursInMilliseconds), [], timeInvestedAllTime, 'Cash out a total of <b>250 hours</b> in <b>Investments</b> across all of your businesses.'),
     	new Award('invest5', 'Elephant Hunter', (500 * hoursInMilliseconds), [], timeInvestedAllTime, 'Cash out a total of <b>500 hours</b> in <b>Investments</b> across all of your businesses.'),
+      new Award('invest6', 'Master Financier', (1000 * hoursInMilliseconds), [], timeInvestedAllTime, 'Cash out a total of <b>1,000 hours</b> in <b>Investments</b> across all of your businesses.'),
+      new Award('invest7', 'The Central Bank', (2000 * hoursInMilliseconds), [], timeInvestedAllTime, 'Cash out a total of <b>2,000 hours</b> in <b>Investments</b> across all of your businesses.'),
 
       new Award('sInv1', 'Scalper', 1000000000, ['sb1'], earnedFromShortInvestments), // 1 bil
       new Award('sInv2', 'Day Trader', 1000000000000000, ['sb2'], earnedFromShortInvestments), // 1 quad
@@ -1314,7 +1714,10 @@ var game = (function() {
       new Award('eInvest12', 'The World Banker', 100000000000000000000000000, [], earnedFromInvestments, 'Milk a total of <b>$100 septillion</b> in earnings from <b>Investments</b>.'), // 100 sept
       new Award('eInvest13', 'Broker of Mammon', 1000000000000000000000000000, ['ir7'], earnedFromInvestments, 'Milk a total of <b>$1 octillion</b> in earnings from <b>Investments</b>.'), // 1 oct
       new Award('eInvest14', 'No Limits to Growth', 100000000000000000000000000000, [], earnedFromInvestments, 'Milk a total of <b>$100 octillion</b> in earnings from <b>Investments</b>.'), // 100 oct
-      new Award('eInvest15', 'Brownian Ratcheter', 1000000000000000000000000000000, [], earnedFromInvestments, 'Milk a total of <b>$1 nonillion</b> in earnings from <b>Investments</b>.'), // 1 non
+      new Award('eInvest15', 'Brownian Ratcheter', 1000000000000000000000000000000, ['ir8'], earnedFromInvestments, 'Milk a total of <b>$1 nonillion</b> in earnings from <b>Investments</b>.'), // 1 non
+      new Award('eInvest16', 'Infinite Returns', 100000000000000000000000000000000, [], earnedFromInvestments, 'Milk a total of <b>$100 nonillion</b> in earnings from <b>Investments</b>.'), // 100 non
+      new Award('eInvest17', 'Maximum Alpha', 1000000000000000000000000000000000, ['ir9'], earnedFromInvestments, 'Milk a total of <b>$1 decillion</b> in earnings from <b>Investments</b>.'), // 1 dec
+      new Award('eInvest18', 'Rated by the Morning Star', 100000000000000000000000000000000000, [], earnedFromInvestments, 'Milk a total of <b>$100 decillion</b> in earnings from <b>Investments</b>.'), // 100 dec
 
       new Award('q1', 'Winners Never Quit', 1, [], canceledInvestments, 'Cancel an <b>Investment</b> before it has matured.'),
       new Award('q2', 'Quitters Never Win', 10, [], canceledInvestments, 'Cancel <b>10 Investments</b> before they have matured.'),
@@ -1328,23 +1731,29 @@ var game = (function() {
       new Award('res5', 'Rearden Metallic', 2500, [], patentsSold, 'Sell <b>2,500 Patents</b> across all of your businesses.'),
       new Award('res6', '1% Inspiration', 5000, [], patentsSold, 'Sell <b>5,000 Patents</b> across all of your businesses.'),
       new Award('res7', 'The Man Who Thought Different', 10000, [], patentsSold, 'Sell <b>10,000 Patents</b> across all of your businesses.'),
+      new Award('res8', 'Edisonian', 25000, [], patentsSold, 'Sell <b>25,000 Patents</b> across all of your businesses.'),
+      new Award('res9', 'The Wind of Change', 50000, [], patentsSold, 'Sell <b>50,000 Patents</b> across all of your businesses.'),
+      new Award('res10', 'Reinventer of Wheels', 100000, [], patentsSold, 'Sell <b>100,000 Patents</b> across all of your businesses.'),
 
       new Award('dead', 'OSHA Doesn\'t Need to Know', 1, [], employeesKilled, 'Discover that <b>1</b> of your employees couldn\'t handle hard work.'),
       new Award('dead2', 'Acceptable Losses', 10, [], employeesKilled, 'Discover that <b>10</b> of your employees couldn\'t handle hard work.'),
 
       new Award('rese1', 'Blue-Sky Thinker', 1000000000000, ['risk1'], earnedFromResearch, 'Haul a total of <b>$1 trillion</b> in earnings from <b>Research</b>.'), // 1 tril
-      new Award('rese2', 'Finger on the Pulse', 100000000000000, [], earnedFromResearch, 'Haul a total of <b>$100 trillion</b> in earnings from <b>Research</b>.'), 
+      new Award('rese2', 'Finger on the Pulse', 100000000000000, ['rd1'], earnedFromResearch, 'Haul a total of <b>$100 trillion</b> in earnings from <b>Research</b>.'), 
       new Award('rese3', 'Bizmeth Artisan', 1000000000000000, ['risk2'], earnedFromResearch, 'Haul a total of <b>$1 quadrillion</b> in earnings from <b>Research</b>.'), // 1 quad
-      new Award('rese4', 'Focus Group Fanatic', 100000000000000000, [], earnedFromResearch, 'Haul a total of <b>$100 quadrillion</b> in earnings from <b>Research</b>.'), 
+      new Award('rese4', 'Focus Group Fanatic', 100000000000000000, ['rd2'], earnedFromResearch, 'Haul a total of <b>$100 quadrillion</b> in earnings from <b>Research</b>.'), 
       new Award('rese5', 'User Storyteller', 1000000000000000000, ['risk3'], earnedFromResearch, 'Haul a total of <b>$1 quintillion</b> in earnings from <b>Research</b>.'), // 1 quint
-      new Award('rese6', 'Big-Game Coolhunter', 100000000000000000000, [], earnedFromResearch, 'Haul a total of <b>$100 quintillion</b> in earnings from <b>Research</b>.'),
+      new Award('rese6', 'Big-Game Coolhunter', 100000000000000000000, ['rd3'], earnedFromResearch, 'Haul a total of <b>$100 quintillion</b> in earnings from <b>Research</b>.'),
       new Award('rese7', 'Blue Ocean Strategist', 1000000000000000000000, ['risk4'], earnedFromResearch, 'Haul a total of <b>$1 sextillion</b> in earnings from <b>Research</b>.'), // 1 sext
-      new Award('rese8', 'Market Diviner', 100000000000000000000000, [], earnedFromResearch, 'Haul a total of <b>$100 sextillion</b> in earnings from <b>Research</b>.'), // 100 sext
+      new Award('rese8', 'Market Diviner', 100000000000000000000000, ['rd4'], earnedFromResearch, 'Haul a total of <b>$100 sextillion</b> in earnings from <b>Research</b>.'), // 100 sext
       new Award('rese9', 'Harbinger of Trends', 1000000000000000000000000, ['risk5'], earnedFromResearch, 'Haul a total of <b>$1 septillion</b> in earnings from <b>Research</b>.'), // 1 sept
-      new Award('rese10', 'Militarized Market Surveyor', 100000000000000000000000000, [], earnedFromResearch, 'Haul a total of <b>$100 septillion</b> in earnings from <b>Research</b>.'), // 100 sept
+      new Award('rese10', 'Militarized Market Surveyor', 100000000000000000000000000, ['rd5'], earnedFromResearch, 'Haul a total of <b>$100 septillion</b> in earnings from <b>Research</b>.'), // 100 sept
       new Award('rese11', 'Business Omniscient', 1000000000000000000000000000, ['risk6'], earnedFromResearch, 'Haul a total of <b>$1 octillion</b> in earnings from <b>Research</b>.'), // 1 oct
-      new Award('rese12', 'The Eye of Market Providence', 100000000000000000000000000000, [], earnedFromResearch, 'Haul a total of <b>$100 octillion</b> in earnings from <b>Research</b>.'), // 100 oct
-      new Award('rese13', 'Trend Predestination', 1000000000000000000000000000000, [], earnedFromResearch, 'Haul a total of <b>$1 nonillion</b> in earnings from <b>Research</b>.'), // 1 nonillion
+      new Award('rese12', 'The Eye of Market Providence', 100000000000000000000000000000, ['rd6'], earnedFromResearch, 'Haul a total of <b>$100 octillion</b> in earnings from <b>Research</b>.'), // 100 oct
+      new Award('rese13', 'Trend Predestination', 1000000000000000000000000000000, ['risk7'], earnedFromResearch, 'Haul a total of <b>$1 nonillion</b> in earnings from <b>Research</b>.'), // 1 nonillion
+      new Award('rese14', 'Ahead of All Curves', 100000000000000000000000000000000, ['rd7'], earnedFromResearch, 'Haul a total of <b>$100 nonillion</b> in earnings from <b>Research</b>.'), // 100 nonillion
+      new Award('rese15', 'Early Editioner', 1000000000000000000000000000000000, ['risk8'], earnedFromResearch, 'Haul a total of <b>$1 decillion</b> in earnings from <b>Research</b>.'), // 1 decillin
+      new Award('rese16', 'Keeper of Secret Knowledge', 100000000000000000000000000000000000, [], earnedFromResearch, 'Haul a total of <b>$100 decillion</b> in earnings from <b>Research</b>.'), // 100 dec
 
       new ManualAward('resMan', 'Hoarder', [], 'Keep at least <b>10 Patents</b> in storage at one time.'),
 
@@ -1352,11 +1761,15 @@ var game = (function() {
       new ManualAward('rSpd2', 'Cyclonic Brainstormer', ['spd2'], 'Sell or store a <b>Patent</b> with a <b>Speed Boost</b> of at least <b>200%</b>'),
       new ManualAward('rSpd3', 'The Wild Black Yonder ', ['spd3'], 'Sell or store a <b>Patent</b> with a <b>Speed Boost</b> of at least <b>400%</b>'),
       new ManualAward('rSpd4', 'Superluminal Thinker', ['spd4'], 'Sell or store a <b>Patent</b> with a <b>Speed Boost</b> of at least <b>600%</b>'),
+      new ManualAward('rSpd5', 'Failing Fast', ['spd5'], 'Sell or store a <b>Patent</b> with a <b>Speed Boost</b> of at least <b>800%</b>'),
+      new ManualAward('rSpd6', 'The Spirit of America', ['spd6'], 'Sell or store a <b>Patent</b> with a <b>Speed Boost</b> of at least <b>1,000%</b>'),
 
       new ManualAward('rVal1', 'Prime Deliverable', ['val1'], 'Sell or store a <b>Patent</b> with a <b>Value Boost</b> of at least <b>100%</b>'),
       new ManualAward('rVal2', 'Supplied & Demanded', ['val2'], 'Sell or store a <b>Patent</b> with a <b>Value Boost</b> of at least <b>200%</b>'),
       new ManualAward('rVal3', 'Best of Breed', ['val3'], 'Sell or store a <b>Patent</b> with a <b>Value Boost</b> of at least <b>400%</b>'),
       new ManualAward('rVal4', 'Most Valuable Patent', ['val4'], 'Sell or store a <b>Patent</b> with a <b>Value Boost</b> of at least <b>600%</b>'),
+      new ManualAward('rVal5', 'Million Dollar Idea', ['val5'], 'Sell or store a <b>Patent</b> with a <b>Value Boost</b> of at least <b>800%</b>'),
+      new ManualAward('rVal6', 'The Tavernier Blue', ['val6'], 'Sell or store a <b>Patent</b> with a <b>Value Boost</b> of at least <b>1,000%</b>'),
 
       /* ACQUISITION AWARDS */
 
@@ -1368,7 +1781,10 @@ var game = (function() {
       new Award('aq6', 'Nothing on the Inside', 100000000000000000000000000, ['ace6', 'exec3'], earnedFromAcquisitions, 'Scrape a total of <b>$100 septillion</b> in earnings from <b>Acquisitions</b>.'),
       new Award('aq7', 'Universal Acquisition', 1000000000000000000000000000, ['ace7'], earnedFromAcquisitions, 'Scrape a total of <b>$1 octillion</b> in earnings from <b>Acquisitions</b>.'),
       new Award('aq8', 'The Giant Void', 100000000000000000000000000000, ['ace8', 'exec4'], earnedFromAcquisitions, 'Scrape a total of <b>$100 octillion</b> in earnings from <b>Acquisitions</b>.'),  
-      new Award('aq9', '100% Unemployment', 1000000000000000000000000000000, [], earnedFromAcquisitions, 'Scrape a total of <b>$1 nonillion</b> in earnings from <b>Acquisitions</b>.'),  
+      new Award('aq9', '100% Unemployment', 1000000000000000000000000000000, [], earnedFromAcquisitions, 'Scrape a total of <b>$1 nonillion</b> in earnings from <b>Acquisitions</b>.'), 
+      new Award('aq10', 'Fully Optimized Workforce', 100000000000000000000000000000000, ['ace9'], earnedFromAcquisitions, 'Scrape a total of <b>$100 nonillion</b> in earnings from <b>Acquisitions</b>.'), // 100 non
+      new Award('aq11', 'Today\'s Companies, Tomorrow\'s Ashes', 1000000000000000000000000000000000, [], earnedFromAcquisitions, 'Scrape a total of <b>$1 decillion</b> in earnings from <b>Acquisitions</b>.'), // 1 dec
+      new Award('aq11', 'The Elephant\'s Graveyard', 100000000000000000000000000000000000, [], earnedFromAcquisitions, 'Scrape a total of <b>$100 decillion</b> in earnings from <b>Acquisitions</b>.'), // 100 dec
 
       new ManualAward('aqw1', 'Temporarily Embarrassed Millionaires', ['acw1'], 'Hire <b>10</b> total <b>Personal Assistants</b> in a single <b>Acquisition</b>.'),
       new ManualAward('aqw2', 'Personnel Realignment Specialists', ['acw2'], 'Hire <b>10</b> total <b>Financial Consultants</b> in a single <b>Acquisition</b>.'),
@@ -1414,6 +1830,48 @@ var game = (function() {
       new Award('fn4', 'The Telecom Cowboy', 100, [], fudgedNumberSessions, 'Brazenly <b>Fudge the Numbers</b> a total of <b>100</b> times across all businesses.'),
       new Award('fn5', 'But Failure is Not a Crime', 250, [], fudgedNumberSessions, 'Brazenly <b>Fudge the Numbers</b> a total of <b>250</b> times across all businesses.'),
 
+      /* ELECTION AWARDS */
+
+      new Award('el0', 'Cronyist', 10000000000000000000000000, ['dt1'], earnedFromElections, 'Receive <b>$10 septillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el1', 'Greased Palms', 100000000000000000000000000, ['elu0', 'strk1'], earnedFromElections, 'Receive <b>$100 septillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el2', 'Pay to Play', 1000000000000000000000000000, ['elu1'], earnedFromElections, 'Receive <b>$1 octillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el3', 'Influence Peddler', 10000000000000000000000000000, ['dt2', 'strk2'], earnedFromElections, 'Receive <b>$10 octillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el4', 'Quid Pro Quo', 100000000000000000000000000000, ['elu2'], earnedFromElections, 'Receive <b>$100 octillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el5', 'Mr. Ten Percent', 1000000000000000000000000000000, ['elu3', 'strk3'], earnedFromElections, 'Receive <b>$1 nonillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el6', 'Boss Tweed', 10000000000000000000000000000000, ['dt3'], earnedFromElections, 'Receive <b>$10 nonillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el7', 'Tangentopoli', 100000000000000000000000000000000, ['elu4', 'strk4'], earnedFromElections, 'Receive <b>$100 nonillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el8', 'The Golden Goose', 1000000000000000000000000000000000, ['elu5'], earnedFromElections, 'Receive <b>$1 decillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el9', 'Raubwirtschaft', 10000000000000000000000000000000000, ['dt4', 'strk5'], earnedFromElections, 'Receive <b>$10 decillion</b> in kickbacks from <b>Elections</b>.'),
+      new Award('el10', 'Friends in High Places', 100000000000000000000000000000000000, [], earnedFromElections, 'Receive <b>$100 decillion</b> in kickbacks from <b>Elections</b>.'),
+
+      new Award('gf1', 'Accident-Prone', 1, [], gaffesExperienced, 'Witness your chosen <b>Election</b> candidate engage in a <b>gaffe</b>.'),
+      new Award('gf2', 'I\'m Nothing You\'ve Heard', 100, [], gaffesExperienced, 'Witness your chosen <b>Election</b> candidates engage in <b>100 gaffes</b>.'),
+      new Award('gf3', 'We Were Wrong, Terribly Wrong', 1000, [], gaffesExperienced, 'Witness your chosen <b>Election</b> candidates engage in <b>1,000 gaffes</b>.'),
+      new Award('gf4', 'Tis Done and Cannot Be Revok\'d', 5000, [], gaffesExperienced, 'Witness your chosen <b>Election</b> candidates engage in <b>5,000 gaffes</b>.'),
+      new Award('gf5', 'Mistakes Were Made', 10000, [], gaffesExperienced, 'Witness your chosen <b>Election</b> candidates engage in <b>10,000 gaffes</b>.'),
+
+      new Award('don01', 'Gift Horse', 1000000000000000000000000, ['gaf0'], donatedToCandidates, 'Donate <b>$1 septillion</b> to <b>Election</b> candidates.'),
+      new Award('don02', 'Hard Money', 100000000000000000000000000, ['pr0'], donatedToCandidates, 'Donate <b>$100 septillion</b> to <b>Election</b> candidates.'),
+      new Award('don2', 'Campaign Financier', 1000000000000000000000000000, ['gaf1', 'elem1'], donatedToCandidates, 'Donate <b>$1 octillion</b> to <b>Election</b> candidates.'),
+      new Award('don3', 'Philanthropist', 100000000000000000000000000000, ['pr1'], donatedToCandidates, 'Donate <b>$100 octillion</b> to <b>Election</b> candidates.'),
+      new Award('don4', 'One-Man Super PAC', 1000000000000000000000000000000, ['gaf2'], donatedToCandidates, 'Donate <b>$1 nonillion</b> to <b>Election</b> candidates.'),
+      new Award('don5', 'Sow Generously, Reap Generously', 100000000000000000000000000000000, ['pr2'], donatedToCandidates, 'Donate <b>$100 nonillion</b> to <b>Election</b> candidates.'),
+      new Award('don6', 'Maximum Individual Contribution', 1000000000000000000000000000000000, ['gaf3'], donatedToCandidates, 'Donate <b>$1 decillion</b> to <b>Election</b> candidates.'),
+
+      new Award('wel1', 'Four More Years', 1, [], electionsWon, 'Win your first <b>Election</b>.'),
+      new Award('wel2', 'A Stunning Upset', 100, [], electionsWon, 'Win <b>100</b> total <b>Elections</b>.'),
+      new Award('wel3', 'One-Party State', 1000, [], electionsWon, 'Win <b>1,000</b> total <b>Elections</b>.'),
+
+      new Award('lel1', 'What Happened', 1, [], electionsLost, 'Lose your first <b>Election</b>.'),
+      new Award('lel2', 'Loser Makes Good', 100, [], electionsLost, 'Lose <b>100</b> total <b>Elections</b>.'),
+      new Award('lel3', 'May God Bless His Stewardship', 500, [], electionsLost, 'Lose <b>500</b> total <b>Elections</b>.'),
+
+      new ManualAward('welp1', 'Dewey Defeats Truman', [], 'Win an <b>Election</b> while polling under <b>50%</b>.'),
+      new ManualAward('welp2', 'No Recount Needed', [], 'Win an <b>Election</b> while polling at <b>100%</b>.'),
+      new ManualAward('don1', 'Wise Investment', [], 'Donate more cash in an <b>Election</b> than you end up earning.'),
+      new ManualAward('elbio', 'Would You Like to Know More?', [], 'Read the full bio of one of your candidates.'),
+      new ManualAward('suff1', 'Peak Electability', [], 'Win an <b>Election</b> without making any donations.'),
+
       /* OUTGOING EMAIL AWARDS */
 
       new Award('oI1', 'Attentive Executive', (1 * hoursInMilliseconds), ['ouI1'], investmentTimeBoosted, 'Inspire <b>1 hour</b> of extra output from your <b>Investments</b> department.'),
@@ -1434,6 +1892,12 @@ var game = (function() {
       new Award('oA4', 'Minimum Viable Personnel', (50 * hoursInMilliseconds), ['ouA4'], acquisitionTimeBoosted, 'Assist your <b>Acquisitions</b> department in managing <b>50 hours</b> of additional firings.'),
       new Award('oA5', 'The Leanest Methodology', (100 * hoursInMilliseconds), ['ouA5'], acquisitionTimeBoosted, 'Assist your <b>Acquisitions</b> department in managing <b>100 hours</b> of additional firings.'),
 
+      new Award('oT1', 'So Thoughtful', (1 * hoursInMilliseconds), ['ouT1'], trainingTimeBoosted, 'Encourage your <b>Career Development</b> department to cultivate <b>1 hour</b> of extra productivity.'), 
+      new Award('oT2', 'Mission Stater', (10 * hoursInMilliseconds), ['ouT2'], trainingTimeBoosted, 'Encourage your <b>Career Development</b> department to cultivate <b>10 hours</b> of extra productivity.'),
+      new Award('oT3', 'Culture Cultivator', (25 * hoursInMilliseconds), ['ouT3'], trainingTimeBoosted, 'Encourage your <b>Career Development</b> department to cultivate <b>25 hours</b> of extra productivity.'),
+      new Award('oT4', 'Personenkultus', (50 * hoursInMilliseconds), ['ouT4'], trainingTimeBoosted, 'Encourage your <b>Career Development</b> department to cultivate <b>50 hours</b> of extra productivity.'),
+      new Award('oT5', 'The Eternal Leader', (100 * hoursInMilliseconds), ['ouT5'], trainingTimeBoosted, 'Encourage your <b>Career Development</b> department to cultivate <b>100 hours</b> of extra productivity.'),
+
       new Award('str1', 'Caretaker', 1, ['stb1'], stressReduced, 'Email <b>Human Resources</b> to reduce your employees\' <b>Stress Level</b> by a total of <b>1%</b>.'),
       new Award('str2', 'Interpersonally Skilled', 10, ['stb2'], stressReduced, 'Email <b>Human Resources</b> to reduce your employees\' <b>Stress Level</b> by a total of <b>10%</b>.'),
       new Award('str3', 'Corporate Empath', 50, ['stb3'], stressReduced, 'Email <b>Human Resources</b> to reduce your employees\' <b>Stress Level</b> by a total of <b>50%</b>.'),
@@ -1446,8 +1910,9 @@ var game = (function() {
       new Award('out4', 'Digital Storyteller', 100, [], outgoingEmails, 'Write <b>100</b> total <b>Outgoing Emails</b> across all businesses.'),
       new Award('out5', 'The Great Communicator', 250, [], outgoingEmails, 'Write <b>250</b> total <b>Outgoing Emails</b> across all businesses.'),
       new Award('out6', 'From Your Keyboard to God\'s Ear', 500, [], outgoingEmails, 'Write <b>500</b> total <b>Outgoing Emails</b> across all businesses.'),
+      new Award('out7', 'Maestro Lettera', 1000, [], outgoingEmails, 'Write <b>1,000</b> total <b>Outgoing Emails</b> across all businesses.'),
 
-      new ManualAward('out7', 'Ascendant Nurturer', [], 'Reference one of your <b>Active Investments</b> in an <b>Outgoing Email</b> to the <b>Investments</b> department.'),
+      new ManualAward('out7-5', 'Ascendant Nurturer', [], 'Reference one of your <b>Active Investments</b> in an <b>Outgoing Email</b> to the <b>Investments</b> department.'),
       new ManualAward('out8', 'Vigilant Prodder', [], 'Reference the current product being <b>Researched</b> in an <b>Outgoing Email</b> to the <b>R&D</b> department.'),
       new ManualAward('out9', 'Can I Speak to the Manager?', [], 'Address the founder of your current <b>Acquisition</b> directly in an <b>Outgoing Email</b> to the <b>Acquisitions</b> department.'),
       new ManualAward('out10', 'Tactical Flanking', [], 'Address an <b>Outgoing Email</b> to somebody currently active in your <b>Acquisition Chat</b>.'),
@@ -1465,50 +1930,62 @@ var game = (function() {
       new Award('bkm1', 'Doubled Down', 2, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>2</b>.'),
       new Award('bkm2', 'Business Decimator', 10, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>10</b>.'),
       new Award('bkm3', 'And So It Goes...', 50, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>50</b>.'),
-      new Award('bkm4', 'Filing for Chapter 50', 100, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>100</b>.'),
+      new Award('bkm4', 'Filing for Chapter 100', 100, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>100</b>.'),
       new Award('bkm5', 'The Ghosts of Fallen Businesses', 500, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>500</b>.'),
       new Award('bkm6', 'The Most Private of Equity', 1000, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>1,000</b>.'),
       new Award('bkm7', 'Choke Their Rivers With Our Bankruptcies', 2500, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>2,500</b>.'),
       new Award('bkm8', 'None More Bankrupt', 10000, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>10,000</b>.'),
       new Award('bkm9', 'The Poincaré Bankruptcy Theorem', 25000, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>25,000</b>.'),
+      new Award('bkm10', 'The Bankruptcy that Came to Sarnath', 50000, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>50,000</b>.'),
+      new Award('bkm11', 'The Vacuum of Bankruptcy', 100000, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>100,000</b>.'),
+      new Award('bkm12', 'Cosmological Bankruptcy Horizon', 250000, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>250,000</b>.'),
+      new Award('bkm13', 'Not With a Bang but With a Bankruptcy', 500000, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>500,000</b>.'),
+      new Award('bkm14', 'The Bankruptcy Out of the Sea', 1000000, [], bankruptcyBonus, 'Raise your <b>Bankruptcy Multiplier</b> to <b>1 million</b>.'),
     	
     	new CustomAward('clk1', 'Barely Lifted a Finger', [], [
-    	    { stat: totalCash, val: 100000000, type: 'gte'},
+    	    { stat: totalCashSlowed, val: 100000000, type: 'gte'},
     	    { stat: manualClicks, val: 15, type: 'lte'}
 	    ], 'Earn at least <b>$100 million</b> while clicking a maximum of <b>15</b> times.'),
 	    
-	   new CustomAward('clk2', 'Peak Efficiency', [], [
-    	    { stat: totalCash, val: 100000000, type: 'gte'},
+	    new CustomAward('clk2', 'Peak Efficiency', [], [
+    	    { stat: totalCashSlowed, val: 100000000, type: 'gte'},
     	    { stat: manualClicks, val: 1000, type: 'lte'}
 	    ], 'Earn at least <b>$100 million</b> while clicking a maximum of <b>1000</b> times.'),
 
+     new ManualAward('fst1', 'A Quick Buck', [], 'Earn <b>$1 trillion</b> within <b>1 minute</b> of starting your business.'),
+     new ManualAward('fst2', 'Instant Success', [], 'Earn <b>$1 quadrillion</b> within <b>1 minute</b> of starting your business.'),
+     new ManualAward('fst3', 'Rapidly Iterating', [], 'Earn <b>$1 quintillion</b> within <b>1 minute</b> of starting your business.'),
+     new ManualAward('fst4', 'Breakneck Speedster', [], 'Earn <b>$1 sextillion</b> within <b>1 minute</b> of starting your business.'),
+     new ManualAward('fst5', 'Maximum Overdrive', [], 'Earn <b>$1 septillion</b> within <b>1 minute</b> of starting your business.'),
+     new ManualAward('fst6', 'The Bus That Couldn\'t Slow Down', [], 'Earn <b>$1 octillion</b> within <b>1 minute</b> of starting your business.'),
+
       new CustomAward('bnk1', 'trigger', ['bk1'], [
-        { stat: totalCash, val: 1000000000000, type: 'gte'},
+        { stat: totalCashSlowed, val: 1000000000000, type: 'gte'},
         { stat: bankruptcies, val: 1, type: 'gte'}
       ]),
 
       new CustomAward('bnk2', 'trigger', ['bk2'], [
-        { stat: totalCash, val: 1000000000000000, type: 'gte'},
+        { stat: totalCashSlowed, val: 1000000000000000, type: 'gte'},
         { stat: bankruptcies, val: 1, type: 'gte'}
       ]),
 
       new CustomAward('bnk3', 'trigger', ['bk3'], [
-        { stat: totalCash, val: 1000000000000000000, type: 'gte'}, // 1 quint
+        { stat: totalCashSlowed, val: 1000000000000000000, type: 'gte'}, // 1 quint
         { stat: bankruptcies, val: 1, type: 'gte'}
       ]),
 
       new CustomAward('bnk4', 'trigger', ['bk4'], [
-        { stat: totalCash, val: 1000000000000000000000, type: 'gte'}, // 1 sext
+        { stat: totalCashSlowed, val: 1000000000000000000000, type: 'gte'}, // 1 sext
         { stat: bankruptcies, val: 1, type: 'gte'}
       ]),
 
       new CustomAward('bnk5', 'trigger', ['bk5'], [
-        { stat: totalCash, val: 1000000000000000000000000, type: 'gte'}, // 1 sept
+        { stat: totalCashSlowed, val: 1000000000000000000000000, type: 'gte'}, // 1 sept
         { stat: bankruptcies, val: 1, type: 'gte'}
       ]),
 
       new CustomAward('bnk6', 'trigger', ['bk6'], [
-        { stat: totalCash, val: 1000000000000000000000000000, type: 'gte'}, // 1 oct
+        { stat: totalCashSlowed, val: 1000000000000000000000000000, type: 'gte'}, // 1 oct
         { stat: bankruptcies, val: 1, type: 'gte'}
       ]),
 
@@ -1525,75 +2002,190 @@ var game = (function() {
 
       // Mid-tier
 
-      new CustomAward('smb1', 'The Bosses', ['symb1'], [
-        { stat: getUnit(3).num, val: 125, type: 'gte'},
-        { stat: getUnit(4).num, val: 125, type: 'gte'}
-      ], 'Employ <b>125</b> each of <b>Middle Managers</b> and <b>C-Levels</b>.'),
+      new CustomAward('smb1', 'The Bosses', ['nsymb1'], [
+        { stat: getUnit(4).num, val: 125, type: 'gte'},
+        { stat: getUnit(5).num, val: 125, type: 'gte'}
+      ], 'Employ <b>125</b> each of <b>C-Levels</b> and <b>Blue Bloods</b>.'),
 
-      new CustomAward('smb2', 'Chain of Command', ['symb2'], [
-        { stat: getUnit(3).num, val: 175, type: 'gte'},
-        { stat: getUnit(4).num, val: 175, type: 'gte'}
-      ], 'Employ <b>175</b> each of <b>Middle Managers</b> and <b>C-Levels</b>.'),
+      new CustomAward('smb2', 'The Second Estate', ['nsymb2'], [
+        { stat: getUnit(4).num, val: 175, type: 'gte'},
+        { stat: getUnit(5).num, val: 175, type: 'gte'}
+      ], 'Employ <b>175</b> each of <b>C-Levels</b> and <b>Blue Bloods</b>.'),
 
-      new CustomAward('smb3', 'The Second Estate', ['symb3'], [
-        { stat: getUnit(5).num, val: 125, type: 'gte'},
+      new CustomAward('smb3', 'Chain of Command', ['nsymb3'], [
         { stat: getUnit(6).num, val: 125, type: 'gte'},
         { stat: getUnit(7).num, val: 125, type: 'gte'}
-      ], 'Employ <b>125</b> each of <b>Blue Bloods</b>, <b>Privatized Cops</b>, and <b>Pocket Politicians</b>.'),
+      ], 'Employ <b>125</b> each of <b>Privatized Cops</b> and <b>Pocket Politicians</b>.'),
 
-      new CustomAward('smb4', 'The Shoulders of Atlas', ['symb4'], [
-        { stat: getUnit(5).num, val: 175, type: 'gte'},
+      new CustomAward('smb4', 'The Shoulders of Atlas', ['nsymb4'], [
         { stat: getUnit(6).num, val: 175, type: 'gte'},
         { stat: getUnit(7).num, val: 175, type: 'gte'}
-      ], 'Employ <b>175</b> each of <b>Blue Bloods</b>, <b>Privatized Cops</b>, and <b>Pocket Politicians</b>.'),
+      ], 'Employ <b>175</b> each of <b>Privatized Cops</b> and <b>Pocket Politicians</b>.'),
 
-      new CustomAward('smb5', 'A City Upon a Hill', ['symb5'], [
+      new CustomAward('smb5', 'A City Upon a Hill', ['nsymb5'], [
         { stat: getUnit(8).num, val: 125, type: 'gte'},
         { stat: getUnit(9).num, val: 125, type: 'gte'}
       ], 'Employ <b>125</b> each of <b>Mercenary Groups</b> and <b>Client States</b>.'),
 
-      new CustomAward('smb6', 'The Last Best Hope of Earth', ['symb6'], [
+      new CustomAward('smb6', 'The Last Best Hope of Earth', ['nsymb6'], [
         { stat: getUnit(8).num, val: 175, type: 'gte'},
         { stat: getUnit(9).num, val: 175, type: 'gte'}
       ], 'Employ <b>175</b> each of <b>Mercenary Groups</b> and <b>Client States</b>.'),
 
-      new CustomAward('smb7', 'Novus Ordo Seclorum', ['symb7'], [
+      new CustomAward('smb7', 'Novus Ordo Seclorum', ['nsymb7'], [
         { stat: getUnit(10).num, val: 125, type: 'gte'},
         { stat: getUnit(11).num, val: 125, type: 'gte'}
       ], 'Employ <b>125</b> each of <b>Shadow Governments</b> and <b>Puppetmasters</b>.'),
 
-      new CustomAward('smb8', 'The Imperial Cult of the Goat', ['symb8'], [
+      new CustomAward('smb8', 'The Imperial Cult of the Goat', ['nsymb8'], [
         { stat: getUnit(10).num, val: 175, type: 'gte'},
         { stat: getUnit(11).num, val: 175, type: 'gte'}
       ], 'Employ <b>175</b> each of <b>Shadow Governments</b> and <b>Puppetmasters</b>.'),
 
-      new CustomAward('smb9', 'Bought the World a Coke', ['symb9'], [
-        { stat: getUnit(2).num, val: 250, type: 'gte'},
-        { stat: getUnit(3).num, val: 250, type: 'gte'}
-      ], 'Employ <b>250</b> each of <b>Sales Hotshots</b> and <b>Middle Managers</b>.'),
+      new CustomAward('smb0', 'High Converters', ['nsymb0'], [
+        { stat: getUnit(2).num, val: 125, type: 'gte'},
+        { stat: getUnit(3).num, val: 125, type: 'gte'}
+      ], 'Employ <b>125</b> each of <b>Sales Hotshots</b> and <b>Middle Managers</b>.'),
 
-      new CustomAward('smb10', 'The Oligarchs', ['symb10'], [
-        { stat: getUnit(4).num, val: 250, type: 'gte'},
-        { stat: getUnit(5).num, val: 250, type: 'gte'}
-      ], 'Employ <b>250</b> each of <b>C-Levels</b> and <b>Blue Bloods</b>.'),
+      new CustomAward('smb00', 'Called to Action', ['nsymb00'], [
+        { stat: getUnit(2).num, val: 175, type: 'gte'},
+        { stat: getUnit(3).num, val: 175, type: 'gte'}
+      ], 'Employ <b>175</b> each of <b>Sales Hotshots</b> and <b>Middle Managers</b>.'),
 
-      new CustomAward('smb11', 'The Monopoly on Violence', ['symb11'], [
-        { stat: getUnit(6).num, val: 250, type: 'gte'},
-        { stat: getUnit(7).num, val: 250, type: 'gte'}
-      ], 'Employ <b>250</b> each of <b>Privatized Cops</b> and <b>Pocket Politicians</b>.'),
+      new CustomAward('smb9', 'Bought the World a Coke', ['nsymb9'], [
+        { stat: getUnit(2).num, val: 225, type: 'gte'},
+        { stat: getUnit(3).num, val: 225, type: 'gte'}
+      ], 'Employ <b>225</b> each of <b>Sales Hotshots</b> and <b>Middle Managers</b>.'),
 
-      new CustomAward('smb12', 'The Empire of Liberty', ['symb12'], [
-        { stat: getUnit(8).num, val: 250, type: 'gte'},
-        { stat: getUnit(9).num, val: 250, type: 'gte'}
-      ], 'Employ <b>250</b> each of <b>Mercenary Groups</b> and <b>Client States</b>.'),
+      new CustomAward('smb9-1', 'Fully Siloed', ['nsymb9.1'], [
+        { stat: getUnit(2).num, val: 275, type: 'gte'},
+        { stat: getUnit(3).num, val: 275, type: 'gte'}
+      ], 'Employ <b>275</b> each of <b>Sales Hotshots</b> and <b>Middle Managers</b>.'),
 
-      new CustomAward('smb13', 'The Man Behind the Curtain', ['symb13'], [
-        { stat: getUnit(10).num, val: 250, type: 'gte'},
-        { stat: getUnit(11).num, val: 250, type: 'gte'}
-      ], 'Employ <b>250</b> each of <b>Shadow Governments</b> and <b>Puppetmasters</b>.'),
+      new CustomAward('smb15', 'On Commission', ['nsymb15'], [
+        { stat: getUnit(2).num, val: 325, type: 'gte'},
+        { stat: getUnit(3).num, val: 325, type: 'gte'}
+      ], 'Employ <b>325</b> each of <b>Sales Hotshots</b> and <b>Middle Managers</b>.'),
+
+      new CustomAward('smb15-1', 'All Sales Final', ['nsymb15.1'], [
+        { stat: getUnit(2).num, val: 375, type: 'gte'},
+        { stat: getUnit(3).num, val: 375, type: 'gte'}
+      ], 'Employ <b>375</b> each of <b>Sales Hotshots</b> and <b>Middle Managers</b>.'),
+
+      new CustomAward('smb10', 'The Oligarchs', ['nsymb10'], [
+        { stat: getUnit(4).num, val: 225, type: 'gte'},
+        { stat: getUnit(5).num, val: 225, type: 'gte'}
+      ], 'Employ <b>225</b> each of <b>C-Levels</b> and <b>Blue Bloods</b>.'),
+
+      new CustomAward('smb10-1', 'Omnia Sunt Privatus', ['nsymb10.1'], [
+        { stat: getUnit(4).num, val: 275, type: 'gte'},
+        { stat: getUnit(5).num, val: 275, type: 'gte'}
+      ], 'Employ <b>275</b> each of <b>C-Levels</b> and <b>Blue Bloods</b>.'),
+
+      new CustomAward('smb16', 'Kleptocracy', ['nsymb16'], [
+        { stat: getUnit(4).num, val: 325, type: 'gte'},
+        { stat: getUnit(5).num, val: 325, type: 'gte'}
+      ], 'Employ <b>325</b> each of <b>C-Levels</b> and <b>Blue Bloods</b>.'),
+
+      new CustomAward('smb16-1', 'Respect Your Betters', ['nsymb16.1'], [
+        { stat: getUnit(4).num, val: 375, type: 'gte'},
+        { stat: getUnit(5).num, val: 375, type: 'gte'}
+      ], 'Employ <b>375</b> each of <b>C-Levels</b> and <b>Blue Bloods</b>.'),
+
+      new CustomAward('smb11', 'The Monopoly on Violence', ['nsymb11'], [
+        { stat: getUnit(6).num, val: 225, type: 'gte'},
+        { stat: getUnit(7).num, val: 225, type: 'gte'}
+      ], 'Employ <b>225</b> each of <b>Privatized Cops</b> and <b>Pocket Politicians</b>.'),
+
+      new CustomAward('smb11-1', 'State Sanctioned', ['nsymb11.1'], [
+        { stat: getUnit(6).num, val: 275, type: 'gte'},
+        { stat: getUnit(7).num, val: 275, type: 'gte'}
+      ], 'Employ <b>275</b> each of <b>Privatized Cops</b> and <b>Pocket Politicians</b>.'),
+
+      new CustomAward('smb17', 'Sovereign Authorities', ['nsymb17'], [
+        { stat: getUnit(6).num, val: 325, type: 'gte'},
+        { stat: getUnit(7).num, val: 325, type: 'gte'}
+      ], 'Employ <b>325</b> each of <b>Privatized Cops</b> and <b>Pocket Politicians</b>.'),
+
+      new CustomAward('smb17-1', 'Long Arm of the Law', ['nsymb17.1'], [
+        { stat: getUnit(6).num, val: 375, type: 'gte'},
+        { stat: getUnit(7).num, val: 375, type: 'gte'}
+      ], 'Employ <b>375</b> each of <b>Privatized Cops</b> and <b>Pocket Politicians</b>.'),
+
+      new CustomAward('smb12', 'The Empire of Liberty', ['nsymb12'], [
+        { stat: getUnit(8).num, val: 225, type: 'gte'},
+        { stat: getUnit(9).num, val: 225, type: 'gte'}
+      ], 'Employ <b>225</b> each of <b>Mercenary Groups</b> and <b>Client States</b>.'),
+
+      new CustomAward('smb12-1', 'Go West, Young Man', ['nsymb12.1'], [
+        { stat: getUnit(8).num, val: 275, type: 'gte'},
+        { stat: getUnit(9).num, val: 275, type: 'gte'}
+      ], 'Employ <b>275</b> each of <b>Mercenary Groups</b> and <b>Client States</b>.'),
+
+      new CustomAward('smb18', 'White Man\'s Burden', ['nsymb18'], [
+        { stat: getUnit(8).num, val: 325, type: 'gte'},
+        { stat: getUnit(9).num, val: 325, type: 'gte'}
+      ], 'Employ <b>325</b> each of <b>Mercenary Groups</b> and <b>Client States</b>.'),
+
+      new CustomAward('smb18-1', 'The Cause of All Mankind', ['nsymb18.1'], [
+        { stat: getUnit(8).num, val: 375, type: 'gte'},
+        { stat: getUnit(9).num, val: 375, type: 'gte'}
+      ], 'Employ <b>375</b> each of <b>Mercenary Groups</b> and <b>Client States</b>.'),
+
+      new CustomAward('smb13', 'The Man Behind the Curtain', ['nsymb13'], [
+        { stat: getUnit(10).num, val: 225, type: 'gte'},
+        { stat: getUnit(11).num, val: 225, type: 'gte'}
+      ], 'Employ <b>225</b> each of <b>Shadow Governments</b> and <b>Puppetmasters</b>.'),
+
+      new CustomAward('smb13-1', 'A Smoke-Filled Room', ['nsymb13.1'], [
+        { stat: getUnit(10).num, val: 275, type: 'gte'},
+        { stat: getUnit(11).num, val: 275, type: 'gte'}
+      ], 'Employ <b>275</b> each of <b>Shadow Governments</b> and <b>Puppetmasters</b>.'),
+
+      new CustomAward('smb19', 'Éminence Grise', ['nsymb19'], [
+        { stat: getUnit(10).num, val: 325, type: 'gte'},
+        { stat: getUnit(11).num, val: 325, type: 'gte'}
+      ], 'Employ <b>325</b> each of <b>Shadow Governments</b> and <b>Puppetmasters</b>.'),
+
+      new CustomAward('smb19-1', 'The Blind Idiot God', ['nsymb19.1'], [
+        { stat: getUnit(10).num, val: 375, type: 'gte'},
+        { stat: getUnit(11).num, val: 375, type: 'gte'}
+      ], 'Employ <b>375</b> each of <b>Shadow Governments</b> and <b>Puppetmasters</b>.'),
+
+      new CustomAward('smb14', 'Nulla Crux, Nulla Corona', ['nsymb14'], [
+        { stat: getUnit(0).num, val: 500, type: 'gte'},
+        { stat: getUnit(1).num, val: 500, type: 'gte'}
+      ], 'Employ <b>500</b> each of <b>Interns</b> and <b>Wage Slaves</b>.'),
 
       new Award('svw', 'It\'s Got a Lot of Numbers In It', 50, [], statsTabViews, 'Stare deep into the void of numbers and charts under <b>Stats</b> at least <b>50</b> times.'),
       new Award('avw', 'Look Upon My Works', 50, [], achievementTabViews, 'Ogle your accomplishments under <b>Upgrades & Achievements</b> at least <b>50</b> times.'),
+
+      new ManualAward('ps0', 'Lifetime Learner', [], 'Delve into <b>Career Development</b> for the first time.'),
+      new ManualAward('ps1', 'Mind Expansion', [], 'Push one form of <b>Career Development</b> to at least <b>level 10</b>.'),
+      new ManualAward('ps2', 'Forbidden Knowledge', [], 'Push one form of <b>Career Development</b> to at least <b>level 20</b>.'),
+      new ManualAward('ps3', 'Well-Rounded', [], 'Earn at least <b>1 level</b> in every form of <b>Career Development</b>.'),
+      new ManualAward('ps4', 'Jack of All Trades', [], 'Earn at least <b>10 levels</b> in every form of <b>Career Development</b>.'),
+      new ManualAward('ps5', 'Polymath', [], 'Earn at least <b>20 levels</b> in every form of <b>Career Development</b>.'),
+
+      new ManualAward('tr0', 'Much Pain, a Little Gain', ['tc3'], 'Subject an employee to <b>Training</b> for the first time.'),
+      new ManualAward('tr1', 'Every Muscle Must be Tight', ['tc4'], 'Push an employee to be <b>100% Trained</b> for the first time.'),
+      new ManualAward('tr2', 'Just a Bunch of Hunks', ['tc1'], 'Push all of your employees to be <b>100% Trained</b> at once.'),
+      new ManualAward('tr3', 'Overqualified', ['tc5'], 'Push an employee to be <b>200% Trained</b> for the first time.'),
+      new ManualAward('tr4', 'Maximum Crunch', ['tc2'], 'Push all of your employees to be <b>200% Trained</b> at once.'),
+      new ManualAward('tr5', 'What Peak Performance Looks Like', [], 'Push an employee to be <b>300% Trained</b> for the first time.'),
+      new ManualAward('tr6', 'PEPCK-C<sup>mus</sup> Employees', [], 'Push all of your employees to be <b>300% Trained</b> at once.'),
+
+      new Award('tt1', 'Risen and Ground', 100 * hoursInMilliseconds, [], timeTrainingAllBusinesses, 'Commit at least <b>100 hours</b> to employee training across all businesses.'),
+      new Award('tt2', 'Seeing Some Progress', 500 * hoursInMilliseconds, [], timeTrainingAllBusinesses, 'Commit at least <b>500 hours</b> to employee training across all businesses.'),
+      new Award('tt3', 'Nose to the Grindstone', 1000 * hoursInMilliseconds, [], timeTrainingAllBusinesses, 'Commit at least <b>1,000 hours</b> to employee training across all businesses.'),
+      new Award('tt4', 'All Work, No Play', 2500 * hoursInMilliseconds, [], timeTrainingAllBusinesses, 'Commit at least <b>2,500 hours</b> to employee training across all businesses.'),
+      new Award('tt5', 'Highest Achiever', 5000 * hoursInMilliseconds, [], timeTrainingAllBusinesses, 'Commit at least <b>5,000 hours</b> to employee training across all businesses.'),
+      new Award('tt6', 'Outlier', 10000 * hoursInMilliseconds, [], timeTrainingAllBusinesses, 'Commit at least <b>10,000 hours</b> to employee training across all businesses.'),
+
+      new Award('cr1', 'Hello, Mother Leopard', 1, ['cru1'], crypticEmailsReceived, 'Receive a <b>Cryptic Email</b> for the first time.'),
+      new Award('cr2', 'Spirit Cooked', 1000, ['cru2'], crypticEmailEarnings, 'Add <b>1,000</b> to your <b>Next Bankruptcy Bonus</b> through <b>Cryptic Emails</b>.'),
+      new Award('cr3', 'Be Cautious They Are Not Human', 10000, ['cru3'], crypticEmailEarnings, 'Add <b>10,000</b> to your <b>Next Bankruptcy Bonus</b> through <b>Cryptic Emails</b>.'),
+      new Award('cr4', 'Harbinger of the Storm', 100000, ['cru4'], crypticEmailEarnings, 'Add <b>100,000</b> to your <b>Next Bankruptcy Bonus</b> through <b>Cryptic Emails</b>.'),
     	
     	new ManualAward('timePlayed1', 'Fresh New Startup', [], 'Experience at least <b>1 full hour</b> of business successes.'), 
     	new ManualAward('timePlayed2', 'Established Corporation', [], 'Experience at least <b>1 full day</b> of business successes.'),
@@ -1602,13 +2194,13 @@ var game = (function() {
     	new ManualAward('timePlayed5', 'All-Encompassing System', [], 'Experience at least <b>3 full weeks</b> of business successes.'),
       new ManualAward('timePlayed6', 'Ancient Cyclopean Construct', [], 'Experience at least <b>1 full month</b> of business successes.'),
     	
-    	new ManualAward('buy10', 'Big Spender', [], 'Hire <b>10</b> Employees at once.'),
-    	new ManualAward('buy25', 'Hiring Spree', [], 'Hire <b>25</b> Employees at once.'),
-    	new ManualAward('buy100', 'Infinitely Scalable', [], 'Hire <b>100</b> Employees at once.'),
+    	new ManualAward('buy10', 'Big Spender', [], 'Hire at least <b>10</b> Employees at once.'),
+    	new ManualAward('buy25', 'Hiring Spree', [], 'Hire at least <b>25</b> Employees at once.'),
+    	new ManualAward('buy100', 'Infinitely Scalable', [], 'Hire at least <b>100</b> Employees at once.'),
     
-    	new ManualAward('sell10', 'Decimator', [], 'Fire <b>10</b> Employees at once.'),
-    	new ManualAward('sell25', 'Firing Spree', [], 'Fire <b>25</b> Employees at once.'),
-    	new ManualAward('sell100', 'Rightsizing!', [], 'Fire <b>100</b> Employees at once.'),
+    	new ManualAward('sell10', 'Decimator', [], 'Fire at least <b>10</b> Employees at once.'), 
+    	new ManualAward('sell25', 'Firing Spree', [], 'Fire at least <b>25</b> Employees at once.'),
+    	new ManualAward('sell100', 'Rightsizing!', [], 'Fire at least <b>100</b> Employees at once.'),
       new ManualAward('sellAll', 'Benny, Bring Me Everyone', [], 'Fire everybody.'),
     	
     	new ManualAward('have1', 'Make Total Employ', ['h1'], 'Employ at least <b>1</b> employee of each type.'),
@@ -1617,17 +2209,13 @@ var game = (function() {
     	new ManualAward('have150', 'Maybe Too Many Now', ['h150'], 'Employ at least <b>150</b> employees of each type.'),
     	new ManualAward('have200', 'Pretty Much All of \'Em', ['h200'], 'Employ at least <b>200</b> employees of each type.'),
       new ManualAward('have250', 'Even More of \'Em', ['h250'], 'Employ at least <b>250</b> employees of each type.'),
-      new ManualAward('have300', 'Definitely Too Many', [], 'Employ at least <b>300</b> employees of each type.'),
+      new ManualAward('have300', 'Definitely Too Many', ['h300'], 'Employ at least <b>300</b> employees of each type.'),
+      new ManualAward('have350', 'It\'s Gone Too Far', ['h350'], 'Employ at least <b>350</b> employees of each type.'),
+      new ManualAward('have400', 'This Must End', [], 'Employ at least <b>400</b> employees of each type.'),
     	
     	new ManualAward('export', 'Cautious', [], 'Export your game data for the first time.'),
     	new ManualAward('import', 'Duty-Free', [], 'Import game data for the first time.')
 	]).extend({ deferred: true, rateLimit: 500});
-	
-	var newAchievementCount = new Stat('New Achievements', ko.computed(function() {
-	  return achievements().filter(function(a) {
-	    return a.name !== 'trigger' && a.awarded() && !a.read();
-	  }).length;
-	}, this));
 	
 	totalAchievementCount = achievements().filter(function(item) {
 	  return item.name !== 'trigger';
@@ -1653,9 +2241,48 @@ var game = (function() {
       return 0;
     }
   };
+
+  /* SECRET ACHIEVEMENTS */
+
+  var secretAchievements = ko.observableArray([
+    new ManualAward('brk', 'On a Break', [], 'Take a break for at least <b>1 month</b> before realizing that you can\'t drop out of this system.'),
+    new Award('empk', 'Truly Callous', 1000, [], employeesKilled, 'Discover that at least <b>1,000</b> employees couldn\'t hack it.'),
+    new Award('outg', 'Gutenberger', 100000, [], outgoingEmails, 'Compose at least <b>100,000</b> outgoing emails.'),
+    new Award('bankr', 'Infinite Looper', 1000, [], bankruptcies, 'Declare bankruptcy at least <b>1,000</b> times.'),
+    new Award('chatmax', 'You are typing...', 100000, [], wordsChatted, 'Type at least <b>100,000</b> smart words into acquisition chats.'),
+    new Award('auc1', 'Autoclicked', 1000000, [], manualClicks, 'Manually click at least <b>1 million</b> times.'),
+    new ManualAward('timePlayed7', 'Never Forget', [], 'Play this nightmare of a game for at least <b>1 year</b>.'),
+    new ManualAward('cheat', 'Prince of Lies', [], 'I can\'t believe you cheated.')
+  ]);
+
+  var secretAchievementCount = new Stat('Secret Achievements Unlocked', ko.computed(function() {
+    return secretAchievements().filter(function(a) {
+      return a.name !== 'trigger' && a.awarded();
+    }).length;
+  }, this));
+
+  var newAchievements = ko.computed(function() {
+    return achievements().filter(function(a) {
+      return a.name !== 'trigger' && a.awarded() && !a.read();
+    })
+  }, this);
+
+  var newAchievementCount = new Stat('New Achievements', ko.computed(function() {
+    return achievements().filter(function(a) {
+      return a.name !== 'trigger' && a.awarded() && !a.read();
+    }).length + secretAchievements().filter(function(a) {
+      return a.name !== 'trigger' && a.awarded() && !a.read();
+    }).length
+  }, this));
+
+  var newSecretAchievementCount = new Stat('New Secret Achievements', ko.computed(function() {
+    return secretAchievements().filter(function(a) {
+      return a.name !== 'trigger' && a.awarded() && !a.read();
+    }).length
+  }, this));
 	
 	// These stats are checked to be saved, but not displayed
-  var stats = ko.observableArray([
+  var stats = [
     unitsUnlocked,
     unitsOwned,
     unitCount,
@@ -1665,7 +2292,6 @@ var game = (function() {
     manualClicksAllTime,
     earnedFromManualClicks,
     earnedPerClick,
-    readCount,
     currentCash,
     totalCash,
     totalCashAllTime,
@@ -1727,6 +2353,8 @@ var game = (function() {
     statsTabViews,
     achievementTabViews,
     windfallChance,
+    windfallProgress,
+    windfallGrowthMultiplier,
     timeSpentIdle,
     timeSpentIdleAllBusinesses,
     idleBonusRate,
@@ -1747,23 +2375,49 @@ var game = (function() {
     emailAway,
     policyAway,
     chatAway,
+    windfallGuarantee,
+    electionNotifications,
     patentsSold,
     earnedFromResearch,
     employeesKilled,
     riskReduction,
     speedBoost,
     valueBoost,
+    researchBonus,
     outgoingEmails,
     overallTimeBoosted,
     investmentTimeBoosted,
     researchTimeBoosted,
     acquisitionTimeBoosted,
+    trainingTimeBoosted,
     investmentBoostBonus,
     researchBoostBonus,
     acquisitionBoostBonus,
+    trainingBoostBonus,
     stressReduced,
-    stressReductionMultiplier
-  ]);
+    stressReductionMultiplier,
+    trainingSeminars,
+    additionalBankruptcyBonus,
+    timeTraining,
+    timeTrainingAllBusinesses,
+    trainingBonus,
+    seminarsUsed,
+    crypticEmailsReceived,
+    crypticEmailsReceivedAllTime,
+    crypticEmailEarnings,
+    crypticEmailBonus,
+    electionsWon,
+    electionsLost,
+    earnedFromElections,
+    donatedToCandidates,
+    gaffesExperienced,
+    gaffeBuffer,
+    prChance,
+    electionPayoutBonus,
+    electionSupportRate,
+    winStreak,
+    winStreakCap
+  ];
 
   // The following stats will be displayed  
   var generalStats = ko.observableArray([
@@ -1788,7 +2442,6 @@ var game = (function() {
   ]);
   
   var cashStats = ko.observableArray([
-    currentCash,
     totalCash,
     totalCashAllTime,
     totalDPM,
@@ -1798,7 +2451,8 @@ var game = (function() {
     unitCountBonusRate,
     idleBonus,
     bankruptcyBonus,
-    nextBankruptcyBonus
+    nextBankruptcyBonus,
+    nextBankruptcySeminars
   ]);
   
   var clickStats = ko.observableArray([
@@ -1807,7 +2461,6 @@ var game = (function() {
     earnedFromManualClicks,
     manualClickMultiplier,
     manualClickDPSPercentage,
-    windfallCount,
     windfallCountAllTime,
     earnedFromWindfalls,
     windfallDuration,
@@ -1815,7 +2468,6 @@ var game = (function() {
   ]);
 
   var acquisitionStats = ko.observableArray([
-    completedAcquisitions,
     completedAcquisitionsAllTime,
     earnedFromAcquisitions,
     acquisitionValueMultiplier,
@@ -1828,11 +2480,11 @@ var game = (function() {
   ]);
 
   var idleStats = ko.observableArray([
+    timeSpentIdle,
     timeSpentIdleAllBusinesses,
     idleBonusRate,
     earnedWhileIdle,
     awayEarningRate,
-    timeAwayEarningRate,
     earnedWhileAway
   ]);
 
@@ -1846,12 +2498,9 @@ var game = (function() {
   ]);
   
   var emailStats = ko.observableArray([
-    mailAnswered,
     mailAnsweredAllTime,
     specialMailAnswered,
     specialMailAnsweredAllTime,
-    expiredEmailsAnswered,
-    freshEmailsAnswered,
     inboxMax,
     totalEarnedFromEmails,
     freshEmailEarned,
@@ -1865,25 +2514,23 @@ var game = (function() {
     interestRate,
     completedInvestments,
     canceledInvestments,
-    shortInvestments,
     shortInvestmentBonus,
-    longInvestments,
     timeBonusRate,
-    timeInvested,
     timeInvestedAllTime,
     earnedFromInvestments,
     earnedFromShortInvestments,
     earnedFromLongInvestments,
-    simultaneousInvestments
+    totalSimultaneousInvestmentsAllowed
   ]);
 
   var earningsStats = ko.observableArray([
-      totalCash,
-      earnedFromManualClicks,
-      totalEarnedFromEmails,
-      earnedFromInvestments,
-      earnedFromResearch,
-      earnedFromAcquisitions
+    totalCash,
+    earnedFromManualClicks,
+    totalEarnedFromEmails,
+    earnedFromInvestments,
+    earnedFromResearch,
+    earnedFromAcquisitions,
+    netElectionEarnings
   ]);
 
   var composedStats1 = ko.observableArray([
@@ -1891,6 +2538,7 @@ var game = (function() {
     investmentTimeBoosted,
     researchTimeBoosted,
     acquisitionTimeBoosted,
+    trainingTimeBoosted,
     stressReduced
   ]);
 
@@ -1899,18 +2547,49 @@ var game = (function() {
     investmentBoostBonus,
     researchBoostBonus,
     acquisitionBoostBonus,
+    trainingBoostBonus,
     stressReductionMultiplier
+  ]);
+
+  var careerDevStats = ko.observableArray([
+    timeTraining,
+    timeTrainingAllBusinesses,
+    trainingBonus,
+    seminarsUsed
+  ]);
+
+  var crypticStats = ko.observableArray([
+    crypticMailChance,
+    crypticEmailsReceivedAllTime,
+    crypticEmailEarnings,
+    crypticEmailBonus
+  ]);
+
+  var electionStats1 = ko.observableArray([
+    electionsWon,
+    electionsLost,
+    winStreak,
+    winStreakCap,
+    gaffeBuffer
+  ]);
+
+  var electionStats2 = ko.observableArray([
+    gaffesExperienced,
+    prChance,
+    earnedFromElections,
+    donatedToCandidates,
+    netElectionEarnings
   ]);
 	
 	/*************************************************************
 						          GENERAL CONSTRUCTORS
 	*************************************************************/
 	
-	function Unit(id, name, icon, basePrice, baseClick, description, flavor) {
+	function Unit(id, name, icon, basePrice, baseClick, description, flavor, careerBonus) {
 	  this.id = id;
-	  this.name = ko.observable(cnItem(name));
-	  this.descriptionText = ko.observable(cnItem(description));
-	  this.flavorText = ko.observable(cnItem(flavor));
+	  this.name = ko.observable(name);
+	  this.descriptionText = ko.observable(description);
+	  this.flavorText = ko.observable(flavor);
 	  this.basePrice = ko.observable(basePrice);
 	  this.baseClick = ko.observable(baseClick);
 	  this.available = ko.observable(id === "0" ? true : false);
@@ -1918,23 +2597,54 @@ var game = (function() {
 	  this.mod = new Stat('Modifier', 0);
     this.numMod = new Stat('Quantity Modifier', 0);
 	  this.icon = ko.observable(icon);
+    this.careerBonus = careerBonus;
 
     this.numCanAfford = ko.computed(function() {
-      var price = 0;
-      var count = -1;
-      while (price <= currentCash.val()) {
-        count++;
-        var p = Math.pow(PRICE_GROWTH, this.num.val() + count) * this.basePrice();
-        var discount = p * (employeeDiscount.val() / 100);
-        price += p - discount
+      if (viewingTab() === 'store' && buyRate() === 'max') {
+        var price = 0;
+        var count = -1;
+        var lastIncrementMet;
+        while (price <= currentCashSlowed()) {
+          count++;
+          var p = Math.pow(PRICE_GROWTH, this.num.val() + count) * this.basePrice();
+          var discount = p * (employeeDiscount.val() / 100);
+          price += p - discount
+
+          if (maxType() !== 'targetIncrement') {
+            if (count % (maxType() === 'maxIncrement' ? maxIncrement() : 1) === 0) {
+              lastIncrementMet = count;
+            }
+          } else {
+            if ((this.num.val() + count) % targetIncrement() === 0) {
+              lastIncrementMet = count;
+            }
+          }
+        }
+
+        return lastIncrementMet ? lastIncrementMet : 0;
+      } else {
+        return 0;
+      }
+    }, this);
+
+    this.minWantToAfford = ko.computed(function() {
+      if (maxType() === 'targetIncrement') { 
+        var count = 0;
+        for (var i = 0; i < targetIncrement(); i++) {
+          count++;
+          if ((this.num.val() + count) % targetIncrement() === 0) {
+            return count;
+          }
+        }
       }
 
-      return count;
+      if (maxType() === 'maxIncrement') { return maxIncrement() }
+      return 1;
     }, this);
 	  
 	  this.price = new Stat('Price', ko.computed(function() {
 	    var price = 0;
-      var rate = buyRate() === 'max' ? this.numCanAfford() : buyRate();
+      var rate = buyRate() === 'max' ? (this.numCanAfford() ? this.numCanAfford() : this.minWantToAfford()): buyRate();
 	    for (var i = 0; i < rate; i++) {
 	      price += Math.pow(PRICE_GROWTH, this.num.val() + i) * this.basePrice();
 	    }
@@ -1961,7 +2671,8 @@ var game = (function() {
 	    var baseMod = baseCPS * (baseDPSMod.val() / 100);
       var quantityMod = (this.numMod.val() * this.num.val()) / 100;
       quantityMod = quantityMod > 1 ? quantityMod : 1;
-	    return (baseCPS + baseMod) * bankruptcyBonus.val() * idleBonus.val() * quantityMod;
+	    var total = (baseCPS + baseMod) * bankruptcyBonus.val() * idleBonus.val() * quantityMod;
+      return total + (total * ((this.careerBonus && this.careerBonus.total ? this.careerBonus.total.val() : 0) / 100));
 	  }, this), '$');
 
 	  this.cpm = new Stat('Dollars Per Minute', ko.computed(function() {
@@ -1973,7 +2684,7 @@ var game = (function() {
 	  }, this), '$');
 	  
 	  this.cantAfford = ko.computed(function() {
-	    return (currentCash && currentCash.val() < this.price.val()) || this.numCanAfford() === 0;
+	    return viewingTab() === 'store' && (currentCashSlowed && currentCashSlowed() < this.price.val()) || (buyRate() === 'max' && this.numCanAfford() === 0);
 	  }, this);
 
     this.shareOfTotal = ko.computed(function() {
@@ -2002,6 +2713,74 @@ var game = (function() {
       }
     }, this);
 
+    /******* TRAINING *******/
+
+    this.trainingCost = new Stat('Training Cost', ko.computed(function() {
+      return ((Math.pow(PRICE_GROWTH, this.num.val()) * this.basePrice()) / 5) * trainingHours();
+    }, this), '$');
+
+    this.cantAffordTraining = ko.computed(function() {
+      return viewingTab() === 'store' && isTrainingView() && (currentCashSlowed() < this.trainingCost.val());
+    }, this);
+
+    this.trainingBonus = new Stat('Training Bonus', 0, null, '%');
+    this.inProgressTrainingBonus = new Stat('In Progress Training Bonus', 0, null, '%');
+    this.nextTrainingBonus = new Stat('Next Training Bonus', ko.computed(function() {
+      var base = (this.num.val() / (75 + (this.trainingBonus.val() * 2))) * trainingHours()
+      var baseWithUpgrades = base + (base * (trainingBonus.val() / 100));
+      return baseWithUpgrades + (baseWithUpgrades * (trainingBoost.total.val() / 100));
+    }, this), null, '%');
+
+    this.trainingTime = new Stat('Training Time', ko.computed(function() {
+      return parseInt(trainingHours());
+    }, this), null, ' hour(s)');
+
+    this.timeRemaining = ko.observable();
+    this.trainingActive = ko.observable(false);
+    this.trainingFinished = ko.observable(false);
+    this.defaultTrainingText = 'Your <b>' + this.name() + '</b> are ' + 'not currently training.';
+    this.trainingText = ko.observable(this.defaultTrainingText);
+    this.targetTime;
+    this.lastInterval = 0;
+
+    this.startTimer = function(loadedTimeRemaining, loadedTargetTime) {
+      this.targetTime = loadedTargetTime || this.trainingTime.val() * 60 * 60 * 1000;
+      this.timeRemaining(loadedTimeRemaining !== undefined ? loadedTimeRemaining : this.trainingTime.val() * 60 * 60  * 1000);
+      this.trainingActive(true);
+      this.trainingText('Your <b>' + this.name() + '</b> are ' + getRandomFromArray(trainingText[this.id]));
+
+      this.handleTimer = setInterval(function() {
+        var now = Date.now();
+        var elapsedTime = now - this.lastInterval;
+        this.lastInterval = now;
+        
+        if (elapsedTime < 60000) {
+          var newTime = this.timeRemaining() - elapsedTime;
+          this.timeRemaining(newTime > 0 ? newTime : 0);
+        }
+
+        if (this.timeRemaining() <= 0) {
+          this.trainingActive(false);
+          this.trainingFinished(true);
+          clearInterval(this.handleTimer);
+        }
+      }.bind(this), 1000);
+    }
+    
+    this.displayTimeRemaining = ko.computed(function() {
+      return formatTimeRemaining(Math.round(this.timeRemaining() / 1000));
+    }, this);
+    
+    this.percentageComplete = ko.computed(function() {
+      if (this.timeRemaining() !== null) {
+        var timeInProgress = this.targetTime - this.timeRemaining();
+        return (timeInProgress / this.targetTime) * 100 + '%';
+      } else {
+        return '0%';
+      }
+    }, this);
+
+
     this.hoverVisible = ko.observable(false);
     this.viewDetails = function() {
       if (enableHover() && window.screen.availWidth >= 500) {
@@ -2013,27 +2792,65 @@ var game = (function() {
       this.hoverVisible(false);
     }
 	}
+
+  Unit.prototype.train = function() {
+    if (currentCash.val() >= this.trainingCost.val()) {
+      this.startTimer();
+      currentCash.sub(this.trainingCost.val());
+      this.inProgressTrainingBonus.val(this.nextTrainingBonus.val());
+    }
+  };
+
+  Unit.prototype.stopTraining = function() {
+    this.trainingActive(false);
+    this.trainingText(this.defaultTrainingText);
+    clearInterval(this.handleTimer);
+    this.targetTime = null;
+    this.timeRemaining(null);
+    this.inProgressTrainingBonus.val(0);
+  }
+
+  Unit.prototype.finishTraining = function() {
+    timeTraining.add(this.targetTime);
+    timeTrainingAllBusinesses.add(this.targetTime);
+    this.trainingFinished(false);
+    this.trainingBonus.add(this.inProgressTrainingBonus.val());
+    this.stopTraining();
+    this.checkTrainingAwards();
+  }
+
+  Unit.prototype.checkTrainingAwards = function() {
+    earnAchievement('tr0');
+    if (this.trainingBonus.val() >= 100) { earnAchievement('tr1'); }
+    if (this.trainingBonus.val() >= 200) { earnAchievement('tr3'); }
+    if (this.trainingBonus.val() >= 300) { earnAchievement('tr5'); }
+
+    var any100Untrained = false;
+    var any200Untrained = false;
+    var any300Untrained = false;
+    for (var i = 0; i < units().length; i++) {
+        if (units()[i].trainingBonus.val() < 100) { any100Untrained = true; } 
+        if (units()[i].trainingBonus.val() < 200) { any200Untrained = true; } 
+        if (units()[i].trainingBonus.val() < 300) { any300Untrained = true; }
+    }
+
+    if (!any100Untrained) { earnAchievement('tr2'); }
+    if (!any200Untrained) { earnAchievement('tr4'); }
+    if (!any300Untrained) { earnAchievement('tr6'); }
+  }
 	
 	Unit.prototype.select = function() {
-	  selectedUnit.id = this.id;
-	  selectedUnit.name(cnItem(this.name()));
-	  selectedUnit.num.val(this.num.val());
-	  selectedUnit.mod.val(this.mod.val());
-    selectedUnit.numMod.val(this.numMod.val());
-	  selectedUnit.basePrice(this.basePrice());
-	  selectedUnit.baseClick(this.baseClick());
-	  selectedUnit.descriptionText(this.descriptionText());
-	  selectedUnit.flavorText(cnItem(this.flavorText()));
-	  selectedUnit.icon(this.icon());
+    selectedUnit(this);
 	};
 	
 	Unit.prototype.buy = function() {
 	  if (currentCash.val() >= this.price.val()) {
       var num = this.numCanAfford();
+      var buyNum = buyRate() === 'max' ? num : buyRate();
 
 	    currentCash.sub(this.price.val());
-	    this.num.add(buyRate() === 'max' ? num : buyRate());
-	    unitCount.add(buyRate() === 'max' ? num : buyRate());
+	    this.num.add(buyNum);
+	    unitCount.add(buyNum);
 	    
 	    var nextId = parseInt(this.id) + 1;
 	    var nextUnit = getUnit(nextId.toString());
@@ -2043,19 +2860,17 @@ var game = (function() {
 	    }
 	    
 	    // Check for the multi-buy achievements
-	    if (buyRate() > 1) {
-	      switch (buyRate()) {
-	        case 10:
-	          earnAchievement('buy10');
-	          break;
-          case 25:
-            earnAchievement('buy25');
-            break;
-          case 100:
-            earnAchievement('buy100');
-            break;
-	      }
-	    }
+      if (buyNum >= 100) {
+        earnAchievement('buy100');
+      } 
+
+      if (buyNum >= 25) {
+        earnAchievement('buy25');
+      } 
+
+      if (buyNum >= 10) {
+        earnAchievement('buy10');
+      }
 	    
 	    // Check for the employee position achievements
       checkEmployeePositionAchievements();
@@ -2067,26 +2882,46 @@ var game = (function() {
       addClicks(this.sellPrice.val());
 
       var num = this.num.val();
-      this.num.sub(buyRate() === 'max' ? num : buyRate());
-      unitCount.sub(buyRate() === 'max' ? num : buyRate());
+      var sellNum = buyRate() === 'max' ? num : buyRate()
+      this.num.sub(sellNum);
+      unitCount.sub(sellNum);
       
       // Check for the multi-sell achievements
-	    if (buyRate() > 1) {
-	      switch (buyRate()) {
-	        case 10:
-	          earnAchievement('sell10');
-	          break;
-          case 25:
-            earnAchievement('sell25');
-            break;
-          case 100:
-            earnAchievement('sell100');
-            break;
-	      }
-	    }
+      if (sellNum >= 100) {
+        earnAchievement('sell100');
+      } 
+
+      if (sellNum >= 25) {
+        earnAchievement('sell25');
+      } 
+
+      if (sellNum >= 10) {
+        earnAchievement('sell10');
+      }
 
       if (unitCount.val() === 0 && unitsUnlocked.val() === 12) {
         earnAchievement('sellAll');
+      }
+
+      if (research().active() && parseInt(this.id) <= 3) {
+        console.log(this.id)
+        if (this.id === '0') {
+          if (research().intern() > this.num.val()) {
+            research().intern(this.num.val());
+          }
+        } else if (this.id === '1') {
+          if (research().wage() > this.num.val()) {
+            research().wage(this.num.val());
+          }
+        } else if (this.id === '2') {
+          if (research().sales() > this.num.val()) {
+            research().sales(this.num.val());
+          }
+        } else if (this.id === '3') {
+          if (research().manager() > this.num.val()) {
+            research().manager(this.num.val());
+          }
+        }
       }
 	  }
 	};
@@ -2095,7 +2930,7 @@ var game = (function() {
 	  var nextId = (parseInt(this.id) + 1).toString();
 	  var nextUnit = getUnit(nextId);
 	  nextUnit.available(true);
-	  document.dispatchEvent(new CustomEvent("employee-unlocked", { "detail": { "id": nextId, "name": cnItem(nextUnit.name()) }}));
+	  document.dispatchEvent(new CustomEvent("employee-unlocked", { "detail": { "id": nextId, "name": nextUnit.name() }}));
 	};
 
   Unit.prototype.getPotentialEarnings = function() {
@@ -2105,9 +2940,14 @@ var game = (function() {
     quantityMod = quantityMod > 1 ? quantityMod : 1;
     return format((baseCPS + baseMod) * bankruptcyBonus.val() * idleBonus.val() * quantityMod);
   };
+
+  function Price(baseVal) {
+    this.val = ko.observable(baseVal);
+    this.displayVal = ko.observable('$' + format(this.val()))
+  }
 	
 	function Stat(name, baseVal, beforeDisplay, afterDisplay, longerFormat, longerSingleDigit, info) {
-	  this.name = cnItem(name);
+	  this.name = name;
 	  this.baseVal = baseVal;
 	  this.beforeDisplay = beforeDisplay ? beforeDisplay : '';
 	  this.afterDisplay = afterDisplay ? afterDisplay : '';
@@ -2142,7 +2982,7 @@ var game = (function() {
 	function DateStat(name, baseVal, info) {
     this.info = info;
     this.type = 'date';
-    this.name = cnItem(name);
+    this.name = name;
     this.baseVal = baseVal;
     this.val = ko.observable(baseVal);
     this.displayVal = ko.computed(function() {
@@ -2151,10 +2991,10 @@ var game = (function() {
     }, this);
   }
 
-  function TimeStat(name, baseVal) {
+  function TimeStat(name, baseVal, doNotRound) {
     Stat.call(this, name, baseVal);
     this.displayVal = ko.computed(function() {
-      return getFormattedTime(this.val(), true);
+      return getFormattedTime(this.val(), true, doNotRound);
     }, this);
   }
 
@@ -2170,11 +3010,12 @@ var game = (function() {
 	/*************************************************************
 						UPGRADE CONSTRUCTORS
 	*************************************************************/
-	
+	var called = 0;
 	function Upgrade(id, name, price, flavor, icon) {
 	  this.id = id;
-	  this.name = ko.observable(cnItem(name));
-	  this.price = new Stat('Price', price ? price : 0, '$');
+	  this.name = ko.observable(name);
+    this.price = new Price(price);
+	  //this.price = new Stat('Price', price ? price : 0, '$');
 	  this.date = ko.observable(null);
 	  this.available = ko.observable(false);
 	  this.bought = ko.observable(false);
@@ -2190,21 +3031,22 @@ var game = (function() {
 	      this.available(false);
 	      this.bought(true);
 	      this.date(new Date().toLocaleString());
+        this.cantAfford = ko.observable(false);
 	    }
 	  };
 	  
 	  this.select = function() {
-	    selectedUpgrade.descriptionText(this.descriptionText());
-	    selectedUpgrade.flavorText('"' + this.flavorText() + '"');
-	    selectedUpgrade.name(cnItem(this.name()));
-      selectedUpgrade.icon(this.icon());
-      
-      this.read(true);
+     selectedUpgrade(this);
+    this.read(true);
 	  };
-	  
-	  this.cantAfford = ko.computed(function() {
-	    return currentCash.val() < this.price.val();
-	  }, this);
+
+    this.cantAfford = ko.observable(false);
+
+   this.trackAffording = function() {
+    this.cantAfford = ko.pureComputed(function() {
+      return currentCashSlowed() < this.price.val();
+    }, this);
+   };
 
     this.hoverVisible = ko.observable(false);
     this.viewDetails = function(isStatsTab) {
@@ -2217,6 +3059,8 @@ var game = (function() {
     this.leaveDetails = function() {
       this.hoverVisible(false);
     }
+
+    this.trackAffording();
 	}
 	
 	function UnitUpgrade(id, name, unit, price, flavor, mod, description) {
@@ -2225,7 +3069,7 @@ var game = (function() {
 	    this.type = 'unit';
 	    this.mod = mod ? mod : 1;
 	    
-	    this.descriptionText = ko.observable(description ? cnItem(description) : 'Squeeze <b>twice</b> as much cash out of every one of your <b>' + getUnit(unit).name() + '</b>.');
+	    this.descriptionText = ko.observable(description ? description : 'Squeeze <b>twice</b> as much cash out of every one of your <b>' + getUnit(unit).name() + '</b>.');
 
 	    this.handlePurchase = function() {
 	      getUnit(unit).mod.add(this.mod);
@@ -2236,7 +3080,7 @@ var game = (function() {
     Upgrade.call(this, id, name, price, flavor, 'people');
     this.type = 'unit';
     var valueText = highValue ? ' a lot ' : ' ';
-    this.descriptionText = ko.observable('Your <b>' + cnItem(getUnit(unlockingUnit).name()) + '</b> wring' + valueText + 'more cash from your <b>Interns</b> and <b>Wage Slaves</b>');
+    this.descriptionText = ko.observable('Your <b>' + getUnit(unlockingUnit).name() + '</b> wring' + valueText + 'more cash from your <b>Interns</b> and <b>Wage Slaves</b>');
 
     this.handlePurchase = function() {
       getUnit(0).mod.add(highValue ? 1.25 : 1);
@@ -2291,7 +3135,7 @@ var game = (function() {
 	      currentDefault = this.percentage > 0 ? percText : multText;
 	    }
 	    
-	    this.descriptionText = ko.observable(description ? cnItem(description) : currentDefault);
+	    this.descriptionText = ko.observable(description ? description : currentDefault);
 	    
 	    this.handlePurchase = function() {
 	      manualClickDPSPercentage.add(this.percentage);
@@ -2308,7 +3152,7 @@ var game = (function() {
 	    var multText = 'TBD';
 	    var percText = 'Inflate your <b>Total Mod to Cash Per Second</b> by an additional <b>' + percentage + '%</b>.';
 	    var currentDefault = this.percentage > 0 ? percText : multText;
-	    this.descriptionText = ko.observable(description ? cnItem(description) : currentDefault);
+	    this.descriptionText = ko.observable(description ? description : currentDefault);
 	    
 	    this.handlePurchase = function() {
 	      overallDPSPercentage.add(this.percentage);
@@ -2321,7 +3165,7 @@ var game = (function() {
 	    this.type = 'investmentsAllowed';
 	   // this.icon = 'access_time';
 	    
-	    this.descriptionText = ko.observable(description ? cnItem(description) : 'Increase the number of <b>Simultaneous Investments</b> permitted by <b>' + investmentsAllowed + '</b>.');
+	    this.descriptionText = ko.observable(description ? description : 'Increase the number of <b>Simultaneous Investments</b> permitted by <b>' + investmentsAllowed + '</b>.');
 	    this.handlePurchase = function() {
 	        simultaneousInvestments.add(investmentsAllowed);  
 	    };
@@ -2332,7 +3176,7 @@ var game = (function() {
 	    this.type = 'investmentInterest';
 	    //this.icon = 'access_time';
 	    
-	    this.descriptionText = ko.observable(description ? cnItem(description) : "Raise the per-second <b>Investment Interest Rate</b> by <b>" + rate + "%</b>.");
+	    this.descriptionText = ko.observable(description ? description : "Raise the per-second <b>Investment Interest Rate</b> by <b>" + rate + "%</b>.");
 	    this.handlePurchase = function() {
 	        interestRate.add(rate);
 	    };
@@ -2352,7 +3196,7 @@ var game = (function() {
 	    this.percentage = percentage;
 	    this.type = 'awardCount';
 	    
-	    this.descriptionText(description ? cnItem(description) : 'Boosts the percentage bonus of each of your achievements by <b>' + percentage + '%</b>. ');
+	    this.descriptionText(description ? description : 'Boosts the percentage bonus of each of your achievements by <b>' + percentage + '%</b>. ');
 	    
 	    this.handlePurchase = function() {
 	      achievementBonusRate.add(this.percentage);
@@ -2364,7 +3208,7 @@ var game = (function() {
     this.percentage = percentage;
     this.type = 'unitCount';
     
-    this.descriptionText(description ? cnItem(description) : 'Boosts the percentage bonus of each of your employees by <b>' + percentage + '%</b>. ');
+    this.descriptionText(description ? description : 'Boosts the percentage bonus of each of your employees by <b>' + percentage + '%</b>. ');
     
     this.handlePurchase = function() {
       unitCountBonusRate.add(this.percentage);
@@ -2377,7 +3221,7 @@ var game = (function() {
     this.type = 'unitCount';
     
     var name = getUnit(unit).name();
-    this.descriptionText(description ? cnItem(description) : 'Chokes each of your <b>' + name + '</b> for an extra <b>' + mod + '%</b> for every <b>' + name.substring(0, name.length - 1) + '</b> employed.');
+    this.descriptionText(description ? description : 'Chokes each of your <b>' + name + '</b> for an extra <b>' + mod + '%</b> for every <b>' + name.substring(0, name.length - 1) + '</b> employed.');
     
     this.handlePurchase = function() {
       getUnit(unit).numMod.add(this.mod);
@@ -2390,7 +3234,7 @@ var game = (function() {
 	
 	function AwardBase(id, name, threshold, unlocks, flavor) {
 	  this.id = id;
-	  this.name = cnItem(name);
+	  this.name = name;
 	  this.threshold = threshold;
 	  this.unlocks = unlocks;
 	  this.date = ko.observable(null);
@@ -2406,7 +3250,9 @@ var game = (function() {
     	  for (var i = 0; i < this.unlocks.length; i++) {
     	    for (var j = 0; j < upgrades().length; j++) {
     	      if (this.unlocks[i] === upgrades()[j].id) {
+              if (!upgrades()[j].bought())
     	        upgrades()[j].available(true);
+              upgrades()[j].trackAffording();
     	        break;
     	      }
     	    }
@@ -2417,13 +3263,12 @@ var game = (function() {
 	  this.earn = function() {
 	    if (!this.awarded()) {
   	    if (this.name !== 'trigger') {
-          //this.date(new Date().toLocaleString());
-          this.date(new Date());
+          this.date(new Date().toISOString());
 
           try {
             gtag('event', 'achievement_earned', {
               'event_category': 'business_simulator',
-              'event_label': cnItem(this.name)
+              'event_label': this.name
             });
           } catch (err) {
             console.log('Google Analytics is unavailable');
@@ -2432,7 +3277,7 @@ var game = (function() {
         
         this.awarded(true);
         document.dispatchEvent(new CustomEvent("achievement-earned", { "detail": { 
-          "name": cnItem(this.name),
+          "name": this.name,
           "id": this.id
         }}));
 	    }
@@ -2440,24 +3285,21 @@ var game = (function() {
       if (!this.upgradesUnlocked()) {
         this.unlock();
       }
+
+      this.earned = null;
+
 	  };
 	  
 	  this.select = function() {
-	    selectedUpgrade.name(this.name);
-	    selectedUpgrade.descriptionText(this.descriptionText());
-      selectedUpgrade.flavorText('Unlocked about ' + timeSinceStartFromLocaleStrings(this.date()));
-	    selectedUpgrade.icon(this.icon());
-	    if (!this.read()) {
-	      readCount.add(1);
-	    }
-	    
+      selectedUpgrade(this);
+      selectedUpgrade().flavorText('Unlocked about ' + achievementTimeSinceStart(this.date()));
 	    this.read(true);
 	  };
 
     this.hoverVisible = ko.observable(false);
     this.viewDetails = function(isStatsTab) {
       if (enableHover() && window.screen.availWidth >= 400 && (isStatsTab !== true || this.awarded())) {
-        this.flavorText('Unlocked about ' + timeSinceStartFromLocaleStrings(this.date()));
+        this.flavorText('Unlocked about ' + achievementTimeSinceStart(this.date()));
         this.hoverVisible(true);
       }
     }
@@ -2475,11 +3317,16 @@ var game = (function() {
 	    this.descriptionText = ko.observable(threshold === 1 ? singleText : 'Hire <b>' + threshold + '</b> ' + uName + '.');
 	    
 	    this.unit = unit;
-	    this.earned = ko.computed(function() {
-	      if (units && getUnit(this.unit.toString()).num.val() >= this.threshold) {
-          this.earn();
-	      } 
-	    }, this);
+	    
+      this.startTracking = function() {
+        this.earned = ko.computed(function() {
+          if (units && getUnit(this.unit.toString()).num.val() >= this.threshold) {
+            this.earn();
+          } 
+        }, this);
+      };
+
+      this.startTracking();
 	}
 	
 	function Award(id, name, threshold, unlocks, stat, description, flavor)  {
@@ -2491,26 +3338,35 @@ var game = (function() {
       );
       
 	    this.stat = stat;
-	    this.earned = ko.computed(function() {
-	      if (this.stat && this.stat.val() >= this.threshold) {
-          this.earn();
-	      }
-	    }, this);
+
+      this.startTracking = function() {
+  	    this.earned = ko.computed(function() {
+  	      if (this.stat && this.stat.val() >= this.threshold) {
+            this.earn();
+  	      }
+  	    }, this);
+      };
+
+      this.startTracking();
 	}
 	
 	function CustomAward(id, name, unlocks, conditions, description, flavor) {
 	    AwardBase.call(this, id, name, null, unlocks, flavor);
 	    this.descriptionText = ko.observable(description);
 	    
-	    this.earned = ko.computed(function() {
-	        var allConditionsMet = conditions.every(function(c) {
-	            return c.type === 'gte' ? c.stat.val() >= c.val : c.stat.val() <= c.val;
-	        });
-	        
-	        if (allConditionsMet) {
-	            this.earn();
-	        }
-	    }, this);
+      this.startTracking = function() {
+  	    this.earned = ko.computed(function() {
+  	        var allConditionsMet = conditions.every(function(c) {
+  	            return c.type === 'gte' ? c.stat.val() >= c.val : c.stat.val() <= c.val;
+  	        });
+  	        
+  	        if (allConditionsMet) {
+  	            this.earn();
+  	        }
+  	    }, this);
+      };
+
+      this.startTracking();
 	}
 	
 	function ManualAward(id, name, unlocks, description, flavor) {
@@ -2527,41 +3383,189 @@ var game = (function() {
 	}
 
   /*************************************************************
-            ACQUISITION SYSTEM
+            CAREER DEVELOPMENT SYSTEM
   *************************************************************/
 
-  var acquisitionOptions = ko.observableArray([
-    {text: 'Small Acquisition', priceSeconds: 10 * 60, employeeRange: [1000, 9999], size: 'small', sizeDivider: 1},
-    {text: 'Medium Acquisition', priceSeconds: 60 * 60, employeeRange: [1000 * 10, 9999 * 10], size: 'medium', sizeDivider: 4.5},
-    {text: 'Large Acquisition', priceSeconds: 6 * 60 * 60, employeeRange: [1000 * 100, 9999 * 100], size: 'large', sizeDivider: 27},
-    {text: 'Massive Acquisition', priceSeconds: 24 * 60 * 60, employeeRange: [1000 * 1000, 9999 * 1000], size: 'massive', sizeDivider: 108}
-  ]);
+  function PermStatBoost(id, unit, icon, mod, name, description, flavor) {
+    Upgrade.call(this, id, name, 0, flavor, icon);
+    this.id = id;
+    this.level = ko.observable(0);
+    this.descriptionText = ko.observable(description.replace('%percent', mod + '%'));
+    this.modifier = mod;
+    this.unit = unit;
+    this.cost = new Stat('Price', ko.computed(function() {
+      return Math.round(Math.pow(1.5, this.level()));
+    }, this));
 
-  var selectedAcquisitionOption = ko.observable(acquisitionOptions()[0]);
-  var selectedAcquisition = ko.observable();
-  var generatePotentialAcquisition = function() {
-    var employees = getRandomInt(selectedAcquisitionOption().employeeRange[0], selectedAcquisitionOption().employeeRange[1]);
-    selectedAcquisition({
-      size: selectedAcquisitionOption().size,
-      sizeDivider: selectedAcquisitionOption().sizeDivider,
-      employees: {
-        val: employees,
-        display: format(employees)
-      },
-      price: {
-        val: selectedAcquisitionOption().priceSeconds * totalDPS.val(),
-        display: '$' + format(selectedAcquisitionOption().priceSeconds * totalDPS.val())
+    this.cantAfford = ko.computed(function() {
+      return this.cost.val() > trainingSeminars.val();
+    }, this);
+
+    this.available = ko.computed(function() {
+      var unit = getUnit(this.unit)
+      return unit != undefined ? getUnit(this.unit).available() : false;
+    }, this);
+
+    this.correspondingEmployee = ko.computed(function() {
+      var unit = getUnit(this.unit)
+      return unit != undefined ? getUnit(this.unit).name() : false;
+    }, this);
+
+    this.total = new Stat('Value', ko.computed(function() {
+      if (units && getUnit(unit)) {
+        var base = this.level() * this.modifier;
+        return base + (base * (getUnit(unit).trainingBonus.val() / 100));
+      } else {
+        return 0;
       }
-    })
-  };
+    }, this), null, '%');
 
-  var makeAcquisition = function() {
-    if (activeAcquisitions().length < simultaneousAcquisitions.val()) {
-      var a = selectedAcquisition();
-      currentCash.sub(a.price.val);
-      activeAcquisitions.push(new Acquisition(a.size, a.employees.val, a.price.val, a.sizeDivider));
+    this.hoverVisible = ko.observable(false);
+    this.viewDetails = function() {
+      if (enableHover() && window.screen.availWidth >= 500) {
+        this.hoverVisible(true);
+      }
     }
-  };
+
+    this.leaveDetails = function() {
+      this.hoverVisible(false);
+    }
+  }
+
+  PermStatBoost.prototype.levelUp = function() {
+    if (trainingSeminars.val() >= this.cost.val()) {
+      trainingSeminars.sub(this.cost.val());
+      seminarsUsed.add(this.cost.val());
+      earnAchievement('ps0');
+      this.level(this.level() + 1);
+
+      if (this.level() >= 10) { earnAchievement('ps1'); }  
+      if (this.level() >= 20) { earnAchievement('ps2'); }
+      if (this.id === 'pm2') { this.checkCrypticNotifications(); }
+
+      checkForAllCareerDevelopments();
+    }
+  }
+
+  PermStatBoost.prototype.checkCrypticNotifications = function() {
+      if (this.level() === 5) {
+        document.dispatchEvent(new CustomEvent("cryptic-notification", { "detail": "True sight expands your ability to invest..." }));
+      }
+
+      if (this.level() === 10) {
+        document.dispatchEvent(new CustomEvent("cryptic-notification", { "detail": "Your email inbox seems to have opened its mind..." }));
+      }
+  }
+
+  function checkForAllCareerDevelopments() {
+    var somethingMissing = false;
+    var somethingMissing10 = false;
+    var somethingMissing20 = false;
+    for (var i = 0; i < careerUpgrades().length; i++) {
+      if (careerUpgrades()[i].level() === 0) { somethingMissing = true; }
+      if (careerUpgrades()[i].level() < 10) { somethingMissing10 = true; }
+      if (careerUpgrades()[i].level() < 20) { somethingMissing20 = true; }
+    }
+
+    if (!somethingMissing) { earnAchievement('ps3'); }
+    if (!somethingMissing10) { earnAchievement('ps4'); }
+    if (!somethingMissing20) { earnAchievement('ps5'); }
+  }
+
+  var trainingHoursValidation = ko.computed(function() {
+    if (trainingHours() < 1) {
+      return 'Employees must train for at least 1 hour to learn anything valuable'
+    } else if (trainingHours() > 12) {
+      return 'Due to employee laziness, 12 straight hours of training is the maximum'
+    } else {
+      return null
+    }
+  }, this);
+
+  var trainingsComplete = ko.computed(function() {
+    return units().filter(function(u) {
+      return u.trainingFinished();
+    }).length;
+  }, this);
+
+  // Your Interns are -
+  var trainingText = {
+    0: [ // Interns
+      'learning <b>hard work</b> and <b>discipline</b> by taking on a second unpaid internship during their off hours.',
+      'attending <b>menial task workshops</b> in order to learn the ideal way to bring lunch to old white men during meetings.',
+      'spending 60 hours weekly at <b>life skills seminars</b> to learn how to refinance student loans to continue living without income.',
+      'attending <b>1-on-1 meetings</b> with management to discuss how there really just might be a full time position coming up soon.',
+    ],
+    1: [ // Wage Slaves
+      'spending 20 hours weekly in <b>mandatory employee therapy sessions</b> to learn how to manage non-stop fight-or-flight responses.',
+      'attending daily <b>group counseling sessions</b> to avoid fusing with the thought that there is no future, no hope, no light at the end of the tunnel, only blank gray cubicle walls that seem to stretch into an infinite, empty future.',
+      'attending annual <b>company conferences</b> during which Coldplay will be performing, but only for level 2 managers and above, as well as corporate partners.',
+      'participating in <b>detailed safety meetings</b> during which light-hearted videos will explain that no benefits will be paid out to employees who intentionally enter the industrial baler.',
+    ],
+    2: [ // Sales Hotshots
+      'spending hours each morning in <b>Rise & Grind Breakfast Meetings</b> to learn the newest techniques to convince potential buyers that products both work and exist.',
+      'attending daily <b>communication workshops</b> to learn to mask the sound of crying over the phone as they scream "I really need a win right now" again and again.',
+      'memorizing <b>daily mantras</b> to maintain an aura of mental calm and avoid losing one\'s sense of self and identity after being hung up on for the 653rd cold call in a row while desperately trying to sell leads harvested from the mostly fake user profiles of a website that aggregates reviews of phones.',
+      'studying the <b>Annual Bonus Plan</b> for the Sales Department and looking up discount vacation packages for resorts in Mexico, refreshing both pages over and over again in the futile hope that the prices might line up, every click weighed down by the memory of the road trips they used to take when their children still loved them.'
+    ],
+    3: [ // Middle Managers
+      'reading <b>Top 10 Listicles</b> about the best ways to leverage what limited power they actually have over their subordinates in order to feel like they have some kind of agency in their lives.',
+      'taking <b>interpersonal skills courses</b> to find more tactful ways to tell subordinates to take notes during meetings in order to maintain a sense of control and authority in their otherwise spiraling lives.',
+      'reading <b>LinkedIn articles by Life-Hack Gurus</b> about innovative business strategies that cutting edge startups have implemented, then scouring the comments for some kind of insight into why their employees responded so poorly when they kicked in the door the next morning and forced everyone to read that LinkedIn article and start doing everything it said.',
+      'poring over <b>Forbes 30 Under 30</b> lists to try to pinpoint the moment in their own lives where everything went wrong, where they could have made one choice, but made the wrong one, and how they ended up trapped in their own skin, staring at the top rungs of a ladder they\'ll never climb, thinking every night of that one hollow-point bullet they\'ve been saving all these years.'
+    ],
+    4: [ // C-Levels
+      'watching <b>TED Talks</b> about the best way to create a floating micronation in international waters that will act as a beacon for tech geniuses who want to create killer apps unfettered by government regulation.',
+      'listening to <b>professional pseudo-scientists</b> explain how hierarchies occur in nature, which completely justifies their impulse to funnel the fruits of their employees\' labor into a new Mercedes-Benz S-Class.',
+      'listening to <b>in-depth investigative podcasts</b> about labor uprisings in Latin America, but with a particular focus on ideal techniques for executing organizers.',
+      'taking <b>in-depth economics courses</b> to be better equipped to explain to employees why it is important that stock buybacks and layoffs occur simultaneously, and why it is essential for executive pay to skyrocket, because how else can one ensure that only the best minds will be hired?'
+    ],
+    5: [ // Blue Bloods
+      'attending <b>alumni fundraisers</b> to determine the best ways to funnel money into prestigious universities, because otherwise your granddaughter might attend Harvard even though your husband is a Yale man, and what are the other ladies at the DAR going to think if that happens?',
+      'studying <b>international tax codes</b> to find the best techniques for off-shoring and investing their hard-earned wealth to ensure that their childrens\' inheritance is untouched by estate taxes.',
+      'reading about the <b>fastest-growing biotech startups</b> in hopes of finding the one rockstar wunderkind who has developed an innovative technique to harvest young peoples\' blood in an attempt at reversing the aging process.',
+      'informing themselves about <b>the beliefs of their political representatives</b> in order to determine which $25k-per-plate fundraisers to attend with the intention of taking a moment of a candidate\'s time to discuss the ways in which free at the point of service healthcare is actually bad because people really don\'t want things handed to them.'
+    ],
+    6: [ // Cops
+      'taking local <b>arts and crafts courses</b> to improve their penmanship when etching "You\'re Fucked" onto their rifles, which is essential to their ability to protect and also to serve.',
+      'taking lessons from <b>military consultants</b> to learn how to drive Army Surplus APCs into civilian populations to finally put a stop to the insidious War on Cops that began the day Obama invented racism by saying that Trayvon Martin could have been his son.',
+      'studying <b>community outreach literature</b> to find new techniques to play basketball with some local kids, or make a silly joke on Instagram, or record a video where they pull somebody over but then give them a gift card, all in order to convince the general public not to complain too much once they\'ve been extrajudicially executed.',
+      'learning <b>tactical defense techniques</b> in order to patrol the halls of local schools and protect students from would-be mass shooters, or, more often, choke-slam teens who they perceive as being belligerent, which is the only way to ensure that they do not forget their place in the prison pipeline.'
+    ],
+    7: [ // Politicians
+      'taking <b>critical reading courses</b> to learn how to better intrepret Orwell\'s 1984 as being an allegory for a nightmarish dystopian hell-scape in which pink-haired students are rude to conservatives on college campuses',
+      'studying <b>theories of pragmatism</b> in order to become more confident in the inspirational belief that things need to change, but when they do, that change should be incremental and profoundly ineffectual.',
+      'watching <b>old episodes of The West Wing</b> to learn the rhetorical fundamentals of awe-inspiring speeches and how divorcing the signifier from the signified can make them that much more effective.',
+      'studying <b>rhetorical strategies</b> to find new ways to explain that there is nothing contradictory about a progressive platform that values the lumbering authoritarianism of an ever-growing carceral state, because they saw photos of Willie Horton in 1988 and they have daughters, you know?'
+    ],
+    8: [ // Mercs
+      'watching <b>facial hair grooming</b> YouTube videos for hours at a time to learn the most advanced techniques to police that mustache.',
+      'attending <b>advanced firearm proficiency courses</b> in order to become adept at explaining, via targeted internet comment, when something is not a clip, but a magazine.',
+      'discussing how to deal with <b>painful memories</b>, such as the time they were in this bar in Saigon and this kid comes up, this kid carrying a shoe-shine box. And he says, uh, "Shine, please, shine!" They said "No." He kept askin\', yeah, and Joey said "Yeah." And, they went to get a couple beers, and the&mdash;the box was wired, and he opened up the box, fucking blew his body all over the place. And he\'s laying there, and he\'s fuckin\' screaming, there\'s pieces of him all over them, just... like this, and they\'re tryin\' to pull him off, you know, and they&mdash;their friend that\'s all over them! They got blood and everything, and they\'re tryin\' to hold him together, they put him together, his fuckin\' insides keep comin\' out, and nobody would help! Nobody\'d help, and he\'s sayin\' "Hey, I wanna go home! I wanna go home!" He keeps calling their names! "I wanna go home, guys! I wanna drive my Chevy!" They said "With what? I can\'t find your fuckin\' legs! I can\'t find your legs!" They can\'t get it out of their heads. They\'ve&mdash;they\'ve dreamed this seven years. Every day, they have this. And sometimes, they wake up, and they don\'t know where they are. They don\'t talk to anybody. Sometimes a day... a week... they can\'t put it out of their minds.',
+      'planning <b>extended indiscriminate bombing campaigns</b> that only inadvertantly decimate weddings and hospitals and other civilian population centers, because that is the only way to fight back against a savage and war-like radical terrorist mentality that threatens our weddings and hospitals and other civilian population centers.'
+    ],
+    9: [ // Client States
+      'teaching <b>crowd control techniques</b> to paramilitary groups at the <em>Elliott Abrams School for Winning Hearts and Minds</em> in El Mozote.',
+      'learning <b>disaster response techniques</b> to help recover as much merchandise as possible from beneath the bodies and rubble of the collapsed factories in Bangladesh.',
+      'studying <b>theoretical labor relations</b> at the <em>Coca Cola Sinaltrainal Memorial Conference</em> in Colombia.'
+    ],
+    10: [ // Shadow Governments
+      'attending <b>Cultural Marxism Symposiums</b> in order to determine the best ways to undermine traditional Western values by encouraging, I don\'t know, miscegenation, probably, or something like that.',
+      'studying <b>Frankfurt School Thinkers</b> to find new ways to reshape nice, matronly teachers into aggressively feminist lesbians, in turn stunting the masculine development of our young men, who may otherwise have grown up to be ruthlessly efficient soldiers, or possibly coal miners.',
+      'strategizing with <b>Triple-A Game Developers</b> to determine the most effective way of inserting extreme social justice ideology into video games, forcing many well-meaning gamers to instantaneously become racist.',
+      'cutting back-room deals with <b>degenerate Hollywood elites</b> in order to surreptitiously shoehorn the Marxist ideology of "diversity" into popular movies and TV shows with the stated goal of "forcing it down the audience\'s throat."',
+    ],
+    11: [ // Puppetmasters
+      'learning to <b>leave careful trails of clues</b> to ensure that pioneering teenagers and manic internet fascists are able to parse their otherwise surreptitious machinations.',
+      'attending <b>conspiratorial gatherings</b> in order to come to a consensus on a consistent set of symbols and code words to use while flagrantly advertising their presence.',
+      'designing <b>vast networks of secret societies</b> to maintain social and economic control over the entire world and assemble the greatest existential threat to human liberty: Antifa.',
+      'laying out <b>detailed long-term plans</b> for the gradual destabilization of Western cultural identity in order to loosen national bonds and bring about authoritarian supranational organizations, which will inevitably be headed by a charismatic figure who will rise to political prominence before descending with his multicultural army on the holy city of Jerusalem.'
+    ]
+  }
+
+  /*************************************************************
+            ACQUISITION SYSTEM
+  *************************************************************/
 
   function getAcquisition(id) {
     for (var i = 0; i < activeAcquisitions().length; i++) {
@@ -2590,11 +3594,12 @@ var game = (function() {
     this.cashSpent = new Stat('Cash Spent', load ? load.spent : 0, '$');
     this.clicks = new Stat('Clicks', load ? load.clicks : 0);
     this.sizeDivider = load ? load.sizeD : sizeDivider;
-    this.name = load ? cnItem(load.name) : (name ? name : getCompanyName());
+    this.name = load ? load.name : (name ? name : getCompanyName());
     this.description = load ? load.desc : getAcquisitionDescription(this.name, this.initialEmployees);
     this.layoffTimer = null;
     this.activeLayoff = ko.observable(false);
     this.activeValBonus = ko.observable(false);
+    this.fireClicked = ko.observable(false);
 
     this.workers = ko.observableArray([
       new AcquisitionWorker('w1', load ? load.emp0 : 0, 'Personal Assistants', 1, this.cashSpent, this.initialPrice.val() * 0.005 / this.sizeDivider, workerDesc[0], 'flav'), // Add to auto progress // Mass Layoffs
@@ -2624,7 +3629,8 @@ var game = (function() {
       var num = this.workers()[1].num() + (this.workers()[3].num() / 2);
       var autoEarningRate = 0.0001 /// this.sizeDivider;
       //return this.initialEmployees * (num * autoEarningRate);
-      return 1 * num;
+      return 1 * num
+      //return total + (total * (acqWorkerBoost.total.val() / 100));
     }, this));
 
     this.clickMod = new Stat('Click Mod', ko.computed(function() {
@@ -2633,19 +3639,21 @@ var game = (function() {
       //var base = this.initialEmployees * (clickRate + (num * clickRate));
       var base = 1 + (0.5 * num)
       return base * (this.activeLayoff() ? 3 : 1);
+      //return total + (total * (acqWorkerBoost.total.val() / 100));
     }, this));
 
     this.valMod = new Stat('Value Mod', ko.computed(function() {
       var num = this.workers()[2].num() + (this.workers()[3].num() / 2);
       return (num * 5) + (this.clicks.val() * 0.0005);
-    }, this));
+    }, this), null, '%');
 
     this.currentValue = new Stat('Current Valuation', ko.computed(function() {
       var endValue = this.initialPrice.val() * acquisitionValueMultiplier.val();
       var completedPercentage = 1 - (this.currentEmployees.val() / this.initialEmployees);
       var baseValue = completedPercentage * endValue;
-      var totalValue = baseValue;// + (completedPercentage * baseValue);
-      return totalValue + (totalValue * (this.valMod.val() / 100));
+      var totalValue = baseValue;
+      totalValue = totalValue + (totalValue * (this.valMod.val() / 100));
+      return totalValue + (totalValue * (acquisitionBoost.total.val() / 100));
     }, this), '$');
 
     this.employeesFired = ko.computed(function() {
@@ -2715,6 +3723,12 @@ var game = (function() {
       this.checkForValBonus();
       this.clicks.add((clicksToAdd * (this.activeLayoff() ? 3 : 1)) * (this.activeValBonus() ? 100 : 1));
       this.currentEmployees.sub(this.clickMod.val());
+
+      this.fireClicked(true);
+      clearTimeout(this.clickTimer);
+      this.clickTimer = setTimeout(function() {
+        this.fireClicked(false);
+      }.bind(this), 200);
     }
   };
 
@@ -2754,7 +3768,7 @@ var game = (function() {
   };
 
   Acquisition.prototype.checkForMail = function() {
-    if (Math.random() * 100 /* TODO should be 100 */ < this.mailChance()) {
+    if (Math.random() * 100 < this.mailChance()) {
       if (awayPolicyInbox().active()) {
         new Email(false, false, 'RE: New Policy Proposal for ' + this.name, getRandomAcquisitionBody(), null, this.id).respond();
       } else if (this.mail().length < MAXIMUM_ACQUISITION_MAIL) {
@@ -2768,7 +3782,7 @@ var game = (function() {
   };
 
   Acquisition.prototype.checkForChat = function() {
-    if (Math.random() * 100 /* TODO should be 100 */ < this.chatChance()) {
+    if (Math.random() * 100 < this.chatChance()) {
       if (awayChatInbox().active()) {
         handleFakeChat(this, awayChatInbox().message());
       } else if (this.chats().length < MAXIMUM_CHATS) {
@@ -3178,7 +4192,7 @@ var game = (function() {
       products.push($(this).text());
     });
 
-    if (!this.bossMentioned && bossName && new RegExp(bossName).test(text)) {
+    if (!this.bossMentioned && bossName && new RegExp(bossName.toLowerCase()).test(text.toLowerCase())) {
       this.textBonus += 10;
       this.bossMentioned = true;
       earnAchievement('pl5');
@@ -3265,7 +4279,7 @@ var game = (function() {
 
   function AcquisitionWorker(id, num, name, baseProgress, cashSpent, basePrice, description, flavor) {
     this.id = id;
-    this.name = cnItem(name);
+    this.name = name;
     this.baseProgress = baseProgress;
     this.basePrice = basePrice;
     this.cashSpent = cashSpent;
@@ -3341,13 +4355,17 @@ var game = (function() {
   *************************************************************/
 
   var name1 = ['Executive Solutions', 'Dutch India', 'Global Petroleum', 'Security Solutions', 'Global Solutions', 'North Star Defense',
-   'Aerospace Tech', 'Global Security', 'International Enforcement', 'International Diamond', 'Elite Defense', 'Risk Control',
+   'Aerospace Tech', 'Global Security', 'International Enforcement', 'International Diamond', 'Elite Defense', 'Risk Control', 'Alexon Security',
    'Industrial Mining', 'Mining Security', 'Oil & Minerals', 'Conflict Resolutions', 'Munitions Supply', 'Worldwide Intelligence',
    'Aegis International', 'Global Phalanx', 'Elite Border Recon', 'Secure Technologies', 'Humane Solutions', 'Essential Personnel',
    'North Star Defense', 'Faithful Shield', 'Orbital Defense', 'East Coast Munitions', 'Apex Armor', 'Vertex Defense', 'Centurion Manufacturing',
-    'Zenith Munitions', 'Global Corporate Solutions', 'Unified Security', 'Phoenix Industries', 'Spartan Technologies', 'Black Mountain', 'Red Sun Solutions',,
+    'Zenith Munitions', 'Global Corporate Solutions', 'Unified Security', 'Phoenix Industries', 'Spartan Technologies', 'Black Mountain', 'Red Sun Solutions',
     'Marine Systems', 'Renegade Manufacturing', 'Black Tiger Manufacturing', 'Eagle Systems', 'Vulcan Systems', 'Praetor Solutions', 'Legate International',
-     ];
+    'Hoplite Industries', 'Enterprise Manufacturing', 'Elysium Pharmaceuticals', 'United Ordnance', 'Precision Dynamics', 'Regen Pharmaceuticals',
+    'Aerospace Intelligence', 'Black Sky Aeronautics', 'Genesis Pharmaceuticals', 'Adriel Laboratories', 'Phobos Aeuronautics', 'Deimos Defense',
+    'Anhur Industrial Dynamics', 'Valkyrie Systems', 'Morning Star Defense', 'Elite Biotechnical Solutions', 'Alecto International', 'Megaera Security'
+  ];
+
   var name2 = ['Corp.', 'Co.', 'Partnership', 'Conglomerate', 'Corporation', 'Group', 'Company', 'Ltd.', 'LLC.', 'Inc.'];
 
   var products = ['depleted uranium', 'discount thalidomide', 'parts for Saudi Arabian tanks', 'white phosphorous',
@@ -3417,7 +4435,7 @@ var game = (function() {
     return getRandomFromArray(name1) + ' ' + getRandomFromArray(name2);
   }
 
-  var viewingAcquisition = ko.observable(new Acquisition(0, 0, 0, 0));
+  var viewingAcquisition = ko.observable(null);
   var viewingChat = ko.observable(new Chat());
 
   /************************************************************
@@ -3534,8 +4552,10 @@ var game = (function() {
     }, this), null, '%');
 
     this.baseValue = new Stat('Value', ko.computed(function() {
-      var val = totalDPS.val() * 15;
-      return val + (val * (this.value.val() / 100));
+      var val = totalDPS.val() * 12.5;
+      var base =  val + (val * (this.value.val() / 100));
+      var upgraded = base + (base * (researchBonus.val() / 100));
+      return upgraded + (upgraded * (rdBoost.total.val() / 100));
     }, this), '$');
 
     this.lastInterval = 0;
@@ -3623,10 +4643,11 @@ var game = (function() {
     }, this);
 
     this.readyToBegin = ko.computed(function() {
-      return this.intern() <= units()[0].num.val() && this.intern() >= 0
+      return this.active() 
+        || (this.intern() <= units()[0].num.val() && this.intern() >= 0
         && this.wage() <= units()[1].num.val() && this.wage() >= 0
         && this.sales() <= units()[2].num.val() && this.sales() >= 0
-        && this.manager() <= units()[3].num.val() && this.manager() >= 0;
+        && this.manager() <= units()[3].num.val() && this.manager() >= 0);
     }, this);
 
     this.toggleProduction = function() {
@@ -3681,36 +4702,27 @@ var game = (function() {
     };
 
     this.checkAwards = function() {
-      if (this.speed.val() >= 600) {
-        earnAchievement('rSpd4');
-      } 
+      if (this.speed.val() >= 1000) { earnAchievement('rSpd6'); }
+      if (this.speed.val() >= 800) { earnAchievement('rSpd5'); }
+      if (this.speed.val() >= 600) { earnAchievement('rSpd4'); } 
+      if (this.speed.val() >= 400) { earnAchievement('rSpd3'); } 
+      if (this.speed.val() >= 200) { earnAchievement('rSpd2'); } 
+      if (this.speed.val() >= 100) { earnAchievement('rSpd1'); }
 
-      if (this.speed.val() >= 400) {
-        earnAchievement('rSpd3');
-      } 
+      if (this.value.val() >= 1000) { earnAchievement('rVal6'); }
+      if (this.value.val() >= 800) { earnAchievement('rVal5'); }
+      if (this.value.val() >= 600) { earnAchievement('rVal4'); } 
+      if (this.value.val() >= 400) { earnAchievement('rVal3'); } 
+      if (this.value.val() >= 200) { earnAchievement('rVal2'); } 
+      if (this.value.val() >= 100) { earnAchievement('rVal1'); }
+    }
 
-      if (this.speed.val() >= 200) {
-        earnAchievement('rSpd2');
-      } 
-
-       if (this.speed.val() >= 100) {
-        earnAchievement('rSpd1');
-      }
-
-      if (this.value.val() >= 600) {
-        earnAchievement ('rVal4');
-      } 
-
-      if (this.value.val() >= 400) {
-        earnAchievement ('rVal3');
-      } 
-
-      if (this.value.val() >= 200) {
-        earnAchievement ('rVal2');
-      } 
-
-      if (this.value.val() >= 100) {
-        earnAchievement ('rVal1');
+    this.assignMax = function() {
+      if (!this.active()) {
+        this.intern(units()[0].num.val());
+        this.wage(units()[1].num.val());
+        this.sales(units()[2].num.val());
+        this.manager(units()[3].num.val());
       }
     }
   }
@@ -3744,7 +4756,7 @@ var game = (function() {
     pastBusinesses.push({
       date: Date.now(),
       length: Date.now() - startTime.val(),
-      name: cnItem(businessName().name()),
+      name: businessName().name(),
       earned: totalCash.val()
     });
   }
@@ -3754,7 +4766,7 @@ var game = (function() {
       return {
         date: new Date(record.date).toLocaleDateString(),
         length: getFormattedTime(record.length),
-        name: cnItem(record.name),
+        name: record.name,
         earned: format(record.earned)
       }
     });
@@ -3765,7 +4777,7 @@ var game = (function() {
 	*************************************************************/
 	
 	var makeInvestment = function(percentage, timeTilRipe) {
-    if (activeInvestments().length < simultaneousInvestments.val() && timeTilRipe > 0 && timeTilRipe <= 1440 && totalCash.val() >= 100000000 && accessibleDPS.val() > 0) {
+    if (activeInvestments().length < totalSimultaneousInvestmentsAllowed.val() && timeTilRipe > 0 && timeTilRipe <= 1440 && totalCash.val() >= 100000000 && accessibleDPS.val() > 0) {
   	  var baseInvestment = totalDPS.val() * (percentage / 100);
   	  activeInvestments.push(new Investment(baseInvestment, timeTilRipe));
     }
@@ -3780,11 +4792,11 @@ var game = (function() {
 	  this.timeCreated = new Date();
 	  this.currentValue = new Stat('Current Value', base, '$');
     this.finalTotal = ko.observable(null);
-    this.name = name ? cnItem(name) : getCompanyName();
+    this.name = name ? name : getCompanyName();
     this.payingOut = false;
 
     if (this.name.indexOf('undefined') > -1) {
-      this.name = cnItem(getCompanyName());
+      this.name = getCompanyName();
     }
 
 	  this.checkInterval = 1000;
@@ -3806,7 +4818,7 @@ var game = (function() {
 	  }.bind(this), this.checkInterval);
 	  
 	  this.displayTimeRemaining = ko.computed(function() {
-	    return formatTimeRemaining(Math.round(this.timeRemaining() / 1000));
+	    return viewingTab() === 'investments' && formatTimeRemaining(Math.round(this.timeRemaining() / 1000));
 	  }, this);
 	  
 	  this.percentageRipe = ko.computed(function() {
@@ -3822,10 +4834,15 @@ var game = (function() {
     }, this));
 
     this.interestEarnings = new Stat('Interest Earnings', ko.computed(function() {
-      var hoursInProgress = (this.targetTime - this.timeRemaining()) / 1000 / 60 / 60;
-      var interestEarned = this.baseEarnings.val() * (interestRate.val() / 100);
-      var timeBonus = interestEarned * ((timeBonusRate.val() / 100) * hoursInProgress);
-      return interestEarned + timeBonus;
+      if (viewingTab() === 'investments') {
+        var hoursInProgress = (this.targetTime - this.timeRemaining()) / 1000 / 60 / 60;
+        var interestEarned = this.baseEarnings.val() * (interestRate.val() / 100);
+        var timeBonus = interestEarned * ((timeBonusRate.val() / 100) * hoursInProgress / 1.5)
+        var total = interestEarned + timeBonus;
+        return total + (total * (investmentBoost.total.val() / 100));
+      } else {
+        return 0;
+      }
     }, this));
 
     this.displayPayout = function(total) {
@@ -3890,7 +4907,7 @@ var game = (function() {
       activeAcquisitions.push(new Acquisition('medium', this.name, getRandomInt(9500, 10500) * sizeDivider, earningsTotal, sizeDivider));
       activeInvestments.splice(activeInvestments.indexOf(this), 1);
 
-      document.dispatchEvent(new CustomEvent("acquisition-made", { "detail": cnItem(this.name) }));
+      document.dispatchEvent(new CustomEvent("acquisition-made", { "detail": this.name }));
     }
   }
   
@@ -3955,8 +4972,29 @@ var game = (function() {
   }
 
   var setViewingInbox = function() {
+    viewingModal('mail');
     regularInbox(true);
   };
+
+  var containsUrgent = ko.computed(function() {
+    for (var i = 0; i < mail().length; i++) {
+      if (mail()[i].isSpecial()) {
+        return true;
+      }
+    }
+
+    return false;
+  }, this);
+
+  var containsCryptic = ko.computed(function() {
+    for (var i = 0; i < mail().length; i++) {
+      if (mail()[i].isCryptic()) {
+        return true;
+      }
+    }
+
+    return false;
+  }, this);
 
   var awayMailInbox = ko.observable(new AwayMailInboxData(0, 0, 0, ''))
 
@@ -3964,6 +5002,7 @@ var game = (function() {
       this.start = ko.observable(new Date().toLocaleString());
       this.regularEmails = new Stat('Regular Emails', 5);
       this.urgentEmails = new Stat('Urgent Emails', 0);
+      this.crypticEmails = new Stat('Urgent Emails', 0);
       this.earned = new Stat('Away Earnings', 0, '$');
       this.message = ko.observable(message);
       this.active = ko.observable(false);
@@ -3973,6 +5012,7 @@ var game = (function() {
           this.start(new Date().toLocaleString());
           this.regularEmails.val(0);
           this.urgentEmails.val(0);
+          this.crypticEmails.val(0);
           this.earned.val(0);
         }
       }
@@ -4021,12 +5061,13 @@ var game = (function() {
   var composedMail = ko.observable(new ComposedMailData());
   var stressLevels = [5, 20, 50];
   var baseValues = [60 * 1000 * 5, 60 * 1000 * 20, 60 * 1000 * 60];
-  var outgoingBonuses = [investmentBoostBonus, researchBoostBonus, acquisitionBoostBonus];
+  var outgoingBonuses = [investmentBoostBonus, researchBoostBonus, acquisitionBoostBonus, trainingBoostBonus];
   var departments = {
     '0': 'Investments',
     '1': 'R&D',
     '2': 'Acquisitions',
-    '3': 'Human Resources'
+    '3': 'Training',
+    '4': 'Human Resources'
   }
 
   function ComposedMailData() {
@@ -4050,25 +5091,28 @@ var game = (function() {
 
     this.unavailable = ko.computed(function() {
       return this.resting() 
-       || (this.stressLevel.val() > 100 && this.selectedDepartment() !== '3') 
+       || (this.stressLevel.val() > 100 && this.selectedDepartment() !== '4') 
        || (this.selectedDepartment() === '' && this.selectedUrgency() === '')
-       || (this.selectedDepartment() !== '3' && this.selectedUrgency() === '')
+       || (this.selectedDepartment() !== '4' && this.selectedUrgency() === '')
     }.bind(this), this);
 
-    this.lowerStress = function(numberOfTicks, totalAmount) {
-      var num = numberOfTicks ? numberOfTicks : 1
-      var lowerAmount = 0.025 + (0.025 * (stressReduction.val() / 100));
-      lowerAmount = totalAmount ? totalAmount : lowerAmount;
-      var newStress = this.stressLevel.val() - (lowerAmount * num);
-      this.stressLevel.val(newStress > 0 ? newStress : 0);
+    this.lowerStress = function(numberOfTicks, totalAmount, actualTimeMod) {
+      if (this.stressLevel.val() > 0) {
+        var num = numberOfTicks ? numberOfTicks : 1
+        var lowerAmount = (0.025 + (0.025 * (stressReduction.val() / 100))) * (actualTimeMod ? actualTimeMod : 1);
+        lowerAmount = totalAmount ? totalAmount : lowerAmount;
+        var newStress = this.stressLevel.val() - (lowerAmount * num);
+        this.stressLevel.val(newStress > 0 ? newStress : 0);
+      }
     };
 
     this.send = function() {
       // TODO validate
 
       this.resting(true);
+      this.fullText = this.subject() + ' ' + this.message();
 
-      var isHR = this.selectedDepartment() === '3'
+      var isHR = this.selectedDepartment() === '4'
       if (!isHR) {
         var stressIncrease = stressLevels[parseInt(this.selectedUrgency())];
         this.stressLevel.add(stressIncrease + (stressIncrease * (this.stressLevel.val() / 100)));
@@ -4122,8 +5166,8 @@ var game = (function() {
       if (this.selectedDepartment() === '0') { // Investments
         if (activeInvestments().length - pendingInvestmentCount.val() > 0) {
           for (var i = 0; i < activeInvestments().length; i++) {
-            if (new RegExp(activeInvestments()[i].name.toLowerCase()).test(this.subject().toLowerCase())) {
-              earnAchievement('out7');
+            if (new RegExp(activeInvestments()[i].name.toLowerCase()).test(this.fullText.toLowerCase())) {
+              earnAchievement('out7-5');
               bonus += 20;
             }
           }
@@ -4139,7 +5183,7 @@ var game = (function() {
             }
           }
 
-          if (new RegExp(research().product().toLowerCase()).test(this.subject().toLowerCase())) {
+          if (new RegExp(research().product().toLowerCase()).test(this.fullText.toLowerCase())) {
             earnAchievement('out8');
             bonus += 60;
           }
@@ -4155,7 +5199,7 @@ var game = (function() {
           });
 
           for (var i = 0; i < products.length; i++) {
-            if (new RegExp(products[i].toLowerCase()).test(this.subject().toLowerCase())) {
+            if (new RegExp(products[i].toLowerCase()).test(this.fullText.toLowerCase())) {
               bonus += 10;
             }
           }
@@ -4177,7 +5221,17 @@ var game = (function() {
         } else {
           return { error: true, msg: 'Error: No active acquisition available'}
         }
-      } else if (this.selectedDepartment() === '3') { // Human Resources
+      } else if (this.selectedDepartment() === '3') { // Employee Training
+        var trainingsActive = units().filter(function(u) {
+          return u.trainingActive();
+        }).length;
+
+        if (trainingsActive > 0) {
+          // TODO bonus points for employee training outgoing emails
+        } else {
+          return { error: true, msg: 'Error: No training in progress' }
+        }
+      } else if (this.selectedDepartment() === '4') { // Human Resources
 
       }
 
@@ -4201,9 +5255,10 @@ var game = (function() {
     this.resolveMail = function(bonus) {
       var base = 0;
 
-      if (this.selectedDepartment() !== '3') {
+      if (this.selectedDepartment() !== '4') {
         base = baseValues[parseInt(this.selectedUrgency())];
         base += (base * outgoingBonuses[parseInt(this.selectedDepartment())].val()) / 100;
+        base += base * (outgoingBoost.total.val() / 100);
       } else {
         bonus += stressReduction.val();
       }
@@ -4216,7 +5271,7 @@ var game = (function() {
       this.resolution().averageBonus(null);
       this.resolution().employeesFired(null);
 
-      if (this.selectedDepartment() !== '3') {
+      if (this.selectedDepartment() !== '4') {
         overallTimeBoosted.add(total);
       }
 
@@ -4229,7 +5284,10 @@ var game = (function() {
       } else if (this.selectedDepartment() === '2') { // Acquisitions
         this.handleAcquisitionResolution(total);
         acquisitionTimeBoosted.add(total);
-      } else if (this.selectedDepartment() === '3') { // Human Resources'
+      } else if (this.selectedDepartment() === '3') { // Training
+        this.handleTrainingResolution(total);
+        trainingTimeBoosted.add(total);
+      } else if (this.selectedDepartment() === '4') { // Human Resources'
         var baseVal = 0.2 * stressReductionMultiplier.val();
         var total = baseVal + (baseVal * (bonus / 100));
         this.lowerStress(null, total)
@@ -4268,15 +5326,34 @@ var game = (function() {
       activeAcquisitions()[0].currentEmployees.val(newTotal > 0 ? newTotal : 0);
       this.resolution().employeesFired(format(fired));
     }.bind(this);
+
+    this.handleTrainingResolution = function(bonusTime) {
+      var activeTrainings = units().filter(function(u) {
+        return u.trainingActive();
+      });
+
+      var avg = bonusTime / activeTrainings.length;
+      this.resolution().averageBonus(getFormattedTime(avg, false, true));
+      for (var i = 0; i < activeTrainings.length; i++) {
+        var newTime = activeTrainings[i].timeRemaining() - avg;
+        activeTrainings[i].timeRemaining(newTime > 0 ? newTime : 0);
+      }
+    }.bind(this);
   }
 	
 	// Use this to cycle through special mail subject lines, so we don't see two in a row
-	var specialMailSessionCycler = 0;
+	var specialMailSessionCycler = getRandomInt(0, 115);
 	
 	var checkForMail = function() {
 	  if (mail().length < inboxMax.val()) {
       if (Math.random() <= (baseMailChance.val() * mailChanceMultiplier.val()) && !locked().mail) {
-	      if (Math.random() * 100 <= specialMailChance.val() && totalDPS.val() > 10000) {
+	      if (mysteryBoostResults.crypticEmailsUnlocked() && (Math.random() * 100 <= crypticMailChance.val())) {
+          if (awayMailInbox().active()) {
+            new CrypticEmail(false).respond();
+          } else {
+             mail.push(new CrypticEmail(false));
+          }
+        } else if (Math.random() * 100 <= specialMailChance.val() && totalDPS.val() > 10000) {
           if (awayMailInbox().active()) {
             new SpecialEmail(false).respond();
           } else {
@@ -4294,7 +5371,7 @@ var game = (function() {
 	};
 
 	// email constructor
-	function Email(isSpecial, isLoaded, subject, body, from, acquisitionId, acquisitionType, stressLevel) {
+	function Email(isSpecial, isLoaded, subject, body, from, acquisitionId, acquisitionType, stressLevel, isCryptic) {
 	  this.date = new Date();
 	  this.unit = getUnit(Math.floor(Math.random() * unitsUnlocked.val().toString()));
 	  this.subject = subject ? subject : getRandomSubject();
@@ -4308,6 +5385,7 @@ var game = (function() {
 	  this.inputText = ko.observable(null);
     this.isSpecial = ko.observable(isSpecial);
     this.isAcquisition = ko.observable(acquisitionId ? true : false);
+    this.isCryptic = ko.observable(isCryptic);
     this.acquisitionId = acquisitionId;
     this.acquisitionType = acquisitionType;
     this.stressLevel = stressLevel;
@@ -4317,47 +5395,13 @@ var game = (function() {
 	  
 	  this.respond = function() {
       this.replied(true);
-      if (!this.isAcquisition()) {
-  	    var specialBonus = this.isSpecial() ? specialMailBonus.val() : 0;
-  	    var bonus = getBonusFromInputText(awayMailInbox().active() ? awayMailInbox().message() : this.inputText(), this.from, this.unit.name(), this.isSpecial()) + specialBonus;
-        var timeBonus = getTimeBonus(this.date.getTime(), this.timeRemaining(), awayMailInbox().active());
-  	    var cash = getCashFromEmail(bonus, timeBonus);
-
-  	    this.payout(format(cash));
-  	    this.payoutBonus(Math.round(bonus) + '%');
-        this.timeBonus(format(timeBonus.bonus * 100) + '%');
-  	    
-  	    if (this.isSpecial()) {
-  	      specialMailAnswered.add(1);
-  	      specialMailAnsweredAllTime.add(1);
-  	      specialMailEarned.add(cash);
-  	    }
-  	    
-  	    mailAnswered.add(1);
-  	    mailAnsweredAllTime.add(1);
-  	    addClicks(cash);
-        totalEarnedFromEmails.add(cash);
-
-        if (awayMailInbox().active()) {
-          if (this.isSpecial()) {
-            awayMailInbox().urgentEmails.add(1);
-          } else {
-              awayMailInbox().regularEmails.add(1);
-          }
-          awayMailInbox().earned.add(cash);
-        }
-      } else {
-        var wordBonus = getBonusFromInputText(awayPolicyInbox().active() ? awayPolicyInbox().message() : this.inputText(), this.from, this.unit.name(), false);
-        var timeBonus = getTimeBonus(this.date.getTime(), this.timeRemaining(), awayPolicyInbox().active()).bonus;
-        var fired = getAcquisition(this.acquisitionId).fireByMail(wordBonus, timeBonus);
-        this.payout(format(fired));
-        this.payoutBonus(format(Math.round(wordBonus)) + '%');
-        this.timeBonus(format(timeBonus * 100) + '%');
-
-        if (awayPolicyInbox().active()) {
-          awayPolicyInbox().policies.add(1);
-          awayPolicyInbox().fired.add(fired);
-        }
+      clearInterval(this.timer);
+      if (!this.isAcquisition() && !this.isCryptic()) {
+        this.regularResponse();
+      } else if (this.isAcquisition()) {
+        this.acquisitionResponse();
+      } else if (this.isCryptic()) {
+        this.crypticResponse();
       }
 
       lastClick.val(Date.now());
@@ -4379,17 +5423,182 @@ var game = (function() {
 	  }.bind(this), 1000);
 	}
 
+  Email.prototype.crypticResponse = function() {
+    var bonus = getBonusFromInputText(awayMailInbox().active() ? awayMailInbox().message() : this.inputText(), this.from, this.unit.name(), this.isSpecial());
+    var timeBonus = getTimeBonus(this.date.getTime(), this.timeRemaining(), awayMailInbox().active());
+
+    var crypticBonus = (baseNextBankruptcyBonus() / 250) * timeBonus.bonus;
+    crypticBonus += crypticBonus * (bonus / 100);
+    crypticBonus += crypticBonus * (emailBoost.total.val() / 100);
+    crypticBonus += crypticBonus * (crypticEmailBonus.val() / 100);
+
+    additionalBankruptcyBonus.add(crypticBonus);
+    crypticEmailEarnings.add(crypticBonus);
+    crypticEmailsReceived.add(1);
+    crypticEmailsReceivedAllTime.add(1);
+    this.payout(format(crypticBonus));
+    this.payoutBonus(Math.round(bonus) + '%');
+    this.timeBonus(format(timeBonus.bonus * 100) + '%');
+
+    // if (awayMailInbox().active()) {
+
+    // }
+    if (awayMailInbox().active()) {
+      awayMailInbox().crypticEmails.add(1);
+    }
+  };
+
+  Email.prototype.acquisitionResponse = function() {
+    var wordBonus = getBonusFromInputText(awayPolicyInbox().active() ? awayPolicyInbox().message() : this.inputText(), this.from, this.unit.name(), false);
+    var timeBonus = getTimeBonus(this.date.getTime(), this.timeRemaining(), awayPolicyInbox().active()).bonus;
+    var fired = getAcquisition(this.acquisitionId).fireByMail(wordBonus, timeBonus);
+    this.payout(format(fired));
+    this.payoutBonus(format(Math.round(wordBonus)) + '%');
+    this.timeBonus(format(timeBonus * 100) + '%');
+
+    if (awayPolicyInbox().active()) {
+      awayPolicyInbox().policies.add(1);
+      awayPolicyInbox().fired.add(fired);
+    }
+  };
+
+  Email.prototype.regularResponse = function() {
+    var specialBonus = this.isSpecial() ? specialMailBonus.val() : 0;
+    var bonus = getBonusFromInputText(awayMailInbox().active() ? awayMailInbox().message() : this.inputText(), this.from, this.unit.name(), this.isSpecial()) + specialBonus;
+    var timeBonus = getTimeBonus(this.date.getTime(), this.timeRemaining(), awayMailInbox().active());
+    var cash = getCashFromEmail(bonus, timeBonus);
+
+    this.payout(format(cash));
+    this.payoutBonus(Math.round(bonus) + '%');
+    this.timeBonus(format(timeBonus.bonus * 100) + '%');
+    
+    if (this.isSpecial()) {
+      specialMailAnswered.add(1);
+      specialMailAnsweredAllTime.add(1);
+      specialMailEarned.add(cash);
+    }
+    
+    mailAnswered.add(1);
+    mailAnsweredAllTime.add(1);
+    addClicks(cash);
+    totalEarnedFromEmails.add(cash);
+
+    if (awayMailInbox().active()) {
+      if (this.isSpecial()) {
+        awayMailInbox().urgentEmails.add(1);
+      } else {
+          awayMailInbox().regularEmails.add(1);
+      }
+      awayMailInbox().earned.add(cash);
+    }
+  }
+
   function SpecialEmail(isLoaded) {
     var subject = getRandomSubject();
     var body = getRandomBody();
     return new Email(true, isLoaded, subject, body);
   }
 
-  var businessWords = ['synergy', 'downsize', 'bandwidth', 'stakeholders', 'clients', 'customers', 'profits', 'ROI', 'ideate', 'ideation', 'globalization', 'evergreen',
-  'disruptive', 'disrupt', 'innovation', 'innovate', 'dynamism', 'millennial', 'holistic', 'paradigm', 'wheelhouse', 'B2B', 'B2C', 'analytics', 'brand', 'branding', 'hyperlocal', 'optimization',
-  'client', 'customer', 'profit', 'outsourcing', 'outsource', 'startup', 'marketing', 'sales', 'agile', 'mission', 'executive', 'stocks', 'investments', 'investment', 'shares', 'valuation', 
-  'investment', 'shareholders', 'BYOD', 'advertainment', 'marketing', 'deliverable', 'hacking', 'KPI', 'pivot', 'leverage', 'startup', 'downsizing', 'outsourcing', 'unicorn',
-  'SEO', 'wunderkind', 'market', 'EBITDA', 'ASAP', 'EOD', 'actionable', 'action', 'influencer', 'CTR', 'gamified', 'gamification', 'revenue', 'overhead'];
+  var crypticEmails = [
+    {
+      subject: 'Military Intelligence. No media. No leaks.',
+      body: 'What really happened when the wizards and warlocks revealed what they had? These are crumbs and you cannot imagine the full and complete picture. Dig deeper - missing critical points to paint the full picture.'
+    },
+    {
+      subject: 'How many clues must we provide?',
+      body: 'Connect the \'markers.\' News (in all forms) unlocks the map. Expand your thinking.'
+    },
+    {
+      subject: 'Mockingbird',
+      body: 'HRC detained, not arrested (yet). Where is Huma? Follow Huma. Mockingbird 10.30.17. God bless fellow Patriot.'
+    },
+    {
+      subject: 'Everything has meaning +++',
+      body: 'Do you believe in coincidences? Paint the picture. Crumbs will make bread. Operations underway. Operators active. Pray.'
+    },
+    {
+      subject: 'The calm before the storm',
+      body: 'Think logically about the timing of everything happening. Note increased military movement. Note NG deployments starting tomorrow. Note false flags. Follow Huma.'
+    },
+    {
+      subject: 'Alice & Wonderland',
+      body: 'You can paint the picture based solely on the questions asked. Be vigilant today and expect a major false flag.'
+    },
+    {
+      subject: 'Collect my crumbs',
+      body: 'Rogue agents/programmers. Per sealed Federal orders, we quickly tracked and reinstated. Expect outages periodically (infiltrated). If this doesn\'t signal what I\'ve been saying I don\'t know what will.'
+    },
+    {
+      subject: 'Why now? Coincidence?',
+      body: 'Do military guards (uniform) typically assist the USSS? Why is this relevant? What flying object was recently shot down? Why is this relevant? How precise is geo tracking (non-public c-level pro)? Why is this relevant?'
+    },
+    {
+      subject: "Who funds MS13?",
+      body: 'Who do you hire for a hit? Who can be eliminated after the job is complete? Seth Rich. Who was found dead (2) shortly after his murder? What affiliation did they have? Classified.'
+    },
+    {
+      subject: 'Game Theory', // 10
+      body: 'The silent ones. Others monitoring (friends and enemies). Instructions. Snow White.'
+    },
+    {
+      subject: 'Who was killed in SA?',
+      body: 'Who fired? Who really fired? Why would we fire? Follow the money. Who pulls the strings? Strings detached. Open season on puppets.'
+    },
+    {
+      subject: '!ITPb.qbhqo',
+      body: 'Bots deactivated upon arrival. Keep up the good fight. It\'s spreading.' 
+    },
+    {
+      subject: 'Keywords: Confirm. Green. Sky.',
+      body: 'Why were keywords added in the stringer? What was the purpose? What was previously stated? To who specifically? ++ Who countered? Learn to read the map. Missing critical items. Graphic is key. Ordering is critical. '
+    },
+    {
+      subject: 'They are puppets',
+      body: 'They are weak. They are scared. 80% dark ops necessary. 20% public for justice. The stage must be set. Have faith. '
+    },
+    {
+      subject: 'Coincidence?',
+      body: 'Review image/location. Nothing provided is random. SFO>JFK. A321. Direct'
+    },
+    {
+      subject: 'It must happen',
+      body: 'What do they fear the most? Public awakening. If they ask. They self destruct. They know this is real. See attacks. The build is near complete. Growing exponentially.'
+    },
+    {
+      subject: 'You have more than you know',
+      body: 'U1. Cash flow funnel. Inside job. Traitors. $. We are in control. Those awake can see.'
+    },
+    {
+      subject: 'Chatter Exploding',
+      body: 'Change of narrative will be required. [-4][-5]. Public to awaken [mass-start]. Sleeping pill reject. OP Mockingbird FAILURE.'
+    },
+    {
+      subject: 'Safe Comms Maybe Exhausted',
+      body: 'We may have exhausted our ability to maintain safe-comms. Snow White. Rig for silent running. Unknown return.'
+    },
+    {
+      subject: 'RED RED Stringer 25th',
+      body: 'Expand your thinking. Take multiple paths. One connects to another. Learn to read the map. The map is the key. Find the keystone. What holds everything together?'
+    }
+    
+  ]
+
+  function CrypticEmail(isLoaded) {
+    var text = getRandomFromArray(crypticEmails);
+    return new Email(false, isLoaded, text.subject, text.body, 'Sender Unknown', null, null, null, true);
+  }
+
+var businessWords = ["ASAP", "B2B", "B2C", "BYOD", "CTR", "EBITDA", "EOD", "KPI", "ROI", "SEO", "SAAS", "accelerator", "action",
+  "advertainment", "agile", "analytic", "bandwidth", "ballpark", "best practice", "blue sky thinking", "boot strap", "bootstrap",
+  "brand", "bubble", "cash flow", "churn rate", "circle back", "client", "content marketing", "crowdfund", "crowdsource", 
+  "customer", "deep dive", "deliverable", "digital nomad", "disrupt", "downsiz", "drill down", "dynamism", "early adopter", 
+  "end-user", "end user", "enterprise", "equity", "evangelist", "evergreen", "executive", "exit strategy", 
+  "freemium", "gamification", "gamified", "globalization", "growth hack", "golden parachute",
+  "hacking", "holistic", "hyperlocal", "ideat", "influencer", "innovat", "intellectual property", 
+  "invest", "iterat", "layoff", "leverage", "market", "millennial", "mission", "monetiz", "moving forward", "optimiz", 
+  "outsourc", "overhead", "paradigm", "pivot", "profit", "redundanc", "revenue", "sale", "scaleable", "share", "shareholder", 
+  "stakeholder", "startup", "stock", "synergy", "thought leader", "trim the fat", "unicorn", "valuation", 
+  "visionary", "wheelhouse", "wunderkind"];
 	
 	function getBonusFromInputText(text, from, unit, isSpecial) {
 	  if (text) {
@@ -4425,15 +5634,13 @@ var game = (function() {
 
       var businessWordsUsed = [];
       for (var i = 0; i < businessWords.length; i++) {
-        if (inputWords.indexOf(businessWords[i]) > -1) {
-          if (businessWordsUsed.indexOf(businessWords[i] === -1)) {
+        if (text.toLowerCase().indexOf(businessWords[i]) > -1) {
+          if (businessWordsUsed.indexOf(businessWords[i].toLowerCase()) === -1) {
             businessWordsUsed.push(businessWords[i]);
             earnAchievement('pl3');
           }
         }
       }
-
-      console.log('Business: ' + businessWordsUsed.length)
 
       if (businessWordsUsed.length >= 5) {
         earnAchievement('pl4');
@@ -4442,7 +5649,8 @@ var game = (function() {
       baseBonus += businessWordsUsed.length * 5;
       multiplier += bonusWordsFound;
   	  
-  	  return baseBonus * multiplier;
+  	  var total = baseBonus * multiplier
+      return total + (total * (textBoost.total.val() / 100));
 	  } else {
 	    return 0;
 	  }
@@ -4477,6 +5685,7 @@ var game = (function() {
   function getCashFromEmail(textBonus, timeBonus) {
     var cashToAdd = (totalDPS.val() * (50 + (emailCashBonus.val() * 2))) * timeBonus.bonus;
     cashToAdd += cashToAdd * (textBonus / 100);
+    cashToAdd += cashToAdd + (cashToAdd * (emailBoost.total.val() / 100));
 
     if (timeBonus.isExpired) {
       expiredEmailsAnswered.add(1); 
@@ -4524,7 +5733,7 @@ var game = (function() {
       '5 Truths Every CEO Needs To Know About Primogeniture',
       'Vid: Ex-Marine CTO & Hiring Manager Destroys PC Culture',
       'Read This Tech Billionaire\'s Epic Clapback Against Taxes',
-      'I Think Millenials Should All Just Buy Houses',
+      'I Think Millennials Should All Just Buy Houses',
       'Born To Lead: Politician\'s Child Also Becomes Politician',
       'All The Feels: This Dedicated Employee Died at Her Desk',
       'Who\'s Cutting Onions: Tear Gas as a Workplace Motivator',
@@ -4579,7 +5788,7 @@ var game = (function() {
       'Inspiring: This Business Leader Launched a Car into the Sun',
       'Stay Vigilant: "Knockout Game" Now Leading Cause of Elderly Death',
       'So Wise: Margaret Thatcher Said the Trouble with Socialism Is...', // 60
-      '1 Per State: Top 57 Most Islamic Quotes From Barack Insane Obungler',
+      '1 Per State: 57 Most Islamic Quotes From Barack Insane Obungler',
       'New Evidence: JFK Jr. Still Alive, Hates Political Correctness',
       'Hypocrite: Local Socialist Owns Phone, Benefits From Capitalism',
       'KilLIARy KKKlinton and the Secret History of the Party of Slavery',
@@ -4598,7 +5807,47 @@ var game = (function() {
       'Enter Sandmann: How One Brave Youth Made America Great Again',
       'Hot Covfefe: How Schultz 2020 is Actually the Most Radical',
       'Doing His Part: Activist\'s Gamertag is \'XxCuckTriggerer420xX\'',
-      'Mob Mentality: Local SJWs Condemn Man Just for Asking Questions'
+      'Mob Mentality: Local SJWs Condemn Man Just for Asking Questions', // 80
+      'True Heroism: Hayden Took a Punch in the Face for All of Us',
+      'Atheist Professor Slain: God\'s Not Dead, He is Surely Alive',
+      'New Study Shows Most Aborted Babies Would Have Been Doctors',
+      'Shocking Report: Public Schools Require Radical Islam Courses',
+      'How Smaller Breasts in Fighting Games Have Rendered Me Impotent',
+      'The Legacy of Stalin: How Joe Biden Embodies Far Left Radicalism',
+      'The Hot Seat: The Ladies of The View Get Personal with Ratko Mladić',
+      'Migration Whoopsie: Scandinavia Now Consists Entirely of No-Go Zones',
+      'Common Sense: Mike Lindell Deconstructs Marxist Commodity Fetishism',
+      'Inspiring: This Sam Elliott Meme Explains Why Millennials Are Stupid', // 90
+      'Racism Solved: Local Cop Shoots Everyone, Regardless of Skin Color',
+      'How a Green Military Can Wage Never-Ending War on Climate Change',
+      'Representation Win: US Military Develops Rainbow Phosphorous',
+      'Freely Speaking: It is Fascism to Criticize a Comedian Ever',
+      'Border-line Genius: Concentration Camp? More Like Summer Camp',
+      '#Resist: Heroic Tweet Slams Dolt45 Orange Drumpf Cheetolini',
+      'So Radical: How Being Called \'TERF\' Made Me the True Victim',
+      'Democratic Hopeful Pitches Kid-Friendly Border Prison Camps',
+      'Startup Genius Just Trying to Talk About Biological Differences',
+      'Heartwarming Coincidence: CEO\'s Son Happens to Be Best Man for Job', // 100
+      'Dark Portents: How John 2:18 Predicted the Coming of Greta',
+      'Culture, Canceled: How Internet Critics Mirror the Gestapo',
+      'More Like Crynet: How I Realized All My Critics Are Russian Bots',
+      'Gun Out of Control: Idiot Charlatan Mixes Up "Clip" and "Magazine"',
+      'True Citizens: Why Only First Responders Should Have Voting Rights',
+      'Murder Advocate: Class Bigot Says Billionaires "Shouldn\'t Exist"',
+      'Pandemic? Dem-panic: Healthy Patriot Coughs Directly into Salad Bar',
+      'CEOvid-19: How Global Pandemics Hurt Those with the Most to Lose',
+      'Netflix & Steal: How \'Work from Home\' Policies Are Robbing You',
+      'No, Bernie Bro: The Existential Threat of Rude People Online', // 110
+      'Outside Agitated: Our Very Happy Locals Would Never Riot',
+      'ANTIFA: Existential Threat, or Suburban Weenies? Actually, Both',
+      'Local Hero Speaks Out for Officers Impacted by Tear Gas Blowback',
+      'Appalling: Unruly Protestor Damages Police Cruiser With Broken Body',
+      'Hindsight is 19/34: How Fact-Checkers Could Have Stopped Hitler',
+      'Ellen Speaks Out: "Félicien Kabuga is My Friend"',
+      'Follow the Money: Police & FBI Should Target the CFO of ANTIFA',
+      'Domestic Terrified: Being a Cop Is Scary, Can You Blame Them?',
+      'Ground Stood: Man Prays for Opportunity to Shoot Home Invaders',
+      'Gentler Policing: What if Cops Learn to Maim Instead of Killing?' // 120
     ];
 
     var prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
@@ -4681,14 +5930,1003 @@ var game = (function() {
       earnAchievement('etime1');
     }
   }
+
+  /*************************************************************
+                      ELECTIONS
+  *************************************************************/ 
+
+  function getRandomGender() {
+    return Math.random() < 0.5 ? 'm' : 'f';
+  }
+
+  function getPoliticianFirstName(gender) {
+    var politicianMaleFirstNames = [
+      'Michael',
+      'Christopher',
+      'Robert',
+      'William',
+      'Matthew',
+      'Richard',
+      'Thomas',
+      'Anthony',
+      'Charles',
+      'Andrew',
+      'Edward',
+      'Benjamin',
+      'Gary',
+      'Douglas',
+      'Larry',
+      'Dennis',
+      'Raymond',
+      'Jeffery',
+      'Rodney',
+      'Roger',
+      'Gerald',
+      'Walter',
+      'Michael',
+      'Henry',
+      'Arthur',
+      'Albert',
+      'Jack',
+      'Jimmy',
+      'Tony'
+    ];
+
+    var politicianFemaleFirstNames = [
+      'Amy',
+      'Elizabeth',
+      'Jennifer',
+      'Michelle',
+      'Angela',
+      'Julia',
+      'Amanda',
+      'Shannon',
+      'Christine',
+      'Susan',
+      'Patricia',
+      'Andrea',
+      'Pamela',
+      'Stacey',
+      'Deborah',
+      'Sharon',
+      'Bridget',
+      'Lauren',
+      'Kathy',
+      'Catherine',
+      'Carol',
+      'Erica',
+      'Janet',
+      'Diane',
+      'Sheila',
+      'Samantha',
+      'Margaret',
+      'Melinda'
+    ];
+
+    if (gender === 'm') {
+      return getRandomFromArray(politicianMaleFirstNames);
+    } else {
+      return getRandomFromArray(politicianFemaleFirstNames);
+    }
+  }
+
+  var offices = ['Mayor', 'to Congress', 'Governor', 'Senator', 'President'];
+  var offices2 = ['Mayor', 'Congress', 'Governor', 'Senator', 'President'];
+
+  var politicianLastNames = [
+    'Sullivan',
+    'Peterson',
+    'Murphy',
+    'Hughes',
+    'Nelson',
+    'Roberts',
+    'Russell',
+    'Bennett',
+    'Phillips',
+    'Morgan',
+    'Anderson',
+    'Campbell',
+    'Thompson',
+    'Harris',
+    'Clark',
+    'Lewis'
+  ];
+
+  function Election() {
+    this.candidateSearchGoal = 1000 /* 75000 */;
+    this.gender = getRandomGender();
+    this.firstName = ko.observable(getPoliticianFirstName(this.gender));
+    this.lastName = ko.observable(getRandomFromArray(politicianLastNames));
+    this.gaffes = ko.observableArray([]);
+    this.totalDonations = new Stat('Donations', 0, '$');
+    this.active = ko.observable(false);
+    this.finished = ko.observable(false);
+    this.resultsView = ko.observable(false);
+    this.resultsMessage = ko.observable('');
+    this.win = ko.observable(false);
+    this.baseElectionTime = 1000 * 60 * 5;
+
+    this.totalEarned = new Stat('Total Earned', 0, '$');
+    this.netEarned = new Stat('Net Earned', 0, '$');
+
+    this.pollNumber = ko.observable(50);
+    this.candidateSearch = ko.observable(0);
+
+    this.selectedOffice = ko.observable();
+    this.selectedBackground = ko.observable();
+    this.selectedPersonality = ko.observable();
+    this.selectedBackup = ko.observable();
+
+    this.bio = ko.observable(getBiography(this.firstName(), this.lastName(), this.gender, this.selectedOffice()));
+    this.miniBio = ko.observable(getMiniBio(this.firstName(), this.lastName(), this.gender));
+    this.slogan = ko.observable(getSlogan());
+
+    /** BONUSES **/
+
+    this.blue = ko.observable(0);
+    this.pocket = ko.observable(0);
+    this.shadow = ko.observable(0);
+    this.puppet = ko.observable(0);
+
+    this.gaffeRisk = new Stat('Gaffe Risk', ko.computed(function() {
+      var selectedOffice = this.selectedOffice() ? parseInt(this.selectedOffice()) : 0;
+      var selectedBackground = this.selectedBackground() ? parseInt(this.selectedBackground()) : 0;
+      var selectedPersonality = this.selectedPersonality() ? parseInt(this.selectedPersonality()) : 0;
+      var selectedBackup = this.selectedBackup() ? parseInt(this.selectedBackup()) : 0;
+      var base = (selectedOffice * 2) + selectedBackground + selectedPersonality + selectedBackup;
+      return 10 + (base * 4) - gaffeBuffer.val();
+      return total > 100 ? 100 : total;
+    }, this), null, '%');
+
+    this.donationDiscount = new Stat('Donation Discount', ko.computed(function() {
+      var base = this.selectedBackground() ? parseInt(this.selectedBackground()) : 0;
+      return base * 15;
+    }, this), null, '%');
+
+    this.lossBonus = new Stat('Loss Bonus', ko.computed(function() {
+      var val = this.selectedBackup() ? parseInt(this.selectedBackup()) : 0;
+      return Math.round(val * 200);
+    }, this), null, '%');
+
+    this.kickbackBonus = new Stat('Kickback Bonus', ko.computed(function() {
+      var val = this.selectedPersonality() ? parseInt(this.selectedPersonality()) : 0;
+      return Math.round(val * 50);
+    }, this), null, '%');
+
+    this.timeReduction = new Stat('Time Reduction', ko.computed(function() {
+      var val = this.selectedBackup() ? parseInt(this.selectedBackup()) : 0;
+      return Math.round(val * 10);
+    }, this), null, '%');
+
+    var electionTimes = [1000 * 60, 1000 * 60 * 2, 1000 * 60 * 3, 1000 * 60 * 4, 1000 * 60 * 5]
+    this.electionTime = new TimeStat('Election Time', ko.computed(function() {
+      var time =  electionTimes[this.selectedOffice() ? parseInt(this.selectedOffice()) : 0];
+      return time - (time * (this.timeReduction.val() / 100));
+    }, this), true);
+
+    this.streakBonus = new Stat('Streak Bonus', ko.computed(function() {
+      return winStreak.val() * 5;
+    }, this), null, '%');
+
+    var valMultipliers = [1, 2.5, 7, 18, 45];
+    this.winValue = new Stat('Win Value', ko.computed(function() {
+      if (this.selectedOffice()) {
+        var base = totalDPS.val() * 200;
+        var office = this.selectedOffice() ? parseInt(this.selectedOffice()) : 0;
+        var val = base * valMultipliers[office];
+        var valWithBonus = val + (val * this.kickbackBonus.val() / 100);
+        var valWithUpgradeBonus = valWithBonus + (valWithBonus * electionPayoutBonus.val() / 100);
+        var valWithStreak = valWithUpgradeBonus + (valWithUpgradeBonus * (this.streakBonus.val() / 100));
+        return valWithStreak + (valWithStreak * (electionBoost.total.val() / 100));
+      } else {
+        return 0;
+      }
+    }, this), '$');
+
+    this.lossValue = new Stat('Loss Value', ko.computed(function() {
+      return this.winValue.val() / 10;
+    }, this), '$');
+
+    this.readyToBegin = ko.computed(function() {
+      return this.active() 
+        || (this.selectedOffice()
+        && this.selectedBackground()
+        && this.selectedPersonality()
+        && this.selectedBackup());
+    }, this);
+
+    this.resetCandidate = function() {
+      this.gender = getRandomGender();
+      this.firstName(getPoliticianFirstName(this.gender));
+      this.lastName(getRandomFromArray(politicianLastNames));
+      this.bio(getBiography(this.firstName(), this.lastName(), this.gender, this.selectedOffice()));
+      this.miniBio(getMiniBio(this.firstName(), this.lastName(), this.gender));
+      this.slogan(getSlogan());
+      this.gaffes.removeAll();
+
+      this.totalDonations.val(0);
+      this.pollNumber(50);
+    }
+
+    this.reset = function() {
+      this.stopElections();
+      this.resetCandidate();
+      this.selectedOffice(null);
+      this.selectedBackground(null);
+      this.selectedBackup(null);
+      this.selectedPersonality(null);
+    }
+
+    this.view = ko.observable('preparing');
+    this.setView = function(view) {
+      this.view(view);
+
+      if (view === 'bio') {
+        earnAchievement('elbio');
+      }
+    }
+
+    this.donateCooldown = ko.observable(false);
+
+    this.donate = function() {
+      this.totalDonations.add(this.donationAmount.val());
+      donatedToCandidates.add(this.donationAmount.val());
+      currentCash.sub(this.donationAmount.val());
+      this.pollNumber(this.pollNumber() + electionSupportRate.val());
+      if (this.pollNumber() > 100) {
+        this.pollNumber(100);
+      }
+
+      clearTimeout(this.cooldown)
+      this.donateCooldown(true);
+      this.cooldown = setTimeout(function() {
+        this.donateCooldown(false);
+      }.bind(this), 300);
+    }
+
+    this.recordResults = function(isWin, num, totalDonations) {
+      if (isWin) {
+        winStreak.add(1);
+        if (winStreak.val() > winStreakCap.val()) {
+          winStreak.val(winStreakCap.val());
+        }
+
+        electionsWon.add(num);
+        this.totalEarned.val(this.winValue.val() * num);
+        this.netEarned.val((this.winValue.val() * num) - totalDonations);
+
+        if (this.pollNumber() >= 100) {
+          earnAchievement('welp2');
+        } else if (this.pollNumber() <= 50) {
+          earnAchievement('welp1');
+        }
+
+        if (this.totalDonations.val() === 0) {
+          earnAchievement('suff1');
+        }
+
+        var thankYouBodies = [
+          'Thank you for your assistance in this effort. It has been duly noted.',
+          'We couldn\'t have done this without you. It won\'t be forgotten.',
+          'Thank you for all your help. Rest assured it will be made up to you.',
+          'Your help is much appreciated. I promise that you will not regret it.',
+          'Thanks again for everything you\'ve done. We won\'t forget it.',
+          'That win was all you - I mean it. We\'ll remember this one.',
+          'Thanks so much for your help. We owe you one for sure.'
+        ];
+
+        if (electionNotifications.val() > 0) {
+          var newEmail = new Email(false, false, 'RE: Successful run for ' + offices2[this.selectedOffice()], getRandomFromArray(thankYouBodies), this.firstName() + ' ' + this.lastName());
+          if (awayMailInbox().active()) {
+            newEmail.respond();
+          } else {
+            mail.push(newEmail);
+          }
+        }
+      } else {
+        winStreak.val(0);
+        electionsLost.add(num);
+        this.totalEarned.val(this.lossValue.val() * num);
+        this.netEarned.val((this.lossValue.val() * num) - totalDonations);
+      }
+
+      if (this.netEarned.val() < 0) {
+        earnAchievement('don1')
+      }
+
+      earnedFromElections.add(this.totalEarned.val());
+      addClicks(this.totalEarned.val());
+      return this.totalEarned.val();
+    }
+
+    this.seeResults = function() {
+      if (!this.resultsView()) {
+        this.seeingResults = true;
+        if (Math.random() * 100 < this.pollNumber()) {
+          this.win(true);
+          this.recordResults(true, 1, this.totalDonations.val());
+          this.resultsMessage(this.firstName() + ' ' + this.lastName() + ' Wins!')
+        } else {
+          this.win(false);
+          this.recordResults(false, 1, this.totalDonations.val());
+          this.resultsMessage(this.firstName() + ' ' + this.lastName() + ' Loses');
+        }
+
+        this.resultsView(true);
+
+        setTimeout(function() {
+          this.resultsView(false);
+          this.finished(false);
+          this.setView('preparing');
+        }.bind(this), 4000);
+      }
+    }
+
+    this.stopElections = function() {
+      this.active(false);
+      clearInterval(this.timer);
+      this.setView('preparing');
+    }
+
+    this.gaffeInterval = 1000 * 5;
+    this.lastInterval = 0;
+    this.targetTime = 1000 * 60 * 5; 
+    this.timeRemaining = ko.observable();
+    this.timer = null;
+    this.lastGaffe = Date.now();
+    this.startTimer = function() { 
+      this.targetTime = this.electionTime.val();
+      this.timeRemaining(this.electionTime.val());
+      this.lastInterval = 0;
+      this.timer = setInterval(function() {
+        var now = Date.now();
+        var elapsedTime = now - this.lastInterval;
+        this.lastInterval = now;
+        
+        if (elapsedTime < 60000) {
+          var newTime = this.timeRemaining() - (elapsedTime);
+          this.timeRemaining(newTime > 0 ? newTime : 0);
+        }
+
+        if (Math.random() < 0.5) {
+          this.pollNumber(this.pollNumber() + getRandomInt(-1, 1));
+          if (this.pollNumber() <= 0) {
+            this.pollNumber(0);
+          }
+
+          if (this.pollNumber() >= 100) {
+            this.pollNumber(100);
+          }
+        }
+
+        if ((Date.now() - this.lastGaffe) >= this.gaffeInterval) {
+          if (Math.random() * 100 < this.gaffeRisk.val()) {
+            var gaffe = new Gaffe();
+            this.pollNumber(this.pollNumber() - gaffe.mod());
+            if (this.pollNumber() <= 0) {
+              this.pollNumber(0);
+            } else if (this.pollNumber() > 100) {
+              this.pollNumber(100);
+            }
+
+            gaffe = checkForGaffeDuplicates(this.gaffes(), gaffe);
+
+            this.gaffes.unshift(gaffe);
+            if (this.gaffes().length > 10) {
+              this.gaffes.pop();
+            }
+          }
+
+          this.lastGaffe = Date.now();
+        } 
+
+        if (this.timeRemaining() <= 0) {
+          this.active(false);
+          this.finished(true);
+          //this.seeResults();
+          clearInterval(this.timer);
+        }
+
+      }.bind(this), 1000);
+    }
+
+    this.donationAmount = new Stat('Donation Amount', ko.computed(function() {
+        var elapsedTime = this.targetTime - this.timeRemaining();
+        var increase = (elapsedTime / this.targetTime) * 5;
+        val = this.winValue.val() / 125;
+        val = val + (val * increase);
+        return val - (val * (this.donationDiscount.val() / 100));
+    }, this), '$');
+
+    this.cantAffordDonation = ko.computed(function() {
+      return this.active() && (currentCash.val() < this.donationAmount.val());
+    }, this);
+
+    this.displayTimeRemaining = ko.computed(function() {
+      return formatTimeRemaining(Math.round(this.timeRemaining() / 1000));
+    }, this);
+
+    this.start = function() {
+      if (this.readyToBegin()) {
+        this.resetCandidate();
+
+        this.active(true);
+        //this.finished(false);
+        this.startTimer();
+        this.view('main');
+      }
+    }
+  } 
+
+  function checkForGaffeDuplicates(gaffes, gaffe) {
+    if (gaffeExists(gaffes, gaffe)) {
+      var newGaffe = new Gaffe();
+      return checkForGaffeDuplicates(gaffes, newGaffe);
+    } else {
+      return gaffe;
+    }
+  }
+
+  function getGaffeText() {
+    var gaffes = [
+      'Threw up in Shinzō Abe\'s lap',
+      'Did a weird scream at a rally',
+      'Said "please clap"',
+      'Got hit in the face with a milkshake',
+      'Had a meeting on a tarmac',
+      'Got video-taped smoking crack in a motel',
+      'Had a wide stance in an airport bathroom',
+      'Wore a tan suit',
+      'Couldn\'t spell "potato"',
+      'Looked really sweaty on TV', // 10
+      'Cheated on a cancer-stricken spouse',
+      'Said "Pokemon Go to the polls"',
+      'Looked weird trying to catch a football',
+      'Tried to dab on Ellen',
+      'Failed to play the sax on Arsenio Hall',
+      'Exploited opponent\'s youth and inexperience',
+      'Bodyslammed a journalist',
+      'Access Hollywood tapes were uncovered',
+      'Revealed to be one of the Pinkenba Six',
+      'Tied the family dog to the roof of the car', // 20
+      'Asked on live television what "Aleppo" was',
+      'Arrested for urinating on the Alamo',
+      'Broke in to the DNC office',
+      'Sold weapons to Nicaraguan rebels',
+      'Forgot about 9/11',
+      'Did not support our troops',
+      'Described veterans as "washed up" and "old news"',
+      'Had never heard of Iowa or New Hampshire',
+      'Accidentally called Angela Merkel "mom"',
+      'Vaped repeatedly during a televised debate', // 30
+      'Listed "hentai" as a personal favorite genre',
+      'Spent the entirety of college in blackface',
+      'Described Anne Frank as "cowardly" and "low-T"',
+      'Called the 9/11 hijackers "ambitious young men"',
+      'Recorded defiling the corpse of Muammar Gaddafi',
+      'Photographed playing tennis with Thomas Lubanga',
+      'Gave a toast at Slobodan Milošević\'s wedding',
+      'Caught executing a Guatemalan union organizer',
+      'Accidentally managed a civil war in El Salvador',
+      'Slip of tongue resulted in various racial slurs', // 40
+      'Accused of sexual assault by %BIGNUM different women',
+      'Suggested the Holocaust was "not that bad"',
+      'Listed Omar al-Bashir as emergency contact',
+      'Described Jerry Sandusky as a "personal hero"',
+      'Interned with the Lord\'s Resistance Army in college', 
+      'Repeatedly defined "ephebophelia" during debate',
+      'Plausibly accused of being the Zodiac Killer',
+      'Wrote a lengthy op-ed defending Jared Fogle',
+      'Noted favorite director as Leni Riefenstahl',
+      'Listed on every Jeffrey Epstein flight log', // 50
+      'Publicly accused of hijacking Flight 305',
+      'Described Casey Anthony as a "celebrity crush"',
+      'Described Heaven\'s Gate as having "some fresh ideas"',
+      'Called age of consent laws "America\'s great injustice"',
+      'Listed Ian Watkins as a personal favorite musician',
+      'Ran afoul of Joe the Plumber',
+      'Brandished a Civil War musket during a debate',
+      'Was unable to name any previous American president',
+      'Records revealed a history of %SMALLNUM DUIs',
+      'Attributed "I Have a Dream" to Martin Lawrence', // 60
+      'Avoided jury duty due to "prejudice against all races"',
+      'Plausibly accused of murdering Leo Ryan',
+      'Sexually harassed an Incan Mummy',
+      'Self-identified as the true Pope due to Vatican II',
+      'Told too many stories about "T-Bone"',
+      'Experienced "heated gaming moments" during a debate',
+      'Admitted to running a James Holmes fan Tumblr',
+      'Called Anita Sarkeesian "an existential threat to life"',
+      'Accidentally wore a novelty SS uniform to a photo op',
+      'Referred to a cop as "sugar tits" during a traffic stop', // 70
+      'Described own genitals as "white supremacist"',
+      'Accidentally Tweeted "sex gifs"',
+      'Tried to kiss Justin Trudeau on the lips',
+      'Said political career was meant to impress Jodie Foster',
+      'Persuasively accused of murdering JonBenet Ramsey',
+      'Called Dzhokhar Tsarnaev "the sexiest man alive"',
+      'Accidentally brought secret second family to a photo op',
+      'Called Woo Bum-kon "an inspiring first responder"',
+      'Tried for war crimes during the Yugoslav Wars',
+      'Described the Armenian Genocide as a "cool story"', // 80
+      'Dismissed the Nanking Massacre as "Japan bashing"',
+      'Called the 1965 Tragedy in Indonesia a "market win"',
+      'Fell off a stage in Chico, California',
+      'Featured in approximately %BIGNUM leaked sex tapes',
+      'Starred in an amateur remake of "The Birth of a Nation"',
+      'Self-described as "more of a Dylan than an Eric"',
+      'Caught selling drugs to Ed Buck',
+      'Adopted the "Carlos Danger" alias for sexting',
+      'Listed a favorite hobby as "youth blood transfusions"',
+      'Persuasively accused of flying United Flight 93', // 90
+      'Authoritatively accused of hijacking MAS370',
+      'Wrote an op-ed tying David Hogg to Anwar al-Awlaki',
+      'Photographed golfing with Idi Amin in 1977',
+      'Suggested that Pinochet was "tough, but fair"',
+      'Accidentally called Imran Khan "Khan Noonien Singh"',
+      'Accused of founding the Davao Death Squad',
+      'Simultaneously accused of both elder and child abuse',
+      'Played Mr. Yunioshi in "Breakfast at Tiffany\'s"',
+      'Described the Statue of Liberty as "a real hag"',
+      'Listed Tucker Max as a favorite author', // 100
+      'Referred to a female journalist as a "slam-pig"',
+      'Described Indira Gandhi as an "old witch"',
+      'Arrested in connection with the Lufthansa heist',
+      'Records show %BIGNUM arrests for public intoxication',
+      'Listed by the SPLC as a one-person hate group',
+      'Revealed to have a purse filled with hot sauce',
+      'Leaked resume includes "Founder, ISIS (1999)"',
+      'Listed all-time favorite author as OJ Simpson',
+      'Self-described as "Micheal Vick, but for cats"',
+      'Drunkenly groped a female interviewer', // 110
+      'Snorted bath salts during a televised debate',
+      'Repeatedly rode the sybian on Howard Stern',
+      'Falsely claimed to have "plowed Kate Upton"',
+      'Threatened to "Chris Benoit" debate opponents',
+      'Chose the Fourteen Words as a campaign slogan',
+      'Suspected of running the Caravan of Death in Chile',
+      'Revealed as a founder of the Silent Brotherhood',
+      'Booted from Opie & Anthony for being too racist',
+      'Still calling for the execution of the Central Park Five',
+      'Inadvertantly confessed to murdering Jeffrey Epstein', // 120
+      'Repeatedly claimed to be the Lindbergh baby'
+    ];
+
+    return getRandomFromArray(gaffes);
+  }
+
+  function Gaffe() {
+    this.text = getGaffeText();
+    this.text = this.text.replace('%BIGNUM', getRandomInt(100, 500));
+    this.text = this.text.replace('%SMALLNUM', getRandomInt(21, 49));
+    this.mod = ko.observable(getRandomInt(2, 6));
+    this.manualSpinsNeeded = this.mod() * 5;
+    this.manualSpins = 0;
+
+    if (Math.random() * 100 < prChance.val()) {
+        this.mod(-this.mod());
+    }
+
+    gaffesExperienced.add(1);
+  }
+
+  function gaffeExists(gaffes, gaffe) {
+    var exists = false;
+    for (var i = 0; i < gaffes.length; i++) {
+      if (gaffes[i].text === gaffe.text) {
+        exists = true;
+      }
+    }
+
+    return exists;
+  }
+
+  /** POLITICIAN BIOGRAPHIES **/
+
+  function getMiniBio(first, last, gender) {
+    var miniTemplates = [
+      '%FULLNAME is %DESCRIPTOR looking to %DOSOMETHING. Read %HIS <a onclick="game.election().setView(\'bio\');setTimeout(function() {$(\'#electionbio\').scrollTop(0) }, 100);">full biography</a> if you\'d like to know more.'
+    ];
+
+    var descriptors = [
+      'a political firebrand',
+      'an ambitious entrepeneur',
+      'an inspiring orator',
+      'a political outsider',
+      'a successful business leader',
+      'a hero of the private sector',
+      'a prolific job creator'
+    ];
+
+    var doThings = [
+      'shake things up in Washington',
+      'bring real change to Capitol Hill',
+      'reach across the aisle in Washington',
+      'bridge the gap between left and right',
+      'bring common sense back to politics',
+      'bring a fresh perspective to Washington'
+    ];
+    var template = getRandomFromArray(miniTemplates);
+
+    return template.replace('%FULLNAME', first + ' ' + last)
+    .replace('%HIS', gender === 'm' ? 'his' : 'her')
+    .replace('%DESCRIPTOR', getRandomFromArray(descriptors))
+    .replace('%DOSOMETHING', getRandomFromArray(doThings));
+  }
+
+  var slogans = [
+    'A Vision for Hope',
+    'A Better Future for Our Children',
+    'A Better Future for All of Us',
+    'Progress for a Stronger America',
+    'A Safer World and Hope for the Future',
+    'Leadership for a Better Tomorrow',
+    'Working for Change, Working for Families',
+    'A Future We Can Believe In',
+    'Pushing Forward to a Prosperous Future'
+  ];
+
+  function getSlogan() {
+    return getRandomFromArray(slogans);
+  }
+
+  function getBiography(first, last, gender, office) {
+    var firstPTemplates = [
+      '%FULLNAME belongs to a generation defined by %SHORTISSUE1, %SHORTISSUE2, and %LONGISSUE. In turn, %HE understands the need for %ISSUENEED, and %HE will fight for it.',
+      'Ever since %HE was a child, %FULLNAME has believed in the future. %CAPHE didn\'t face %SHORTISSUE1 and %SHORTISSUE2 as young people do today, but as a leader, %HE understands that the only way forward is %ISSUENEED.',
+      'Ever since %HE was a child, %FULLNAME has been a leader. %CAPHE grew up in a generation defined by %SHORTISSUE1, %SHORTISSUE2, and %LONGISSUE, and as a result, %HE understands the need for %ISSUENEED. Like every strong leader, %HE will fight for it.',
+      '%FULLNAME understands that the world is changing. Today\'s young people are faced with issues like %SHORTISSUE1 and %SHORTISSUE2, not to mention %LONGISSUE. As a result, %FIRSTNAME understands the need for %ISSUENEED, and %HE will work for it.',
+      'Throughout %HIS career, %FULLNAME has been a vocal advocate for %GENERICCOMMUNITY1 and %GENERICCOMMUNITY2. %CAPHE believes in all people, not just %GENERICBADCOMMUNITY, which is why %HE understands the need for %ISSUENEED.'
+    ];
+
+    var secondPTemplates = [
+      'As %PREVIOUSJOB, %FIRSTNAME created an environment of %GOODQUALITY1 and %GOODQUALITY2. In turn, it\'s only fair to remember that %DEFENSIVE1. That is why %FIRSTNAME needs your support now more than ever.', 
+      'Unlike the career politicians in Washington, %FIRSTNAME is no stranger to strong leadership. As %PREVIOUSJOB, %HE created an environment of %GOODQUALITY1 and %GOODQUALITY2, and over time, %DEFENSIVE1. That is leadership we can rely on.',
+      'During %HIS time as %PREVIOUSJOB, %FIRSTNAME learned a lot about %GOODQUALITY1 and %GOODQUALITY2. That is why we have to remember that %DEFENSIVE1, and it\'s why %FIRSTNAME needs your support more now than ever.',
+      'It was during %HIS time as %PREVIOUSJOB that %FIRSTNAME was drawn to politics. That was where %HE learned that %GOODQUALITY1 and %GOODQUALITY2 are essential to strong leadership, and more importantly, that is why it is important to understand that %DEFENSIVE1.',
+      'One of %FIRSTNAME\'s greatest passions is %HIS love of %COMMUNITY1, as well as %HIS life-long interest in %COMMUNITY2. That is why %HIS work as %PREVIOUSJOB was so close to %HIS heart, and why we must always keep in mind that %DEFENSIVE1.',
+      'The road to success has been challenging for %FIRSTNAME. As %PREVIOUSJOB, %HE was victimized and persecuted &mdash; after all, %DEFENSIVE1 &mdash; and that struggle has informed %HIS character ever since. %CAPHE knows what it\'s like for regular folks.',
+      'Like most hard-working people, %FIRSTNAME has known %HIS share of struggles. As %PREVIOUSJOB, %HE was dogged by misinformation &mdash; for example, %DEFENSIVE1 &mdash; and the pain of that struggle has strengthened %HIS resolve ever since.'
+    ]
+
+    var policyPTemplates = [
+      'When elected %OFFICE, %FIRSTNAME will hit the ground running and make major changes on day one. %CAPHIS innovative plans for %HIS first 100 days in office include: <ul><li>%GENERICPOLICY1</li><li>%GENERICPOLICY2</li><li>%HORRORPOLICY</li></ul>',
+      'If elected %OFFICE, %FIRSTNAME will get to work immediately, rather than spending %HIS days on the golf course like some politicians. %CAPHIS top priorities for %HIS first term include: <ul><li>%GENERICPOLICY1</li><li>%GENERICPOLICY2</li><li>%HORRORPOLICY</li></ul>',
+      'When elected %OFFICE, %FIRSTNAME will put %HIS nose to the grindstone on day one. %CAPHIS revolutionary plans for %HIS first 50 days in office include: <ul><li>%GENERICPOLICY1</li><li>%GENERICPOLICY2</li><li>%HORRORPOLICY</li></ul>'
+    ];
+
+    var thirdPTemplates = [
+      'A native of %PLACE, %FIRSTNAME is a graduate of %COLLEGE and %POSTGRAD. %CAPHE is married to %OTHERNAME, and together they live with their %QUANTITY %CHILDORPET, %NAMES',
+      'Born and raised in %PLACE, %FIRSTNAME is a graduate of %COLLEGE and %POSTGRAD. %CAPHE is married to %OTHERNAME, and together they live with their %QUANTITY %CHILDORPET, %NAMES',
+      'A graduate of %COLLEGE and %POSTGRAD, %FIRSTNAME lives in %HIS hometown of %PLACE with %HIS %GENDERSPOUSE, %OTHERNAME, and %HIS %QUANTITY %CHILDORPET, %NAMES',
+      '%CAPHIS most important roles, however, are those at home. %CAPHE is %GENDERSPOUSE to %OTHERNAME and %GENDERPARENT to %KIDNAME1 and %KIDNAME2, and they live together in %HIS hometown of %PLACE.'
+    ];
+
+    var firstP = fillOutTemplate(getRandomFromArray(firstPTemplates), first, last, gender, office);
+    var secondP = fillOutTemplate(getRandomFromArray(secondPTemplates), first, last, gender, office);
+    var policyP = fillOutTemplate(getRandomFromArray(policyPTemplates), first, last, gender, office);
+    var thirdP = fillOutTemplate(getRandomFromArray(thirdPTemplates), first, last, gender, office);
+    return '<p>' + firstP + '</p><p>' + secondP + '</p><p>' + policyP + '</p><p>' + thirdP + '</p>';
+  }
+
+  var childNames = [
+    'Taylee',
+    'Mckarty',
+    'Nayvie',
+    'Maylee',
+    'Lakynn',
+    'Taysom',
+    'Ollie',
+    'Grayson',
+    'Asher',
+    'Tatum',
+
+    'Hunter',
+    'Scout',
+    'Peyton'
+  ];
+
+  function fillOutTemplate(template, first, last, gender, office) {
+    var places = [
+      'Shelbyville, Kentucky',
+      'Blair, Oklahoma',
+      'Waterville, Ohio',
+      'Johnson City, Texas',
+      'Buffalo, Wyoming',
+      'Yankton, South Dakota',
+      'Buck Creek, Indiana',
+      'North Liberty, Iowa'
+    ];
+
+    var colleges = [
+      'Columbia University',
+      'Princeton University',
+      'Brown University',
+      'Cornell University',
+      'Dartmouth College',
+      'Harvard University'
+    ];
+
+    var postGrads = [
+      'Yale Law',
+      'Yale School of Management',
+      'Harvard Law',
+      'Harvard Business School'
+    ];
+
+    var childOrPet = [
+      'beautiful children',
+      'adorable children',
+      'perfect children',
+      'lovely children',
+      'purebred munchkin cats',
+      'adorable and sickly pugs',
+      'deaf German Shepherds',
+      'Mastiffs with hip dysplasia'
+    ];
+
+    var shortIssues = [
+      'gun violence',
+      'falling wages',
+      'political division',
+      'climate catastrophe',
+      'economic turmoil',
+      'immigration crises',
+      'overwhelming debt',
+      'police brutality',
+      'rising healthcare costs'
+    ];
+
+    var longIssues = [
+      'never-ending war in the Middle East',
+      'an unstoppable global war on terrorism',
+      'the advent of a militarized police state',
+      'the soul-crushing weight of burgeoning corporate dystopia',
+      'the profound alienation of modern life'
+    ];
+
+    var issueNeeds = [
+      'massive corporate deregulation',
+      'exponential GDP growth at all costs',
+      'massive and unimpeded corporate growth',
+      'the unending spread of globalization',
+      'the forceful spread and maintenance of global markets',
+      'the relentless defense of international business interests'
+    ];
+
+    var genericCommunities = [
+      'the voiceless',
+      'the vulnerable',
+      'the working class',
+      'the middle class',
+      'the children'
+    ];
+
+    var genericBadCommunities = [
+      'the 1%',
+      'the special interests',
+      'the big shots on Capitol Hill',
+      'the coastal elites'
+    ];
+
+    var previousJobTitles = [
+      'Director of R&D for',
+      'Vice President of',
+      'CEO of',
+      'CFO of',
+      'Director of Weapons Development for'
+    ];
+
+    var goodQualities = [
+      'trust',
+      'compassion',
+      'empathy',
+      'dedication'
+    ];
+
+    var defensive = [
+      'the claims of physical and emotional abuse leveled against %HIM were ultimately determined to be unfounded',
+      'no evidence was found to support the accusations of coercion and physical intimidation made against %HIM',
+      'all reports of inappropriate touching on %HIS part were found to have been made by disgruntled ex-employees who should be ignored',
+      'the exposé on OSHA violations written about %HIM was proven to be nothing more than a mainstream media witch hunt',
+      'the Fraternal Order of Police confirmed that every death attributed to %HIM was necessitated by %HIS own fear for %HIS safety',
+      'an internal task force exonerated %HIM of all charges of sexual impropriety, rightfully observing that %HE was just kidding around',
+      'the slanderous hit piece describing %FIRSTNAME\'s management style as "%BADQUALITY1 and %BADQUALITY2" was widely interpreted to be biased and misinformed',
+      'the oft-quoted %MAGAZINE interview %HE gave about %INTERVIEWTOPIC was proven to have been selectively edited to portray %FIRSTNAME in a negative light',
+      'a thorough internal investigation found that no sexual misconduct had occurred under %HIS watch',
+      'the portrayal of %HIM in the %YEAR biopic titled <i>%BIOPIC</i> was proven to be heavily fictionalized',
+      'the leaked copy of %HIS unpublished essay titled <i>%ESSAYTITLE</i> was shown to have been taken wildly out of context by muck-raking critics',
+      'the unearthed copy of %HIS essay titled <i>%ESSAYTITLE</i> was proven to have been widely misrepresented by detractors',
+      'a lengthy criminal trial found %HIM to be not guilty on all counts of manslaughter, both negligent and aggravated'
+    ];
+
+
+    var biopics = [
+      'The Butcher of Burundi',
+      'Ghosts of Sarajevo',
+      'Memories of Rhodesia',
+      'Freedom\'s Last Gasp',
+      '%FIRSTNAME\'s America: Empire of Blood'
+    ];
+
+    var essayTitles = [
+      'The Central Failure of the Female Brain',
+      'How Israel Can Cleanse the Arab World',
+      'Affirmative Action: Signs of the End Times',
+      'Is Desegregation Really the Answer?',
+      'How the #MeToo Movement Wronged Bill Cosby',
+      'Je Suis Charlie Kirk'
+    ];
+
+    var interviewTopics = [
+      'race and IQ',
+      'the merits of eugenics',
+      'Roman Polanski'
+    ];
+
+    var communities = [
+      'the LGBTQ+ community',
+      'the African-American people',
+      'the veteran community',
+      'the disabled community',
+      'the mothers and fathers of America'
+    ];
+
+    var unseriousCommunities = [
+      'Facebook groups about how nice pitbulls are',
+      'listservs dedicated to father\'s rights issues',
+      'online forums dedicated to men going their own way',
+      'anti-circumcision activism',
+      'anti-vaccination activism',
+      'holistic alternatives to AIDs treatment'
+    ]
+
+    var magazine = [
+      'Vanity Fair',
+      'New York Times',
+      'Time Magazine'
+    ];
+
+    var badQualities = [
+      'draconian',
+      'violent',
+      'brutal',
+      'maniacal',
+      'vicious',
+      'inhuman',
+      'remorseless',
+      'borderline criminal',
+      'racially insensitive'
+    ];
+
+    var genericPolicies = [
+      'Getting things done',
+      'Working hard',
+      'Reaching across the aisle',
+      'Coming up with common-sense policies',
+      'Being pragmatic',
+      'Making a difference',
+      'Finding bipartisan solutions'
+    ];
+
+    var horrorPolicies = [
+      'Maintaining the profitability of the private prison industry at all costs',
+      'Pushing for war in hopes that defense contracts might be sold to %HIS friends',
+      'Leading the search for Antifa\'s founder, notorious terrorist William H. Antifa',
+      'Preserving free speech through a series of draconian anti-BDS laws',
+      'Protecting free speech by punishing flag burning with the death penalty',
+      'Ensuring that all abortions are preceded by 10-month waiting periods',
+      'Solving mass shootings by replacing all teachers with retired Navy SEALs',
+      'Pushing back against crime by becoming the world leader in executions',
+      'Repealing Obamacare and replacing it with BOGO fentanyl patches',
+      'Deploying targeted MOABs to strike a decisive blow in the War on Christmas',
+      'Protecting campus free speech by legally mandating that all spaces be unsafe'
+    ];
+
+    var shortIssue1 = getRandomFromArray(shortIssues);
+    var genericCommunity1 = getRandomFromArray(genericCommunities);
+    var goodQuality1 = getRandomFromArray(goodQualities);
+    var community1 = getRandomFromArray(communities);
+    var defensive1 = getRandomFromArray(defensive);
+    var badQuality1 = getRandomFromArray(badQualities);
+    var genericPolicy1 = getRandomFromArray(genericPolicies);
+    var quantity = getRandomInt(3, 5);
+    var kid1 = getRandomFromArray(childNames);
+
+    return template.replace('%SHORTISSUE1', shortIssue1)
+    .replace('%SHORTISSUE2', getRandomFromArrayExcept(shortIssues, [shortIssue1]))
+    .replace('%LONGISSUE', getRandomFromArray(longIssues))
+    .replace('%ISSUENEED', getRandomFromArray(issueNeeds))
+    .replace('%GENERICCOMMUNITY1', genericCommunity1)
+    .replace('%GENERICCOMMUNITY2', getRandomFromArrayExcept(genericCommunities, [genericCommunity1]))
+    .replace('%GENERICBADCOMMUNITY', getRandomFromArray(genericBadCommunities))
+    .replace('%PREVIOUSJOB', getRandomFromArray(previousJobTitles) + ' ' + getCompanyName())
+    .replace('%GOODQUALITY1', goodQuality1)
+    .replace('%GOODQUALITY2', getRandomFromArrayExcept(goodQualities, [goodQuality1]))
+    .replace('%COMMUNITY1', community1)
+    .replace('%COMMUNITY2', getRandomFromArray(unseriousCommunities))
+    .replace('%DEFENSIVE1', defensive1)
+    .replace('%DEFENSIVE2', getRandomFromArrayExcept(defensive, [defensive1]))
+    .replace('%COLLEGE', getRandomFromArray(colleges))
+    .replace('%POSTGRAD', getRandomFromArray(postGrads))
+    .replace('%OTHERNAME', getPoliticianFirstName(gender === 'm' ? 'f' : 'm') + ' ' + last)
+    .replace('%GENDERSPOUSE', gender === 'm' ? 'wife' : 'husband')
+    .replace('%GENDERPARENT', gender === 'm' ? 'father' : 'mother')
+    .replace('%QUANTITY', quantity)
+    .replace('%CHILDORPET', getRandomFromArray(childOrPet))
+    .replace('%NAMES', getChildNames(quantity))
+    .replace('%KIDNAME1', kid1)
+    .replace('%KIDNAME2', getRandomFromArrayExcept(childNames, [kid1]))
+    .replace('%PLACE', getRandomFromArray(places))
+    .replace('%FULLNAME', first + ' ' + last)
+    .replace('%YEAR', getRandomInt(2002, 2017))
+    .replace('%BIOPIC', getRandomFromArray(biopics))
+    .replace('%ESSAYTITLE', getRandomFromArray(essayTitles))
+    .replace('%ADULTAGE', getRandomInt(35, 49))
+    .replace('%MAGAZINE', getRandomFromArray(magazine))
+    .replace('%INTERVIEWTOPIC', getRandomFromArray(interviewTopics))
+    .replace('%BADQUALITY1', badQuality1)
+    .replace('%BADQUALITY2', getRandomFromArrayExcept(badQualities, [badQuality1]))
+    .replace('%GENERICPOLICY1', genericPolicy1)
+    .replace('%GENERICPOLICY2', getRandomFromArrayExcept(genericPolicies, [genericPolicy1]))
+    .replace('%HORRORPOLICY', getRandomFromArray(horrorPolicies))
+    .replace('%OFFICE', offices[office])
+    .replace(/%FIRSTNAME/g, first)
+    .replace(/%HIM/g, gender === 'm' ? 'him' : 'her')
+    .replace(/%HIS/g, gender === 'm' ? 'his' : 'her')
+    .replace(/%HE/g, gender === 'm' ? 'he' : 'she')
+    .replace(/%CAPHE/g, gender === 'm' ? 'He' : 'She')
+    .replace(/%CAPHIS/g, gender === 'm' ? 'His' : 'Her')
+
+  }
+
+  function getChildNames(quantity) {
+    var names = [];
+    names.push(getRandomFromArray(childNames));
+
+    while (names.length < quantity) {
+      names.push(getRandomFromArrayExcept(childNames, names));
+    }
+
+    var text = '';
+    for (var i = 0; i < names.length; i++) {
+      var isFirst = i === 0;
+      var isLast = i === names.length - 1;
+
+      if (isFirst) {
+        text += names[i];
+      } else if (isLast) {
+        text += ', and ' + names[i];
+      } else {
+        text += ', ' + names[i];
+      }
+    }
+
+    return text + '.';
+  }
+
+  var election = ko.observable(new Election());
   
   /*************************************************************
                       WINDFALL
   *************************************************************/
 
+  function chargeWindfall(time) {
+    windfallCharge.add(Math.round(time * 5));
+
+    if (windfallCharge.val() >= 100) {
+      windfallCharge.val(100);
+    }
+  }
+
+  var clicksSinceWindfall = 0;
   function checkForWindfall() {
-    if ((Math.random() * 500) < windfallChance.val() && totalDPS.val() > 100) {
+    var windfallAllowed = totalDPS.val() > 100 && locked().windfallGuarantee;
+    if (windfallAllowed && (((Math.random() * 500) < windfallChance.val()) || clicksSinceWindfall > 1000)) {
       startWindfall();
+      clicksSinceWindfall = 0
+    } else {
+      clicksSinceWindfall++;
     }
   }
   
@@ -4700,6 +6938,15 @@ var game = (function() {
     setTimeout(function() {
       isWindfall(false);
     }, windfallDuration.val() * 1000);
+  }
+
+  function triggerManualWindfall() {
+    if (windfallProgress.val() >= 100) {
+      windfallProgress.val(0);
+      startWindfall();
+    } else {
+      addManualClicks();
+    }
   }
 
 	/*************************************************************
@@ -4739,11 +6986,25 @@ var game = (function() {
 	      return achievements()[i];
 	    }
 	  }
+
+    return getSecretAchievementById(id);
 	}
 	
 	function earnAchievement(id) {
 	  getAchievementById(id).earn();
 	}
+
+  function getSecretAchievementById(id) {
+    for (var i = 0; i < secretAchievements().length; i++) {
+      if (secretAchievements()[i].id === id) {
+        return secretAchievements()[i];
+      }
+    }
+  }
+
+  function earnSecretAchievement(id) {
+    getSecretAchievementById(id).earn();
+  }
 
 	var addManualClicks = function() {
     var now = Date.now();
@@ -4799,11 +7060,12 @@ var game = (function() {
   	    stats: {},
   	    units: {},
   	    achievements: {},
+        secretAchievements: {},
   	    upgrades: {},
   	    activeInvestments: {},
   	    emails: {},
         bankruptcies: {},
-        time: new Date(),
+        time: new Date().toISOString(),
         name: 'Unnamed Business',
         mailStress: 0,
   	    settings: {
@@ -4813,12 +7075,18 @@ var game = (function() {
           enableNotifications: enableNotifications(),
           enableEmptyUpgradesAndAchievements: enableEmptyUpgradesAndAchievements(),
           enableDarkMode: enableDarkMode(),
-          enableFixedNavTabs: enableFixedNavTabs()
+          enableFixedNavTabs: enableFixedNavTabs(),
+          enableWindfallGuarantee: enableWindfallGuarantee(),
+          maxType: maxType(),
+          maxIncrement: maxIncrement(),
+          targetIncrement: targetIncrement(),
+          twoColumnEmployees: twoColumnEmployees()
   	    }
   	  };
 
       if (isRestarting) {
-        gameData.restartBonus = nextBankruptcyBonus.val()
+        gameData.restartBonus = nextBankruptcyBonus.val();
+        gameData.restartSeminarBonus = nextBankruptcySeminars.val();
       }
 
       gameData.bankruptcies = pastBusinesses().map(function(b) {
@@ -4840,6 +7108,24 @@ var game = (function() {
       		r: a.read()
         }; 
       });
+
+      gameData.secretAchievements = secretAchievements().filter(function(a) {
+        return a.awarded();  
+      }).map(function(a) {
+        return {
+          id: a.id,
+          u: isRestarting ? false : a.upgradesUnlocked(),
+          d: a.date(),
+          r: a.read()
+        }; 
+      });
+
+      gameData.career = careerUpgrades().map(function(u) {
+        return { 
+          id: u.id,
+          l: u.level()
+        }
+      });
       
       if (isRestarting) {
         gameData.stats = handleRestartStats();
@@ -4857,7 +7143,7 @@ var game = (function() {
           };
         });
         
-        gameData.stats = stats().filter(function(s) {
+        gameData.stats = stats.filter(function(s) {
           return !ko.isComputed(s.val);
         }).map(function(s) {
           return {
@@ -4872,13 +7158,18 @@ var game = (function() {
             a: u.available(),
             n: u.num.val(),
             m: u.mod.val(),
-            l: u.numMod.val()
+            l: u.numMod.val(),
+            tb: u.trainingBonus.val(),
+            itb: u.inProgressTrainingBonus.val(),
+            tr: u.timeRemaining(),
+            tt: u.targetTime,
+            tf: u.trainingFinished()
           };
         });
         
         gameData.activeInvestments = activeInvestments().map(function(i) {
           return {
-            name: cnItem(i.name),
+            name: i.name,
             base: i.baseInvestment.val(),
             loadedTargetTime: i.targetTime,
             loadedProgress: i.timeRemaining(),
@@ -4894,8 +7185,8 @@ var game = (function() {
             spent: a.cashSpent.val(),
             clicks: a.clicks.val(),
             sizeD: a.sizeDivider,
-            name: cnItem(a.name),
-            desc: cnItem(a.description),
+            name: a.name,
+            desc: a.description,
             emp0: a.workers()[0].num(),
             emp1: a.workers()[1].num(),
             emp2: a.workers()[2].num(),
@@ -4907,10 +7198,13 @@ var game = (function() {
         
         gameData.emails = {
           n: mail().filter(function(m) {
-            return !m.isSpecial();
+            return !m.isSpecial() && !m.isCryptic();
           }).length,
           s: mail().filter(function(m) {
             return m.isSpecial();
+          }).length,
+          c: mail().filter(function(m) {
+            return m.isCryptic();
           }).length
         };
 
@@ -4923,6 +7217,18 @@ var game = (function() {
           active: research().active(),
           timeRemaining: research().timeRemaining(),
           product: research().product()
+        }
+
+        gameData.elections = {
+          of: election().selectedOffice() ? election().selectedOffice() : 0,
+          bg: election().selectedBackground() ? election().selectedBackground() : 0,
+          pe: election().selectedPersonality() ? election().selectedPersonality() : 0,
+          bu: election().selectedBackup() ? election().selectedBackup() : 0,
+          td: election().totalDonations.val(),
+          tr: election().timeRemaining(),
+          tt: election().targetTime,
+          active: election().active(),
+          poll: election().pollNumber()
         }
       }
       
@@ -4959,7 +7265,24 @@ var game = (function() {
       newData.upgradesUnlocked(loadData.u);
       newData.date(loadData.d);
       newData.read(loadData.r);
+
+      if (loadData.u) {
+        newData.earned = null;
+      }
 	  });
+
+    if (data.secretAchievements) {
+      loadSegment(data.secretAchievements, secretAchievements(), 'id', 'id', function(loadData, newData) {
+        newData.awarded(true);
+        newData.upgradesUnlocked(loadData.u);
+        newData.date(loadData.d);
+        newData.read(loadData.r);
+
+        if (loadData.u) {
+          newData.earned = null;
+        }
+      });
+    }
 
     console.log('achievements loaded...')
 	  
@@ -4967,11 +7290,15 @@ var game = (function() {
       newData.available(loadData.a);
       newData.bought(loadData.b);
       newData.read(loadData.r);
+
+      if (loadData.b) {
+        newData.cantAfford = ko.observable(false);
+      }
 	  });
 
     console.log('upgrades loaded...')
 	  
-	  loadSegment(data.stats, stats(), 'name', 'name', function(loadData, newData) {
+	  loadSegment(data.stats, stats, 'name', 'name', function(loadData, newData) {
       newData.val(loadData.v);
 	  });
 
@@ -5037,15 +7364,50 @@ var game = (function() {
     }
 
     console.log('research loaded...')
+
+    if (data.elections && data.elections.of) {
+      election().active(data.elections.active);
+      if (election().active()) {
+        election().start();
+      }
+
+      election().selectedOffice(data.elections.of);
+      election().selectedBackground(data.elections.bg);
+      election().selectedPersonality(data.elections.pe);
+      election().selectedBackup(data.elections.bu);
+      election().totalDonations.val(data.elections.td);
+      election().timeRemaining(data.elections.tr);
+      election().targetTime = data.elections.tt ? data.elections.tt : 30000;
+      election().pollNumber(data.elections.poll);
+    }
+
+    console.log('elections loaded...');
 	  
 	  loadSegment(data.units, units(), 'id', 'id', function(loadData, newData) {
       newData.available(loadData.a);
       newData.num.val(loadData.n);
       newData.mod.val(loadData.m);
       newData.numMod.val(loadData.l ? loadData.l : 0);
+      newData.trainingBonus.val(loadData.tb ? loadData.tb : 0);
+      newData.inProgressTrainingBonus.val(loadData.itb ? loadData.itb : 0);
+
+      if (loadData.tt) {
+        newData.startTimer(loadData.tr, loadData.tt)
+
+        if (loadData.tf) { 
+          newData.trainingFinished(true);
+        } 
+      }
+
 	  });
 
-    console.log('employees loaded loaded...')
+    console.log('employees loaded...')
+
+    if (data.career) {
+      loadSegment(data.career, careerUpgrades(), 'id', 'id', function(loadData, newData) {
+        newData.level(loadData.l);
+      });
+    }
 
     mail.removeAll();
     for (var n = 0; n < parseInt(data.emails.n); n++) {
@@ -5056,6 +7418,12 @@ var game = (function() {
       mail.push(new SpecialEmail(true));
     }
 
+    if (data.emails.c) {
+      for (var a = 0; a < parseInt(data.emails.c); a++) {
+        mail.push(new CrypticEmail(false))
+      }
+    }
+
     console.log('mail loaded...')
     
     if (data.mailStress) {
@@ -5063,7 +7431,7 @@ var game = (function() {
     }
 
     if (data.name) {
-      businessName().name(cnItem(data.name));
+      businessName().name(data.name);
     }
 
     bankruptcyModalViewed(data.settings.bankruptcyModalViewed);
@@ -5073,17 +7441,27 @@ var game = (function() {
     enableEmptyUpgradesAndAchievements(data.settings.enableEmptyUpgradesAndAchievements != undefined ? data.settings.enableEmptyUpgradesAndAchievements : true);
     enableDarkMode(data.settings.enableDarkMode != undefined ? data.settings.enableDarkMode : false);
     enableFixedNavTabs(data.settings.enableFixedNavTabs != undefined ? data.settings.enableFixedNavTabs : false);
+    enableWindfallGuarantee(data.settings.enableWindfallGuarantee != undefined ? data.settings.enableWindfallGuarantee : true);
+    maxType(data.settings.maxType != undefined ? data.settings.maxType : 'default');
+    maxIncrement(data.settings.maxIncrement != undefined ? data.settings.maxIncrement : 1);
+    targetIncrement(data.settings.targetIncrement != undefined ? data.settings.targetIncrement : 1);
+    twoColumnEmployees(data.settings.twoColumnEmployees != undefined ? data.settings.twoColumnEmployees : false);
 
     console.log('settings loaded...')
 
     handleAwayEarnings(data.time);
-    handlePatches();
+    handlePatches(data);
 	  
 	  console.log('everything loaded!');
 
     if (data.restartBonus) {
       bankruptcyBonus.add(data.restartBonus);
       bankruptcies.add(1);
+
+      if (data.restartSeminarBonus !== undefined) {
+        trainingSeminars.add(data.restartSeminarBonus);
+      }
+
       currentlyRestarting = false;
     }
 	}
@@ -5098,7 +7476,11 @@ var game = (function() {
     this.patentsStored = ko.observable(0),
     this.patentsSold = ko.observable(0),
     this.patentsSoldValue = ko.observable(0),
-    this.employeesGone = ko.observable(0)
+    this.employeesGone = ko.observable(0);
+    this.electionEarnings = ko.observable(0);
+    this.electionsWon = ko.observable(0);
+    this.electionsLost = ko.observable(0);
+    this.gaffesExperienced = ko.observable(0);
   }
 
   function handleAwayEarnings(timeStamp, elapsedTime) {
@@ -5108,12 +7490,16 @@ var game = (function() {
 
     awayEarnings().time(getFormattedTime(timeInMs));
 
+    if (elapsedTimeInSeconds >= 2630000) {
+      earnSecretAchievement('brk');
+    }
+
     // Cut off at 5 days
     var fiveDays = (60 * 60 * 24 * 5)
+    //elapsedTimeInSeconds = 60 * 5; // TODO restore the line below
     elapsedTimeInSeconds = elapsedTimeInSeconds < fiveDays ? elapsedTimeInSeconds : fiveDays
 
     var awayRate = awayEarningRate.val() / 100;
-    var timeAwayRate = timeAwayEarningRate.val() / 100;
     var amountToAdd = elapsedTimeInSeconds * (totalDPS.val() * awayRate);
     if (elapsedTimeInSeconds > 60 && amountToAdd > 0) {
       earnedWhileAway.add(amountToAdd);
@@ -5121,29 +7507,39 @@ var game = (function() {
       awayEarnings().cashProgress('$' + format(amountToAdd));
 
       if (activeInvestments().length > 0) {
-        var investmentProgress = elapsedTimeInSeconds * 1000 * timeAwayRate;
+        var investmentProgress = elapsedTimeInSeconds * 1000
         addAwayProgressToInvestments(investmentProgress);
         awayEarnings().investmentProgress(getFormattedTime(investmentProgress));
         console.log('Away Progress (Investments) Handled...')
       }
 
       if (activeAcquisitions().length > 0) {
-        var acquisitionProgress = elapsedTimeInSeconds * timeAwayRate;
+        var acquisitionProgress = elapsedTimeInSeconds
         addAwayProgressToAcquisitions(acquisitionProgress);
         console.log('Away Progress (Acquisitions) Handled...')
         awayEarnings().acquisitionProgress(getFormattedTime(acquisitionProgress * 1000));
       }
 
       if (research().active()) {
-        var researchProgress = (elapsedTimeInSeconds * timeAwayRate) * 1000;
+        var researchProgress = (elapsedTimeInSeconds) * 1000;
         researchProgress += researchProgress * (research().speed.val() / 100);
         handleExtraResearchTime(researchProgress, true);
         console.log('Away Progress (Research) Handled...')
       }
 
+      if (!locked().windfallGuarantee) {
+        var numberOfTicks = elapsedTimeInSeconds / 2.5;
+        incrementWindfallGuarantee(numberOfTicks);
+      }
+
       if (!locked().composedMail) {
         var time = elapsedTimeInSeconds / 2.5;
         composedMail().lowerStress(time);
+      }
+
+      if (!locked().careerDev) {
+        var trainingProgress = (elapsedTimeInSeconds) * 1000;
+        addAwayProgressToTraining(trainingProgress);
       }
 
       setTimeout(function() {
@@ -5182,16 +7578,6 @@ var game = (function() {
 
       employeesKilled.add(killed);
 
-      var storageRemaining = research().storage.val() - research().patents().length;
-      while (research().patents().length < research().storage.val() && count > 0) {
-        count--;
-        research().patents.push(research().baseValue.val());
-      }
-
-      if (fromAway) {
-        awayEarnings().patentsStored(format(storageRemaining));
-      }
-
       // For the remaining count, see if you can auto-sell
       var soldCount = 0;
       var soldValue = 0;
@@ -5214,14 +7600,36 @@ var game = (function() {
           research().handleSales(soldValue, soldCount);
       }
 
+      count -= soldCount;
+
+      // If anything is left unsold, store as much as possible
+      var storageRemaining = research().storage.val() - research().patents().length;
+      var stored = 0;
+      while (research().patents().length < research().storage.val() && count > 0) {
+        count--;
+        stored++;
+        research().patents.push(research().baseValue.val());
+      }
+
+      if (fromAway) {
+        awayEarnings().patentsStored(format(stored));
+      }
+
       if (fromAway) {
         awayEarnings().patentsSold(format(soldCount));
         awayEarnings().patentsSoldValue(format(soldValue));
       }
       
       patentsSold.add(soldCount);
-      earnedFromResearch.add(soldValue);
+      //earnedFromResearch.add(soldValue);
       return soldCount;
+    }
+  }
+
+  function addAwayProgressToTraining(reducedTimeInSeconds) {
+    for (var i = 0; i < units().length; i++) {
+      var reducedTime = units()[i].timeRemaining() - reducedTimeInSeconds;
+      units()[i].timeRemaining(reducedTime > 0 ? reducedTime : 0);
     }
   }
 
@@ -5239,7 +7647,7 @@ var game = (function() {
     }
   }
 
-  function handlePatches() {
+  function handlePatches(data) {
     switch (timeToAnswerMail.val()) {
       case 30:
         timeToAnswerMail.val(60);
@@ -5266,9 +7674,75 @@ var game = (function() {
       awayEarningRate.val(15 + (remaining * 5)); // Add the new default to the number of upgrades bought
     }
 
-    // Temporary fix for missing email upgrade
-    if (getAchievementById('eEm12').upgradesUnlocked() && !getUpgrade('em6').bought()) {
-      getUpgrade('em6').available(true);
+    var upgradeCatchUp = [
+      { 'eEm12': 'em6' },
+      { 'rese2': 'rd1' },
+      { 'rese4': 'rd2' },
+      { 'rese6': 'rd3' },
+      { 'rese8': 'rd4' },
+      { 'rese10': 'rd5' },
+      { 'rese12': 'rd6' },
+      { 'rese14': 'rd7' },
+      { 'ec14': 'gwf'}
+    ];
+
+    for (var i = 0; i < upgradeCatchUp.length; i++) {
+      var item = upgradeCatchUp[i];
+      var key = Object.keys(item)[0];
+      if (getAchievementById(key).upgradesUnlocked() && !getUpgrade(item[key]).bought()) {
+        getUpgrade(item[key]).available(true);
+      }
+    }
+
+    // Temporary fix for adjusted investment time bonus rates
+    timeBonusRate.val(15);
+    if (getUpgrade('tb1').bought()) timeBonusRate.add(15);
+    if (getUpgrade('tb2').bought()) timeBonusRate.add(15);
+    if (getUpgrade('tb3').bought()) timeBonusRate.add(15);
+
+    /**  Handle changes to symb upgrade values **/
+
+    // Old values
+    var symbChanges = {
+      'symb1': [{'3': 6}, {'4': 5}],
+      'symb2': [{'3': 6}, {'4': 5}],
+      'symb3': [{'5': 5}, {'6': 5}, {'7': 4}],
+      'symb4': [{'5': 5}, {'6': 5}, {'7': 4}],
+      'symb5': [{'8': 3}, {'9': 2}],
+      'symb6': [{'8': 3}, {'9': 2}],
+      'symb7': [{'10': 2}, {'11': 1.5}],
+      'symb8': [{'10': 2}, {'11': 1.5}],
+      'symb9': [{'2': 18}, {'3': 6}],
+      'symb10': [{'4': 5}, {'5': 4}],
+      'symb11': [{'6': 4}, {'7': 3}],
+      'symb12': [{'8': 3}, {'9': 2}],
+      'symb13': [{'10': 2}, {'11': 1}],
+    };
+
+    for (var i = 0; i < data.upgrades.length; i++) {
+      var d = data.upgrades[i]
+      if (/^symb/.test(d.id)) {
+        var oldValues = symbChanges[d.id];
+
+        if (oldValues) {
+          for (var j = 0; j < oldValues.length; j++) {
+            var vals = oldValues[j];
+            var key = Object.keys(vals)[0];
+            getUnit(key).mod.sub(vals[key]);
+          }
+        }
+
+        var newUpgrade = getUpgrade('n' + d.id);
+        if (newUpgrade) {
+          newUpgrade.available(d.a)
+          newUpgrade.bought(d.b);
+          newUpgrade.read(d.r);
+          
+          if (newUpgrade.bought()) {
+            newUpgrade.handlePurchase();
+          }
+        }
+      }
     }
   }
 	
@@ -5303,7 +7777,7 @@ var game = (function() {
 	    earnAchievement('import');
 	};
 	
-    /***********************************************
+  /***********************************************
 	                BANKRUPTCY
 	***********************************************/
 	
@@ -5312,12 +7786,11 @@ var game = (function() {
 	    'Start Time (All Businesses)', 'Bankruptcies Declared', 'Bankruptcy Multiplier', 'Acquisitions Sold (All Businesses)', 'Outgoing Emails Sent (All Businesses)',
       'Policies Accepted (All Businesses)', 'Chats Completed (All Businesses)', 'Massive Layoffs Conducted (All Businesses)', 'Number Fudgings Occurred (All Businesses)',
       'Total Windfalls (All Businesses)', 'Emails Answered (All Businesses)', 'Time Spent Idle (All Businesses)', 'Patents Sold (All Businesses)',
-      'Time Dedicated to Investments (All Businesses)', 'Urgent Emails Answered (All Businesses)', 'Earned While Away (All Businesses)', 'Overall Time Boosted (All Businesses)'];
-
-   // bankruptcyBonus.add(nextBankruptcyBonus.val());
-   // bankruptcies.add(1);
+      'Time Dedicated to Investments (All Businesses)', 'Urgent Emails Answered (All Businesses)', 'Earned While Away (All Businesses)', 'Overall Time Boosted (All Businesses)',
+      'Time Spent Training (All Businesses)', 'Training Seminars Attended (All Businesses)', 'Cryptic Emails Received (All Businesses)', 'Training Seminars',
+      'Elections Won (All Businesses)', 'Elections Lost (All Businesses)', 'Gaffes Experienced (All Businesses)', 'Smart Words Replied (All Businesses)'];
 	  
-	  var restartStats = stats().filter(function(s) {
+	  var restartStats = stats.filter(function(s) {
       return !ko.isComputed(s.val);
     }).map(function(s) {
       if (statsToKeep.indexOf(s.name) === -1) {
@@ -5337,8 +7810,10 @@ var game = (function() {
 	}
 
   var currentlyRestarting = false;
+  var recentlyRestarted = false;
 	
 	var restartGame = function() {
+    if (!currentlyRestarting && !recentlyRestarted) {
       currentlyRestarting = true;
       addBankruptcyToRecord();
 
@@ -5346,6 +7821,14 @@ var game = (function() {
 	    resetEverything(false);
 
 	    loadGame(null);
+      checkSpeedAwards();
+      $('#storetab').click();
+
+      recentlyRestarted = true;
+      setTimeout(function() {
+        recentlyRestarted = false;
+      }, 10000);
+    }
 	};
 	
 	
@@ -5371,6 +7854,7 @@ var game = (function() {
       upgrades()[i].available(false);
       upgrades()[i].bought(false);
       upgrades()[i].read(false);
+      upgrades()[i].trackAffording();
     }
 
     for (var j = 0; j < units().length; j++) {
@@ -5380,14 +7864,17 @@ var game = (function() {
 
       units()[j].num.val(units()[j].num.baseVal);
       units()[j].mod.val(units()[j].mod.baseVal);
+      units()[j].trainingBonus.val(0);
+      units()[j].stopTraining();
+      units()[j].trainingFinished(false);
     }
 
-    for (var k = 0; k < stats().length; k++) {
-      if (!ko.isComputed(stats()[k].val)) {
-        if (stats()[k].type && stats()[k].type === 'date') {
-          stats()[k].val(Date.now());
+    for (var k = 0; k < stats.length; k++) {
+      if (!ko.isComputed(stats[k].val)) {
+        if (stats[k].type && stats[k].type === 'date') {
+          stats[k].val(Date.now());
         } else {
-          stats()[k].val(stats()[k].baseVal);
+          stats[k].val(stats[k].baseVal);
         }
       }
     }
@@ -5396,10 +7883,30 @@ var game = (function() {
       achievements()[l].awarded(false);
       achievements()[l].date(null);
       achievements()[l].read(false);
+
+      if (achievements()[l].startTracking) {
+        achievements()[l].startTracking();
+      }
       
       if (wipeSave) {
         achievements()[l].upgradesUnlocked(false);
       }
+    }
+
+    for (var l = 0; l < secretAchievements().length; l++) {
+      secretAchievements()[l].awarded(false);
+      secretAchievements()[l].date(null);
+      secretAchievements()[l].read(false);
+      
+      if (wipeSave) {
+        secretAchievements()[l].upgradesUnlocked(false);
+      }
+    }
+
+    if (wipeSave) {
+      for (var m = 0; m < careerUpgrades().length; m++) {
+        careerUpgrades()[m].level(0);
+      } 
     }
 
     // If any achievements have been triggered in the process, kill their alerts
@@ -5411,6 +7918,7 @@ var game = (function() {
     pastBusinesses([]);
     businessName().name('Unnamed Business');
     research().reset();
+    election().reset();
     awayMailInbox().active(false);
     awayChatInbox().active(false);
     awayPolicyInbox().active(false);
@@ -5421,23 +7929,27 @@ var game = (function() {
 	function incrementMediumIntervalCounter() {
 	  mediumIntervalCounter(mediumIntervalCounter() + 1);
 	}
+
+  function incrementWindfallGuarantee(numberOfTicks) {
+    if (!locked().windfallGuarantee) {
+      if (windfallProgress.val() + windfallGuaranteeRate.val() >= 100) {
+        windfallProgress.val(100);
+      } else {
+        windfallProgress.add(windfallGuaranteeRate.val() * numberOfTicks);
+      }
+    }
+  }
 	
 	var checkTimePlayedAwards = function() {
 	  var minutesPlayed = Math.floor((Date.now() - startTimeAllTime.val()) / 1000 / 60);
 	  
-    if (minutesPlayed > 40320) { // 1 month
-      earnAchievement('timePlayed6');
-    } else if (minutesPlayed > 30240) { // 3 weeks
-      earnAchievement('timePlayed5');
-    } else if (minutesPlayed > 20160) { // 2 weeks
-      earnAchievement('timePlayed4');
-    } else if (minutesPlayed > 10080) { // 1 week
-	    earnAchievement('timePlayed3');
-	  } else if (minutesPlayed > 1440) { // 1 day
-	    earnAchievement('timePlayed2');
-	  } else if (minutesPlayed > 60) { // 1 hour
-	    earnAchievement('timePlayed1');
-	  }
+    if (minutesPlayed > 525600) { earnSecretAchievement('timePlayed7'); } // 1 year
+    if (minutesPlayed > 40320) { earnAchievement('timePlayed6'); } // 1 month 
+    if (minutesPlayed > 30240) { earnAchievement('timePlayed5'); } // 3 weeks
+    if (minutesPlayed > 20160) { earnAchievement('timePlayed4'); } // 2 weeks
+    if (minutesPlayed > 10080) { earnAchievement('timePlayed3'); } // 1 week 
+    if (minutesPlayed > 1440) { earnAchievement('timePlayed2'); } // 1 day 
+    if (minutesPlayed > 60) { earnAchievement('timePlayed1'); } // 1 hour
 	  
 	  // For random awards - if they aren't earned randomly after a certain period 
 	  // of time, we'll go ahead and award them to avoid arbitrary frustration
@@ -5455,6 +7967,28 @@ var game = (function() {
     }
 	};
 
+  var speedCheck;
+  function checkSpeedAwards() {
+    setTimeout(function() {
+      speedCheck = setInterval(function() {
+        var secondsPlayed = (Date.now() - startTime.val()) / 1000;
+        if (secondsPlayed < 65) {
+          if (totalCash.val() >= 1000000000000) { earnAchievement('fst1'); } // 1 trillion
+          if (totalCash.val() >= 1000000000000000) { earnAchievement('fst2'); } // 1 quad
+          if (totalCash.val() >= 1000000000000000000) { earnAchievement('fst3'); } // 1 quint
+          if (totalCash.val() >= 1000000000000000000000) { earnAchievement('fst4'); } // 1 sext
+          if (totalCash.val() >= 1000000000000000000000000) { earnAchievement('fst5'); } // 1 sept
+          if (totalCash.val() >= 1000000000000000000000000000) { earnAchievement('fst6'); } // 1 oct
+        } else {
+          clearInterval(speedCheck);
+        }
+      }, 500);
+    }, 30000);
+  }
+
+  // Default check upon loading the game
+  checkSpeedAwards();
+
   var buyAllUpgrades = function() {
     for (var i = 0; i < upgrades().length; i++) {
       if (upgrades()[i].available() && upgrades()[i].price.val() <= currentCash.val()) {
@@ -5470,6 +8004,10 @@ var game = (function() {
       achievementTabViews.add(1);
     }
   };
+
+  var toggleTrainingView = function() {
+    isTrainingView(!isTrainingView());
+  }
   
   function checkEmployeePositionAchievements() {
     if (units().every(function(unit) { return unit.num.val() >= 1 })) {
@@ -5492,6 +8030,14 @@ var game = (function() {
 
                         if (units().every(function(unit) { return unit.num.val() >= 300 })) {
                           earnAchievement('have300');
+
+                          if (units().every(function(unit) { return unit.num.val() >= 350 })) {
+                            earnAchievement('have350');
+
+                            if (units().every(function(unit) { return unit.num.val() >= 400 })) {
+                              earnAchievement('have400');
+                            }
+                          }
                         }
                       }
                   }
@@ -5509,12 +8055,28 @@ var game = (function() {
     }
   }
 
+  var clearAllSecretAwards = function() {
+    for (var i = 0; i < secretAchievements().length; i++) {
+      if (!secretAchievements()[i].read() && secretAchievements()[i].awarded()) {
+        secretAchievements()[i].read(true);
+      }
+    }
+  }
+
+  function achievementTimeSinceStart(startTime) {
+    if (/^\S*T\S*Z$/.test(startTime)) { // Check if it's an ISO string
+      return timeSinceStart(startTime);
+    } else {
+      return timeSinceStartFromLocaleStrings(startTime); // Hang on to this for old saves with locale string dates
+    }
+  }
+
   function timeSinceStartFromLocaleStrings(startTime) {
-     return getFormattedTime(new Date(new Date().toLocaleString()) - new Date(startTime)) + " 前";
+     return getFormattedTime(new Date(new Date().toLocaleString()) - new Date(startTime)) + " ago";
   }
 	
 	function timeSinceStart(startTime) {
-     return getFormattedTime(new Date() - new Date(startTime)) + " 前";
+     return getFormattedTime(new Date() - new Date(startTime)) + " ago";
 	}
 
   function getFormattedTime(time, skipHours, doNotRound) {
@@ -5529,7 +8091,7 @@ var game = (function() {
     } else if (mins >= 120) {
         return formattedTimeHelper(mins / 60, doNotRound) + " hours"; 
     } else if (mins >= 60) {
-        return formattedTimeHelper(mins / 60, doNotRound) + " hour";
+        return formattedTimeHelper(mins / 60, doNotRound) + (mins > 60 ? " hours" : " hour");
     } else if (mins >= 1) {
         return mins + (mins == 1 ? " minute" : " minutes");
     } else {
@@ -5576,32 +8138,13 @@ var game = (function() {
     return array[getRandomInt(0, array.length - 1)];
   }
 
-  function rounder(num) {
-    if (num >= 1000000000000000000000000000000000000) {
-        num = (num / 1000000000000000000000000000000000000).toFixed(2) * 1000000000000000000000000000000000000;
-    } else if (num >= 1000000000000000000000000000000000) {
-        num = (num / 1000000000000000000000000000000000).toFixed(2) * 1000000000000000000000000000000000;
-    } else if (num >= 1000000000000000000000000000000) {
-        num = (num / 1000000000000000000000000000000).toFixed(2) * 1000000000000000000000000000000;
-    } else if (num >= 1000000000000000000000000000) {
-        num = (num / 1000000000000000000000000000).toFixed(2) * 1000000000000000000000000000;
-    } else if (num >= 1000000000000000000000000) {
-        num = (num / 1000000000000000000000000).toFixed(2) * 1000000000000000000000000;
-    } else if (num >= 1000000000000000000000) {
-        num = (num / 1000000000000000000000).toFixed(2) * 1000000000000000000000;
-    } else if (num >= 1000000000000000000) {
-        num = (num / 1000000000000000000).toFixed(2) * 1000000000000000000;
-    } else if (num >= 1000000000000000) {
-        num = (num / 1000000000000000).toFixed(2) * 1000000000000000;
-    } else if (num >= 1000000000000) {
-        num = (num / 1000000000000).toFixed(2) * 1000000000000;
-    } else if (num >= 1000000000) {
-        num = (num / 1000000000).toFixed(2) * 1000000000;
-    } else if (num >= 1000000) {
-        num = (num / 1000000).toFixed(2) * 1000000;
+  function getRandomFromArrayExcept(array, exceptions) {
+    var random = getRandomFromArray(array);
+    while (exceptions.indexOf(random) > -1) {
+      random = getRandomFromArray(array);
     }
 
-    return num;
+    return random;
   }
 	
 	/**
@@ -5622,7 +8165,16 @@ var game = (function() {
     }
     
     var abrev = window.screen.availWidth <= 400;
-    if (num >= 1000000000000000000000000000000000000) {
+    if (num >= 1000000000000000000000000000000000000000000000) {
+        num = num / 1000000000000000000000000000000000000000000000;
+        name = abrev ? 'Qad' : 'quattuordecillion';
+    } else if (num >= 1000000000000000000000000000000000000000000) {
+        num = num / 1000000000000000000000000000000000000000000;
+        name = abrev ? 'Td' : 'tredecillion';
+    } else if (num >= 1000000000000000000000000000000000000000) {
+        num = num / 1000000000000000000000000000000000000000;
+        name = abrev ? 'Dd' : 'duodecillion';
+    } else if (num >= 1000000000000000000000000000000000000) {
         num = num / 1000000000000000000000000000000000000;
         name = abrev ? 'Ud' : 'undecillion';
     } else if (num >= 1000000000000000000000000000000000) {
@@ -5692,10 +8244,31 @@ var game = (function() {
 	***********************************************/
 	
 	var cheat = function(val) {
+    earnSecretAchievement('cheat');
 	  currentCash.add(val);
 	  totalCash.add(val);
 	  totalCashAllTime.add(val);
 	};
+
+  var getUpgradePrice = function(unitId, num, isSymb) {
+    var price = (Math.pow(1.15, num) * getUnit(unitId).basePrice()) * (isSymb ? 100 : 25);
+    console.log(price);
+    console.log(format(price));
+    var stringPrice = '' + price;
+    var mainNum = '';
+    var zeroes = '';
+    for (var i = 0; i < stringPrice.length; i++) {
+      if (i < 3) {
+        mainNum += stringPrice[i];
+      } else {
+        zeroes += '0';
+      }
+    }
+
+    mainNum = '' + Math.round((Math.round(parseInt(mainNum) / 10) / 10) * 100);
+
+    console.log(parseInt(mainNum + zeroes))
+  }
 
 	return {
 	  cheat: cheat,
@@ -5714,14 +8287,17 @@ var game = (function() {
 		currentCash: currentCash,
     totalCash: totalCash,
 		achievementCount: achievementCount,
+    secretAchievementCount: secretAchievementCount,
 		upgradeCount: upgradeCount,
 		totalAchievementCount: totalAchievementCount,
 		achievementPercentageEarned: achievementPercentageEarned,
 		newAchievementCount: newAchievementCount,
+    newSecretAchievementCount: newSecretAchievementCount,
 		newUpgradesCount: newUpgradesCount,
 		totalUpgradeCount: totalUpgradeCount,
 		upgradePercentageEarned: upgradePercentageEarned,
 		achievements: achievements,
+    secretAchievements: secretAchievements,
 		upgrades: upgrades,
     availableUpgrades: availableUpgrades,
 		stats: stats,
@@ -5750,6 +8326,7 @@ var game = (function() {
 		activeInvestments: activeInvestments,
     activeAcquisitions: activeAcquisitions,
     simultaneousInvestments: simultaneousInvestments,
+    totalSimultaneousInvestmentsAllowed: totalSimultaneousInvestmentsAllowed,
     simultaneousAcquisitions: simultaneousAcquisitions,
 		clearAllEmails: clearAllEmails,
 		incrementMediumIntervalCounter: incrementMediumIntervalCounter,
@@ -5778,14 +8355,13 @@ var game = (function() {
     enableEmptyUpgradesAndAchievements: enableEmptyUpgradesAndAchievements,
     enableDarkMode: enableDarkMode,
     enableFixedNavTabs: enableFixedNavTabs,
+    enableWindfallGuarantee: enableWindfallGuarantee,
+    maxType: maxType,
+    maxIncrement: maxIncrement,
+    targetIncrement: targetIncrement,
     bankruptcyListToggled: bankruptcyListToggled,
     lastVisibleUnit: lastVisibleUnit,
     bankruptcies: bankruptcies,
-    makeAcquisition: makeAcquisition,
-    acquisitionOptions: acquisitionOptions,
-    selectedAcquisitionOption: selectedAcquisitionOption,
-    selectedAcquisition: selectedAcquisition,
-    generatePotentialAcquisition: generatePotentialAcquisition,
     buyAllUpgrades: buyAllUpgrades,
     viewingAcquisition: viewingAcquisition,
     viewingChat: viewingChat,
@@ -5795,7 +8371,10 @@ var game = (function() {
     cashOutAllInvestments: cashOutAllInvestments,
     handleAwayEarnings: handleAwayEarnings,
     clearAllAwards: clearAllAwards,
+    clearAllSecretAwards: clearAllSecretAwards,
     buyRate: buyRate,
+    trainingHours: trainingHours,
+    trainingHoursValidation: trainingHoursValidation,
     awayMailInbox: awayMailInbox,
     awayPolicyInbox: awayPolicyInbox,
     awayChatInbox: awayChatInbox,
@@ -5814,6 +8393,38 @@ var game = (function() {
     getFormattedTime: getFormattedTime,
     locked: locked,
     bankruptcyListToggled: bankruptcyListToggled,
-    toggleBankruptcyList: toggleBankruptcyList
+    toggleBankruptcyList: toggleBankruptcyList,
+    toggleTrainingView: toggleTrainingView,
+    isTrainingView: isTrainingView,
+    containsUrgent: containsUrgent,
+    containsCryptic: containsCryptic,
+    careerUpgrades: careerUpgrades,
+    trainingSeminars: trainingSeminars,
+    trainingsComplete: trainingsComplete,
+    trainingsCanAfford: trainingsCanAfford,
+    multiTrain: multiTrain,
+    finishAllTrainings: finishAllTrainings,
+    careerDevStats: careerDevStats,
+    crypticStats: crypticStats,
+    mysteryBoostResults: mysteryBoostResults,
+    nextBankruptcySeminars: nextBankruptcySeminars,
+    seminarsUsed: seminarsUsed,
+    mysteryBoost: mysteryBoost,
+    election: election,
+    electionStats1: electionStats1,
+    electionStats2: electionStats2,
+    earnAchievement: earnAchievement,
+    electionSupportRate: electionSupportRate,
+    getUpgradePrice: getUpgradePrice,
+    incrementWindfallGuarantee: incrementWindfallGuarantee,
+    windfallProgress: windfallProgress,
+    triggerManualWindfall: triggerManualWindfall,
+    windfallGuarantee: windfallGuarantee,
+    enableWindfallGuarantee: enableWindfallGuarantee,
+    windfallGrowthMultiplier: windfallGrowthMultiplier,
+    viewingTab: viewingTab,
+    viewingModal: viewingModal,
+    newAchievements: newAchievements,
+    twoColumnEmployees: twoColumnEmployees
 	};
 })();

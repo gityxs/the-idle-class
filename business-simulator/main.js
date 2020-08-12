@@ -26,12 +26,82 @@ ko.bindingHandlers.fadeVisible = {
   }
 };
 
+ko.bindingHandlers.quickFadeVisible = {
+  init: function(element, valueAccessor) {
+      // Initially set the element to be instantly visible/hidden depending on the value
+      var value = valueAccessor();
+      $(element).toggle(ko.unwrap(value)); // Use "unwrapObservable" so we can handle values that may or may not be observable
+  },
+  update: function(element, valueAccessor) {
+      // Whenever the value subsequently changes, slowly fade the element in or out
+      var value = valueAccessor();
+      ko.unwrap(value) ? /*setTimeout(function() {$(element).fadeIn()}, 500)*/ $(element).finish().show() : $(element).finish().fadeOut(150);
+  }
+};
+
+ko.bindingHandlers.fadeHtml = {
+  update: function(element, valueAccessor, allBindings) {
+    var text = ko.unwrap(valueAccessor());
+    $(element).fadeOut('fast', function() {
+      $(element).html(text);
+      $(element).fadeIn('fast');
+    });
+  }
+};
+
+ko.bindingHandlers.slowFadeHtml = {
+  update: function(element, valueAccessor, allBindings) {
+    var text = ko.unwrap(valueAccessor());
+    $(element).fadeOut('slow', function() {
+      $(element).html(text);
+      $(element).fadeIn('slow');
+    });
+  }
+}
+
+/************* Mobile Header Tools **************/
+
+  var mobileScrolls = 0;
+  var searchOpen = true;
+  var lastPos = 0;
+
+  function toggleSearchCollapse() {
+      $('#slide-nav').slideToggle(250);
+      searchOpen = !searchOpen
+  }
+
+  $(window).scroll(function() {
+      mobileScrolls++;
+      var pos = $(window).scrollTop();
+      var isScrollingUp = pos < lastPos;
+      lastPos = pos;
+      if (pos != undefined && pos >= 0) {
+          if (mobileScrolls >= 5 && searchOpen) {
+              $('#slide-nav').stop();
+             $('#slide-nav').animate({
+              'top': '0px',
+              'margin-top': '0px'
+             }, 300);
+             searchOpen = false;
+          }
+
+          if (mobileScrolls >= 5 && isScrollingUp && !searchOpen) {
+              $('#slide-nav').stop();
+                 $('#slide-nav').animate({
+                'top': '50px'
+               }, 300);
+               searchOpen = true;
+          }
+      }
+  });
+
 function mainClick() {
   game.addManualClicks();
 }
 
 function startGame() {
   var lastLoop = Date.now();
+  var lastCheckLoop = Date.now();
 	setInterval(function() {
 	    var now = Date.now();
 	    var elapsedTime = now - lastLoop;
@@ -46,56 +116,58 @@ function startGame() {
 	}, DISPLAY_LOOP_INTERVAL);
 
 	setInterval(function() {
+    var elapsedTime = Date.now() - lastCheckLoop;
+    lastCheckLoop = Date.now();
 		document.title = game.currentCash.displayVal() + " Dollars - The Idle Class";
 		game.checkForMail();
 		game.incrementMediumIntervalCounter();
 		game.checkTimePlayedAwards();
-    game.composedMail().lowerStress();
+    game.composedMail().lowerStress(null, null, elapsedTime / CHECK_LOOP_INTERVAL);
+    game.incrementWindfallGuarantee(elapsedTime / CHECK_LOOP_INTERVAL);
 	}, CHECK_LOOP_INTERVAL);
 	
 	setInterval(function() {
 	  game.saveGame();
     checkSessionLength();
 	}, LONG_INTERVAL);
-
-  // If someone checks changelog in a new tab
-  if (window.location.hash.substr(1) === 'changelog') {
-    $('#changelogModal').modal('show');
-  }
 }
 
 function reloadCharts() {
   if (game.enableCharts()) {
-    Chart.defaults.global.defaultFontColor='red';
-    myLineGraph.data.datasets[0].data = getLineGraphData();
-    myLineGraph.options.scales.xAxes[0].ticks.minor.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myLineGraph.options.scales.yAxes[0].ticks.minor.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myLineGraph.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myLineGraph.update();
+    if (myPieChart) {
+      Chart.defaults.global.defaultFontColor='red';
+      myLineGraph.data.datasets[0].data = getLineGraphData();
+      myLineGraph.options.scales.xAxes[0].ticks.minor.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myLineGraph.options.scales.yAxes[0].ticks.minor.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myLineGraph.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myLineGraph.update();
 
-    myInvestmentChart.data.datasets[0].data = getInvestmentChartData();
-    myInvestmentChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myInvestmentChart.update();
+      myInvestmentChart.data.datasets[0].data = getInvestmentChartData();
+      myInvestmentChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myInvestmentChart.update();
 
-    myEmailChart.data.datasets[0].data = getEmailChartData();
-    myEmailChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myEmailChart.update();
+      myEmailChart.data.datasets[0].data = getEmailChartData();
+      myEmailChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myEmailChart.update();
 
-    myClickChart.data.datasets[0].data = getClickChartData();
-    myClickChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myClickChart.update();
+      myClickChart.data.datasets[0].data = getClickChartData();
+      myClickChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myClickChart.update();
 
-    myPieChart.data.labels = getPieChartLabels();
-    myPieChart.data.datasets[0].data = getPieChartData();
-    myPieChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myPieChart.update();
+      myPieChart.data.labels = getPieChartLabels();
+      myPieChart.data.datasets[0].data = getPieChartData();
+      myPieChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myPieChart.update();
 
-    myBankruptcyChart.data.labels = getBankruptcyLabels();
-    myBankruptcyChart.data.datasets[0].data = getBankruptcyGraphData();
-    myBankruptcyChart.options.scales.xAxes[0].ticks.minor.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myBankruptcyChart.options.scales.yAxes[0].ticks.minor.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myBankruptcyChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
-    myBankruptcyChart.update();
+      myBankruptcyChart.data.labels = getBankruptcyLabels();
+      myBankruptcyChart.data.datasets[0].data = getBankruptcyGraphData();
+      myBankruptcyChart.options.scales.xAxes[0].ticks.minor.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myBankruptcyChart.options.scales.yAxes[0].ticks.minor.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myBankruptcyChart.options.legend.labels.fontColor = game.enableDarkMode() ? "white" : "gray";
+      myBankruptcyChart.update();
+    } else {
+      renderCharts();
+    }
   }
 }
 
@@ -106,7 +178,7 @@ function initializeGame() {
   });
   
   // Flash the earned amount after every manual cash click
-  $(".main-click").each(function() {
+  $(".main-click, .windfall-btn").each(function() {
     $(this).click(function() {
       var ui = $('.click-value-display');
       ui.text('+ ' + game.earnedPerClick.displayVal());
@@ -123,8 +195,8 @@ function initializeGame() {
   
   document.addEventListener("achievement-earned", function(e) {
     if (e.detail.name !== 'trigger' && game.enableNotifications()) {
-      var link = '<a class="alert-link" onclick="selectAchievement(\'' + e.detail.id + '\')" data-toggle="modal" data-target="#upgradeModal">' + cnItem(e.detail.name)  + '</a></div>';
-      var alert = getAlertHTML(e.detail.id, '成就', 'alert-warning', link);
+      var link = '<a class="alert-link" onclick="selectAchievement(\'' + e.detail.id + '\')" data-toggle="modal" data-target="#upgradeModal">' + e.detail.name  + '</a></div>';
+      var alert = getAlertHTML(e.detail.id, 'ACHIEVEMENT', 'alert-warning', link);
       $('#achievement-box').append(alert);
 
       setTimeout(function() {
@@ -136,8 +208,8 @@ function initializeGame() {
   document.addEventListener("employee-unlocked", function(e) {
     if (game.enableNotifications()) {
       var id = 'employee-alert-' + e.detail.id;
-      var link = '<a class="alert-link" onclick="selectEmployee(\'' + e.detail.id + '\', \'' + id + '\')" data-toggle="modal" data-target="#unitModal">' + cnItem(e.detail.name)  + '</a></div>';
-      var alert = getAlertHTML(id, '新员工', 'alert-info', link);
+      var link = '<a class="alert-link" onclick="selectEmployee(\'' + e.detail.id + '\', \'' + id + '\')" data-toggle="modal" data-target="#unitModal">' + e.detail.name  + '</a></div>';
+      var alert = getAlertHTML(id, 'NEW EMPLOYEE', 'alert-info', link);
       $('#achievement-box').append(alert);
 
       setTimeout(function() {
@@ -155,24 +227,6 @@ function initializeGame() {
     }
   });
 
-  document.addEventListener("away-investment-progress", function(e) {
-    if (game.enableNotifications()) {
-      var details = '<span><b>' + e.detail  + '</b></span>';
-      $('.investment-earnings-alert').remove();
-      var alert = getAlertHTML('investment-earnings-alert', 'INVESTMENT PROGRESS WHILE AWAY', 'alert-success', details);
-      $('#achievement-box').append(alert);
-    }
-  });
-
-  document.addEventListener("away-acquisition-progress", function(e) {
-    if (game.enableNotifications()) {
-      var details = '<span><b>' + e.detail  + '</b></span>';
-      $('.acquisition-earnings-alert').remove();
-      var alert = getAlertHTML('acquisition-earnings-alert', 'ACQUISITION PROGRESS WHILE AWAY', 'alert-success', details);
-      $('#achievement-box').append(alert);
-    }
-  });
-
   document.addEventListener("acquisition-made", function(e) {
     var details = '<span><b>' + e.detail  + '</b></span>';
     var alert = getAlertHTML('acquisition-made-alert', 'COMPANY ACQUIRED', 'alert-success', details);
@@ -182,6 +236,18 @@ function initializeGame() {
         $(this).remove();
       })
     }, 3000);
+  });
+
+  document.addEventListener("cryptic-notification", function(e) {
+    var details = '<span><b>' + e.detail  + '</b></span>';
+    var id = Date.now();
+    var alert = getAlertHTML('cryptic-' + id, 'CLASSIFIED', 'alert-cryptic', details, 'help');
+    $('#achievement-box').append(alert);
+    setTimeout(function() {
+      $('.cryptic-' + id).fadeOut(500, function() {
+        $(this).remove();
+      })
+    }, 5000);
   });
 
   document.addEventListener("employee-killed", function(e) {
@@ -204,7 +270,7 @@ function initializeGame() {
     var timeTilRipe = getInvestmentFormData();
 
     if (investType === 'all') {
-      var slots = game.simultaneousInvestments.val() - game.activeInvestments().length
+      var slots = game.totalSimultaneousInvestmentsAllowed.val() - game.activeInvestments().length
       for (var i = 0; i < slots; i++) {
         game.makeInvestment(10, timeTilRipe)
       }
@@ -223,18 +289,30 @@ function initializeGame() {
     // close the modal
     $('#acquisitionModal').modal('toggle');
   });
+
+  $('.modal').on('hidden.bs.modal', function(e) {
+      game.viewingModal(null);
+  });
   
   // load game data
   game.loadGame();
-  
-  renderCharts();
-  
+    
   // Once everything is done, kill the loading screen
   $('#loading-screen').hide();
 }
 
 function validateResearch(unitId) {
   var target = $('#research-' + unitId);
+  var val = target.val();
+  if (val > game.units()[parseInt(unitId)].num.val() || val < 0) {
+    target.addClass('error');
+  } else {
+    target.removeClass('error');
+  }
+}
+
+function validateElections(unitId) {
+  var target = $('#election-' + unitId);
   var val = target.val();
   if (val > game.units()[parseInt(unitId)].num.val() || val < 0) {
     target.addClass('error');
@@ -263,7 +341,7 @@ function validateInvestment() {
   if (timeTilRipe > 1440) {
     $('#investmentForm').addClass('error');
     $('.investment-submit').addClass('disabled');
-  } else if (timeTilRipe > 0 && game.activeInvestments().length < game.simultaneousInvestments.val()) {
+  } else if (timeTilRipe > 0 && game.activeInvestments().length < game.totalSimultaneousInvestmentsAllowed.val()) {
     $('#investmentForm').removeClass('error');
     $('.investment-submit').removeClass('disabled');
   } else {
@@ -272,12 +350,12 @@ function validateInvestment() {
   }
 }
 
-function getAlertHTML(id, type, colorClass, link) {
+function getAlertHTML(id, type, colorClass, link, altIcon) {
   return '<div class="' + id + ' alert ' + colorClass + '" role="alert">'
     + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'
     +  '<span aria-hidden="true">&times;</span>'
     + '</button>'
-    + '<i class="material-icons" style="font-size:48px; color:darkgray;">check_circle</i>'
+    + '<i class="material-icons" style="font-size:48px; color:darkgray;">' + (altIcon ? altIcon : 'check_circle') + '</i>'
     + '<span class="achievement-label">' + type + ':</span>'
     +  '&nbsp;' + link;
 }
@@ -325,30 +403,50 @@ function copyToClipboard() {
   var s = document.execCommand('copy');
 }
 
+function downloadExport() {
+  var data = $('.export-data').val();
+  var blob = new Blob([data], { type: "text/plain; encoding=utf8" });
+  saveData(blob, 'idle-class-save-' + Date.now() + '.txt');    
+}
+
+function saveData(blob, fileName) {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+
+    var url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
 function setBankruptcyModalViewed() {
+  game.viewingModal('bankruptcy');
   game.bankruptcyModalViewed(true);
 }
 
 function getLineGraphData() {
   return [
-    (game.earningsStats()[0].val() - game.earningsStats()[1].val() - game.earningsStats()[2].val() - game.earningsStats()[3].val()) - game.earningsStats()[4].val() - game.earningsStats()[5].val() || 0,
+    (game.earningsStats()[0].val() - game.earningsStats()[1].val() - game.earningsStats()[2].val() - game.earningsStats()[3].val() - game.earningsStats()[4].val() - game.earningsStats()[5].val() - game.earningsStats()[6].val()) || 0,
     game.earningsStats()[1].val(),
     game.earningsStats()[2].val(),
     game.earningsStats()[3].val(),
     game.earningsStats()[4].val(),
-    game.earningsStats()[5].val()
+    game.earningsStats()[5].val(),
+    game.earningsStats()[6].val()
   ]
 }
 
 function getBankruptcyLabels() {
   return game.pastBusinesses().map(function(business) {
-    return cnItem(business.name) + ': ' + game.format(business.earned);
+    return business.name + ': ' + game.format(business.earned);
   });
 }
 
 function getPieChartLabels() {
   return game.units().map(function(unit) {
-    return unit.available() ? cnItem(unit.name()) : '?';
+    return unit.available() ? unit.name() : '?';
   });
 }
 
@@ -359,15 +457,15 @@ function getPieChartData() {
 }
 
 function getInvestmentChartData() {
-  return [game.investmentStats()[10].val(), game.investmentStats()[11].val()];
+  return [game.investmentStats()[7].val(), game.investmentStats()[8].val()];
 }
 
 function getEmailChartData() {
-  return [game.emailStats()[7].val() - game.emailStats()[10].val(), game.emailStats()[10].val()];
+  return [game.emailStats()[4].val() - game.emailStats()[7].val(), game.emailStats()[7].val()];
 }
 
 function getClickChartData() {
-  return [game.clickStats()[2].val() - game.clickStats()[7].val(), game.clickStats()[7].val()];
+  return [game.clickStats()[2].val() - game.clickStats()[6].val(), game.clickStats()[6].val()];
 }
 
 function getBankruptcyGraphData() {
@@ -502,10 +600,10 @@ function renderCharts() {
     myLineGraph = new Chart(ctx5, {
       type: 'bar',
       data: {
-        labels: ['Employees', 'Clicking', 'Emails', 'Investments', 'R&D', 'Acquisitions'],
+        labels: ['Employees', 'Clicking', 'Emails', 'Investments', 'R&D', 'Acquisitions', 'Elections'],
         datasets: [{
           label: 'Types of Earnings',
-            backgroundColor: ['#337ab7', '#d9534f', '#f0ad4e', '#5cb85c', '#994499', '#3B3EAC'],
+            backgroundColor: ['#337ab7', '#d9534f', '#f0ad4e', '#5cb85c', '#994499', '#3B3EAC', '#0099C6'],
           data: getLineGraphData()
         }]
       },
@@ -586,8 +684,6 @@ function renderCharts() {
     });
 }
 
-
-
 function chartTooltipCallback(tooltipItem, data) {
   var allData = data.datasets[tooltipItem.datasetIndex].data;
 	var tooltipLabel = data.labels[tooltipItem.index];
@@ -598,26 +694,6 @@ function chartTooltipCallback(tooltipItem, data) {
 	}
 	var tooltipPercentage = Math.round((tooltipData / total) * 100);
 	return tooltipLabel + ': ' + tooltipPercentage + '%';
-}
-
-function renderCPSChart() {
-  var ctx = document.getElementById('cashGraph').getContext('2d');
-  var myLineGraph = new Chart(ctx,{
-    type: 'line',
-    data: {
-      labels: game.dailyCashPerSecondStamps().map(function(stamp) {
-        return stamp.date;
-      }),
-      datasets: [{
-        label: 'Dollars Per Second (Last 7 Days)',
-        backgroundColor: '#dff0d8',
-        borderColor: '#3c763d',
-        data: game.dailyCashPerSecondStamps().map(function(stamp) {
-          return stamp.cps;
-        })
-      }]
-    }
-  });
 }
 
 var got10m, got1h, got6h, got12h, got1d;

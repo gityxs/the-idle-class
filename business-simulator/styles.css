@@ -1,3 +1,29 @@
+/** MATERIAL ICONS **/
+
+/* fallback */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(material-icons.woff2) format('woff2');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
 /** HOVERS **/
 .hover {
   
@@ -17,6 +43,10 @@
   right: -490px;
   width: 525px;
   top: 0;
+}
+
+.trainingView .upgrade-list .hover-box {
+  top: -47px;
 }
 
 .upgrade-list .hover-box li {
@@ -47,6 +77,12 @@
 .employee-list .reverse-hover .hover-box {
   top: initial;
   bottom: 0 ;
+}
+
+.hover-box p {
+  max-height: 200px;
+  overflow: hidden;
+  overflow-y: auto;
 }
 
 .hover .flavor {
@@ -192,14 +228,22 @@
 
 /** GENERAL **/ 
 
+#slide-nav {
+  display: none;
+}
+
 #top-clickable {
   margin-top: 8px;
   padding: 4px 8px;
   font-size: 16px;
 }
 
-button#top-clickable:focus {
-  outline: 0;
+#top-clickable.windfallGuaranteed {
+  border-radius: 0px 7px 7px 0px;
+}
+
+button#top-clickable:focus, button.windfall-btn:focus, button.windfall-btn:active {
+  outline: 0 !important;
 }
 
 @keyframes windfallPulse {
@@ -226,6 +270,22 @@ button#top-clickable:focus {
   -moz-animation-iteration-count: infinite;
 }
 
+.btn.windfall-btn {
+  padding: 5.5px 8px 5.5px 10px;
+  font-size: 14px;
+  margin-top: 8px;
+  border-radius: 6px 0 0 6px;
+  min-width: 45px;
+  height: 31px;
+  position: relative;
+}
+
+.btn.windfall-btn .material-icons {
+  color: white;
+  background-color: inherit;
+  top: 2px;
+}
+
 .jumbotron {
   overflow-y: hidden;
 }
@@ -247,7 +307,7 @@ button#top-clickable:focus {
   margin-left: 15px;
 }
 
-#top-clickable-box {
+.top-box {
   position: relative;
 }
 
@@ -257,6 +317,10 @@ button#top-clickable:focus {
   position: absolute;
   top: 12px;
   left: 115px;
+}
+
+.windfallGuaranteed .top-click-value-display {
+  left: 165px;
 }
 
 label {
@@ -274,7 +338,7 @@ label {
 
 .unit .badge {
   position: absolute;
-  top: 10px;
+  top: 12px;
   right: 5px;
 }
 
@@ -437,12 +501,17 @@ ul {
   font-size: 32px !important;
 }
 
+.alert-cryptic {
+  background: rebeccapurple;
+  color: white;
+}
+
 .employee-header {
   display: inline-block;
 }
 
 .mobile-only-text {
-  display: none;
+  display: none !important;
 }
 
 /**********************************************
@@ -543,11 +612,33 @@ body {
 
 /* ACHIEVEMENTS & UPGRADES PANEL */
 
+.secret-count-label.label {
+  vertical-align:text-bottom; 
+  display: inline-block;
+}
+
 .btn.clear-awards-btn {
   padding: 2px 6px;
   position: absolute;
   margin-left: 7px;
   top: 6px;
+}
+
+.secret-achievements-toggle {
+  position: absolute;
+  top: 2px;
+  margin-left: -9px;
+}
+
+.secret-achievements-toggle i {
+  position: relative; 
+  background: transparent; 
+  color: inherit;
+  opacity: 0.6;
+}
+
+.secret-achievements-toggle i:hover, .secret-achievements-toggle:focus {
+  opacity: 0.8;
 }
 
 /* UNITS */
@@ -614,6 +705,36 @@ body {
 
 .unit-box {
   position: relative;
+}
+
+.twocolumn .unit-box {
+  width: 48%;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+.twocolumn .unit-num .num {
+  display: none;
+}
+
+.twocolumn .unit-button-sell, .twocolumn .unit-num {
+  display:  none;
+}
+
+.twocolumn .unit-buttons {
+  float: none;
+}
+
+.twocolumn .unit-button-buy {
+  width: 100%;
+}
+
+.twocolumn .hiretext {
+  display:  none;
+}
+
+.twocolumn .buy-rate-selector {
+  right: 27px;
 }
 
 /** STATS PANEL **/
@@ -694,7 +815,8 @@ body {
 #unitModal .material-icons,
 .mailModal .material-icons,
 #upgradeModal .material-icons,
-#acqWorkerModal .material-icons {
+#acqWorkerModal .material-icons,
+#trainingModal .material-icons {
   border-radius: 50%;
   padding: 5px;
   border: solid 2px #337ab7;
@@ -706,7 +828,8 @@ body {
 #unitModal .modal-title,
 .mailModal .modal-title,
 #upgradeModal .modal-title,
-#acqWorkerModal .modal-title {
+#acqWorkerModal .modal-title,
+#trainingModal .modal-title {
   margin-left: 45px;
 }
 
@@ -749,6 +872,11 @@ body {
 .email-message.special {
   border-color: goldenrod !important;
   box-shadow: 0 1px 10px goldenrod !important;
+}
+
+.email-message.cryptic {
+  border-color: rebeccapurple !important;
+  box-shadow: 0 1px 10px rebeccapurple !important;
 }
 
 .email-message.acquisition {
@@ -937,7 +1065,7 @@ body {
 }
 
 #productModal table {
-  margin-bottom: 0;
+  margin-bottom: 10px;
 }
 
 .badge.research-badge {
@@ -945,13 +1073,15 @@ body {
 }
 
 #productModal input[type=number]::-webkit-inner-spin-button, 
-#productModal input[type=number]::-webkit-outer-spin-button { 
+#productModal input[type=number]::-webkit-outer-spin-button,
+#electionModal input[type=number]::-webkit-inner-spin-button, 
+#electionModal input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
   margin: 0; 
 }
 
-#productModal input[type=number] {
-    -moz-appearance:textfield;
+#productModal input[type=number], #electionModal input[type=number] {
+    -moz-appearance: textfield;
 }
 
 #productModal .progress-header {
@@ -980,6 +1110,10 @@ body {
   right: 8px;
   top: 8px;
   text-align: center;
+}
+
+.mobile-assign-all {
+  width: 100%;
 }
 
 .sell-value {
@@ -1083,6 +1217,19 @@ body {
   left: 20px;
   top: -5px;
   z-index: 2;
+}
+
+.mail-badge.urgent {
+  box-shadow: 0 1px 4px goldenrod !important;
+  border: solid 1px goldenrod;
+}
+
+.mail-badge.cryptic {
+  background-color: rebeccapurple !important;
+}
+
+.label-cryptic {
+  background-color: rebeccapurple;
 }
 
 .cps-penalty-badge {
@@ -1286,6 +1433,13 @@ body {
   vertical-align: sub;
 }
 
+#settingsModal #maxincrement, #settingsModal #targetincrement {
+  display: inline;
+  width: 100px;
+  height: 26px;
+  vertical-align: baseline;
+}
+
 /* GENERAL */
 .disabled {
   pointer-events: none;
@@ -1382,6 +1536,11 @@ body {
   list-style-position: inside;
 }
 
+#changelogModal ul > ul {
+  list-style-type: circle;
+  margin-left: 10px;
+}
+
 /****************************
         AWAY INFO
 ****************************/
@@ -1429,6 +1588,113 @@ p.time-away {
 
 #awayEarningsModal .well {
   margin: 0px 0px 15px 0px;
+}
+
+/****************************
+    CAREER DEVELOPMENT
+*****************************/
+
+.badge.badge-success {
+  background: #5cb85c !important;
+}
+
+.badge.badge-danger {
+  background: #d9534f !important;
+}
+
+.career-box i {
+  position: relative;
+  top: 5px;
+  left: -5px;
+  background: none;
+  color: #666;
+}
+
+.career-box button {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.training-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  position: relative;
+}
+
+.training-toggle .material-icons {
+  position: relative;
+  top: 3px;
+  left: 0;
+  color: #888;
+}
+
+.training-progress.progress {
+  width: 100%;
+  position: relative;
+  top: 8px;
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 0;
+}
+
+.trainingActive .unit-buttons {
+  min-width: 152px;
+}
+
+.trainingActive .panel-body {
+  display: flex;
+}
+
+.trainingActive .unit-buttons button {
+  min-width: 73px;
+}
+
+.progress-timer {
+  top: -8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.progress-timer span {
+  color: #000;
+  background: #f5f5f5;
+  border-radius: 4px;
+  padding: 1px 5px 0;
+  min-width: 60px;
+  font-size: 12px;
+  display: inline-block;
+}
+
+.unit-buttons .well {
+  margin: 0;
+  display: inline-block;
+  padding: 6px 0;
+  vertical-align: middle;
+  min-width: 75px;
+  text-align: center;
+}
+
+.trainings-badge {
+  position: absolute;
+  top: -5px;
+  right: -15px;
+}
+
+.label.label-success.new-trainings-label {
+  font-size: 10px;
+  vertical-align: middle;
+}
+
+.training-toggle {
+  outline: none;
+}
+
+.training-toggle .material-icons:hover,
+.training-toggle:focus .material-icons {
+  opacity: 0.8;
 }
 
 /****************************
@@ -1570,6 +1836,19 @@ p.time-away {
   pointer-events: none;
 }
 
+.acquisition td span {
+  padding: 2px 8px;
+  border-radius: 10px;
+    -webkit-transition : background 100ms ease-out;
+  -moz-transition : background 100ms ease-out;
+  -o-transition : background 100ms ease-out;
+  transition : background 100ms ease-out;
+      -webkit-transition : box-shadow 100ms ease-out;
+  -moz-transition : box-shadow 100ms ease-out;
+  -o-transition : box-shadow 100ms ease-out;
+  transition : box-shadow 100ms ease-out;
+}
+
 #acquisitionMailModal .away-record .well,
 #chatModal .away-record .well {
   background: #d9534f;
@@ -1636,6 +1915,14 @@ p.time-away {
 .pending .unit-buttons button, .pending .btn-danger {
   opacity: 0.7;
   pointer-events: none;
+}
+
+.label.label-danger.fired-label {
+  padding-left: 10px;
+  padding-right: 10px;
+  position: absolute;
+  margin-left: 7px;
+  box-shadow: #d9534f 0px 0px 10px 0.5px;
 }
 
 /****************************
@@ -1855,6 +2142,292 @@ p.time-away {
 }
 
 /*****************************
+        ELECTIONS MODAL
+******************************/
+
+.polling-box.row {
+}
+
+.election-bio {
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
+.election-bio ul {
+  list-style-type: disc;
+  list-style-position: inside;
+}
+
+#electionModal .table {
+  margin-bottom: 5px;
+}
+
+#electionModal .stat-header {
+  display: inline-block;
+  border-bottom: solid 1px white;
+  margin-bottom: 5px;
+  font-size: 12px;
+  padding: 0 20px;
+}
+
+#electionModal .stat-value {
+  font-size: 18px;
+  display: block;
+}
+
+.kickback-header {
+  text-align: center;
+  border-bottom: solid 1px #ddd;
+  padding-bottom: 2px;
+}
+
+.election-left-box {
+  padding-left: 0;
+}
+
+.election-left-box p, .election-right-box p {
+  padding: 5px 10px;
+  color: white;
+  text-align: center;
+  margin: 5px 0;
+  border-radius: 3px;
+}
+
+.donate-btn {
+  min-width: 200px;
+}
+
+.modal-content {
+  transition: height 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+.research-input button {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+}
+
+.election-left-box p {
+  background: #5cb85c;
+  border: solid 1px #5cb85c;
+}
+
+.election-right-box {
+  padding-right: 0;
+}
+
+.election-right-box p {
+  background: #d9534f;
+  border: solid 1px #d9534f;
+}
+
+.poll-stats {
+  transform: translateY(-50%);
+  top: 50%;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.poll-stats .stat-header {
+    font-size:  12px;
+    display:  inline-block;
+    border-bottom:  solid 1px #ddd;
+    padding: 0 10px;
+}
+
+.poll-stats .stat-value {
+  font-size: 24px;
+}
+
+.polling-box .col-md-3 .poll-wrapper {
+  border: solid 1px #ddd;
+  border-radius: 3px;
+  text-align: center;
+  height: 100px;
+      -webkit-transition : border 100ms ease-out;
+  -moz-transition : border 100ms ease-out;
+  -o-transition : border 100ms ease-out;
+  transition : border 100ms ease-out;
+}
+
+.polling-box .col-md-9 {
+  padding-left: 0;
+}
+
+.polling-box .col-md-9 .poll-wrapper {
+  border: solid 1px #ddd;
+  border-radius: 3px;
+  overflow-y: scroll;
+  height: 100px;
+}
+
+.poll-gaffe-entry {
+  padding: 6px 10px;
+  width: 100%;
+  text-align: left !important;
+}
+
+.poll-gaffe-entry .badge {
+  float: right;
+}
+
+.policy-ideas .badge-success {
+  margin-left: 5px;
+}
+
+.policy-box {
+  border: solid 1px #ddd;
+  border-radius: 3px;
+  margin-bottom: 15px;
+  padding: 0 20px;
+}
+
+.election-timer {
+  border: solid 1px #ddd;
+  border-radius: 5px;
+  padding: 1px 15px;
+  background: white;
+}
+
+.no-gaffes {
+  background: #eee;
+  padding: 12px;
+  border-radius:  3px;
+  margin: auto !important;
+  position:   relative; 
+  width: 200px;
+  text-align: center;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b3b3b3;
+}
+
+.candidate-prepared-wrapper {
+  position: relative; 
+  height: 50px;
+  border: solid 1px #ddd;
+  border-radius: 3px;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.current-search {
+  text-align: center;
+  padding: 25px;
+  border: solid 1px #ddd;
+  border-radius: 3px;
+}
+
+.results-box {
+  position: absolute;
+  background: white;
+  width: 75%;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: auto;
+  padding: 25px;
+  border-radius: 5px;
+  border: solid 1px #ddd;
+  display: none;
+  z-index: 1;
+}
+
+.results-view .results-box {
+  display: block;
+}
+
+.results-view .election-box {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.election-earnings-box {
+  text-align: center;
+  background: #5cb85c;
+  color: white;
+  padding: 10px;
+}
+
+.election-earnings-box.lost {
+  background: #d9534f;
+}
+
+.badge.donation-add {
+  position: absolute;
+  top: -30px;
+  right: 7px;
+}
+
+.polling-box .col-md-3 .clicked.poll-wrapper {
+  border: solid 1px #5cb85c !important;
+  box-shadow: #5cb85c 0px 0px 5px; 
+  -webkit-transition : border 100ms ease-out;
+  -moz-transition : border 100ms ease-out;
+  -o-transition : border 100ms ease-out;
+  transition : border 100ms ease-out;
+}
+
+select.form-control.last-form {
+  margin-bottom: 0;
+}
+
+select.form-control {
+  margin-bottom: 2px;
+}
+
+.gaffe-risk-box {
+  border: solid 1px #ddd;
+  border-radius: 3px;
+  text-align: center;
+  padding: 5px;
+  margin: 10px 0 !important;
+}
+
+/** ELECTIONS MODAL ICON **/
+
+.ballot-badge {
+  left: 106px;
+  padding: 3px 4px;
+}
+
+.ballot-badge i {
+  font-size: 12px !important;
+}
+
+.label-success.ballot-badge {
+  position: absolute;
+  top: -5px;
+  z-index: 2;
+}
+
+/** DONATE MODAL **/
+
+.donate-btns {
+  text-align: center;
+}
+
+.donate-btns .btn {
+  width: 46%;
+  margin: 15px 10px;
+  display: inline-block;
+}
+
+/** SOCIAL MODAL **/
+
+.social-btns {
+  text-align:  center;
+}
+
+.social-btns .btn {
+  width: 28%;
+  margin: 15px 10px;
+  display: inline-block;
+}
+
+/*****************************
         DARK MODE
 *****************************/
 
@@ -1886,6 +2459,10 @@ of the Bootswatch 'Darkly' theme */
 .darkmode .padlock-icon {
   color: #605e5e !important;
   background: transparent;
+}
+
+.darkmode .navbar-right .locked-icon .padlock-icon {
+  color: #BBB !important;
 }
 
 .darkmode .nav-tabs .badge {
@@ -2023,6 +2600,61 @@ of the Bootswatch 'Darkly' theme */
   background: #222222;
 }
 
+.darkmode .training-toggle .material-icons {
+  background: transparent;
+}
+
+.darkmode .training-progress {
+  height: 23px !important;
+  width: 100%;
+}
+
+.darkmode .trainingActive .unit-buttons {
+  min-width: 155px;
+}
+
+.darkmode .progress-timer span {
+  background: #ebebeb;
+}
+
+.darkmode .buy-rate-selector .btn-group .btn {
+  padding: 4px 10px;
+}
+
+.darkmode #settingsModal #maxincrement, .darkmode #settingsModal #targetincrement {
+  padding: 0 10px;
+}
+
+.darkmode .panel-title {
+  color: white !important;
+}
+
+.darkmode #electionModal .form-control {
+  height: 37px;
+  padding: 0 10px;
+}
+
+.darkmode .no-gaffes {
+  background: #464545;
+}
+
+.darkmode .poll-gaffe-entry .text {
+  font-size: 14px;
+}
+
+.darkmode .election-timer {
+  background: #333;
+}
+
+.darkmode .results-box {
+  background: #303030;
+}
+
+.darkmode .btn.windfall-btn {
+  margin-top: 7px;
+  height: 33px;
+}
+
 @media only screen  
 and (max-width : 767px) {
   .darkmode .navbar {
@@ -2101,15 +2733,36 @@ and (max-width : 415px) {
 
 @media only screen  
 and (max-width : 767px) {
+  .nav-tabs {
+    margin-top: 115px;
+  }
+
   .hide-mobile {
-    display: none;
+    display: none !important;
   }
   .mobile-only-text {
+    display: inline-block !important;
+  }
+
+  /* Guaranteed Windfall */
+
+  .windfallGuaranteed .windfall-btn {
+    padding: 10px;
+    height: initial;
     display: inline-block;
+    margin-top: 0;
+    height: 43px;
+    position: relative;
+    top: -2px;
+  }
+
+  .windfallGuaranteed#top-clickable {
+    display: inline-block;
+    width: 75%;
   }
 
   /* Mobile Main Button */
-  #top-clickable-box {
+  .top-box {
     position: fixed;
     bottom: 25px;
     right: 0;
@@ -2118,6 +2771,7 @@ and (max-width : 767px) {
     margin: 0;
     background: #222;
     border-top: solid 1px #080808;
+    text-align: center;
   }
 
   #top-clickable {
@@ -2125,6 +2779,16 @@ and (max-width : 767px) {
     width: 90%;
     margin: 8px auto 12px;
     display: block;
+  }
+
+  #top-clickable.windfallGuaranteed {
+    width: 75%;
+    display: inline-block;
+  }
+
+  .btn.windfall-btn {
+    margin-top: -1px;
+    height: 43px;
   }
 
   .footer {
@@ -2148,6 +2812,10 @@ and (max-width : 767px) {
   }
 
   .upgrade-list li {
+    width: 100%;
+  }
+
+  .twocolumn .unit-box {
     width: 100%;
   }
 
@@ -2192,7 +2860,7 @@ and (max-width : 767px) {
   /* Mobile Cash Display */
 
   .mobile-cash-display {
-    display:  block;
+    display: block;
     position: fixed;
     top: -2px;
     padding: 10px;
@@ -2207,7 +2875,7 @@ and (max-width : 767px) {
   }
 
   .mobile-cash-display .panel-body {
-    padding: 5px 10px;
+    padding: 5px 15px;
   }
 
   .alert {
@@ -2229,6 +2897,30 @@ and (max-width : 767px) {
 
   .navbar-right .panel {
     display: none;
+  }
+
+  #slide-nav {
+    display: block;
+    position: fixed;
+    min-height: 50px;
+    top: 50px;
+    border-top: solid 1px white;
+    width: 100%;
+    z-index: 5;
+  }
+
+  #slide-nav .panel.panel-default {
+    position: absolute;
+    top: 7px;
+    width: 95%;
+    left: 0;
+    right: 0;
+    margin: auto;
+    text-align: center;
+  }
+
+  #slide-nav .panel .panel-body {
+    padding: 5px 15px;
   }
 
 /*  #top-clickable-box {
@@ -2443,6 +3135,51 @@ and (max-width : 767px) {
     width: 80%;
   }
 
+  /* Mobile Elections */
+
+  .polling-box .col-md-3 .poll-wrapper {
+    height: 50px;
+  }  
+
+  .polling-box .col-md-9 {
+    padding-left: 15px;
+  }
+
+  .polling-box .col-md-9 .poll-wrapper {
+    height: 145px;
+    margin-top: 10px;
+  }
+
+  .poll-gaffe-entry .text {
+    display: inline-block;
+    width: 81%;
+    vertical-align: middle;
+  }
+
+  .poll-gaffe-entry .badge {
+    display: inline-block;
+    vertical-align: baseline;
+    float: none;
+  }
+
+  #electionModal .stat-header {
+    margin-bottom: -2px;
+  }
+
+  #electionModal .modal-footer .btn + .btn {
+    width: 100%;
+    margin-top: 6px;
+    margin-left: 0;
+  }
+
+  .election-preparation-stats {
+    margin-top: 10px;
+  }
+
+  .badge.donation-add {
+    top: -10px;
+  }
+
   /* Mobile Darkmode */
   .darkmode .mobile-cash-display {
     font-size: 14px;
@@ -2467,5 +3204,10 @@ and (max-width : 767px) {
   .darkmode .left-box.resting-box {
     left: 10px;
     width: 140px;
+  }
+
+  .darkmode .btn.windfall-btn {
+    margin-top: -4px;
+    height: 45px;
   }
 }
