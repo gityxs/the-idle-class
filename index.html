@@ -5,34 +5,35 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>放置大亨 - The Idle Class</title>
+  <title>放置大亨 - The Idle Class</title>
   <meta name="description" content="The Idle Class is an incremental game about the never-ending bull market of capitalism. Those who click vigorously will inevitably become wealthy." /> 
 
   <meta name="twitter:card" content="summary"/>
   <meta name="twitter:site" content="@smallgraygames"/>
   <meta name="twitter:title" content="The Idle Class"/>
   <meta name="twitter:description" content="An incremental descent into the nightmare of capitalism"/>
-  <!-- <meta name="twitter:url" content="https://www.smallgraygames.com/the-idle-class"/> -->
+  <meta name="twitter:image" content="idleclass.png" />
+  <meta name="twitter:url" content="https://www.smallgraygames.com/the-idle-class"/>
 
   <!-- http://plaza.dsolver.ca/m/smallgraygames -->
 
-<!--  <script defer src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
-  <script defer src="https://cdn.bootcdn.net/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
-  <script defer src="https://cdn.bootcdn.net/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
-  <script defer src="https://cdn.bootcdn.net/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
-  <script defer src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script defer src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.js"></script>
+  <script defer src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script defer src="business-simulator/game.js"></script>
   <script defer src="business-simulator/main.js"></script>
 
   <link async rel="stylesheet" type="text/css" href="business-simulator/styles.css">
-  <link async rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link async rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link rel="stylesheet" title="dark">
   <link async rel="shortcut icon" href="business-simulator/favicon.ico" type="image/x-icon" />
 </head>
 
 <body data-bind="css: { darkmode: enableDarkMode, fixednav: enableFixedNavTabs }">
-<script src="chs.js?202106041511"></script>
-<script src="//g8hh.com/zh/core.js"></script>
+  <script src="chs.js"></script>
+  <script src="core.js"></script>
   <div id="loading-screen" style="position: fixed; height: 100vh; width: 100vw; z-index: 10000; background: white;">
     <div style="text-align: center; margin-top: 50vh;">
       <p style="margin: 15px; border:solid 1px #ddd; display: inline-block; padding: 15px; border-radius: 15px; background: #EEE;">
@@ -154,14 +155,14 @@
       </a>
     </li>
     <li role="presentation">
-      <a href="#achievements" data-bind="click: function() { incrementViewCount.bind($data, 'achievementTab'); setTimeout(function() { viewingTab('achievements'); }, 100); }" aria-controls="messages" role="tab" data-toggle="tab">
+      <a href="#achievements" data-bind="click: function() { incrementViewCount('achievementTab'); setTimeout(function() { viewingTab('achievements'); }, 100); }" aria-controls="messages" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">check_circle</i>
         <span class="nav-tab-text">Achievements & Upgrades</span>
         <span class="badge" data-bind="visible: newAchievementCount.val, text: newAchievementCount.displayVal"></span>
       </a>
     </li>
     <li role="presentation">
-      <a href="#stats" onclick="reloadCharts()" data-bind="click: function() { incrementViewCount.bind($data, 'statsTab'); viewingTab('stats'); }" aria-controls="settings" role="tab" data-toggle="tab">
+      <a href="#stats" onclick="reloadCharts()" data-bind="click: function() { incrementViewCount('statsTab'); viewingTab('stats'); }" aria-controls="settings" role="tab" data-toggle="tab">
         <i class="material-icons nav-tab-icon">insert_chart</i>
         <span class="nav-tab-text">Stats</span>
       </a>
@@ -1153,7 +1154,8 @@
   <a href="/">Home</a> |
   <span id="changelog-footer-link"><a href="business-simulator/changelog.html" target="_blank">Changelog</a> |</span>
   <a href="#" data-toggle="modal" data-target="#socialModal" data-bind="click: function() { viewingModal('social'); }">Social</a> |
-  <a href="#" data-toggle="modal" data-target="#donateModal" data-bind="click: function() { viewingModal('donate'); }">Donate</a>
+  <a href="#" data-toggle="modal" data-target="#donateModal" data-bind="click: function() { viewingModal('donate'); }">Donate</a> 
+  <span class="hide-mobile">| <a target="_blank" href="https://smallgraygames.itch.io/the-salt-keep">New Game</a> <span style="position: relative;top:-1px;" class="label label-success">NEW</span></span>
 </footer>
 
 <!-- MODALS -->
@@ -2294,14 +2296,33 @@
 <div id="achievement-box"></div>
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-117412788-1"></script>
+<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-117412788-1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', 'UA-117412788-1');
-</script></body>
+</script> -->
+
+<!--客服 开始-->
+<script src="//g8hh.com/static/js/jquery.min.js"></script>
+<link rel="stylesheet" href="//g8hh.com/static/css/kf.css" type="text/css" media="screen" charset="utf-8">
+<script src="//g8hh.com/static/js/kf.js"></script>
+<!-- 客服 结束 -->
+<!--站长统计-->
+<div style="display: none">
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?dbb7ff142f4d4b68546c93b9cd6e9328";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+        </div>
+</body>
 
 <script type="text/html" id="stat-template">
     <tr data-bind="if: $root.viewingTab() === 'stats'">
@@ -2379,21 +2400,4 @@
     </div>
   </div>
 </script>
-<!--客服 开始-->
-<script src="//g8hh.com/static/js/jquery.min.js"></script>
-<link rel="stylesheet" href="//g8hh.com/static/css/kf.css" type="text/css" media="screen" charset="utf-8">
-<script src="//g8hh.com/static/js/kf.js"></script>
-<!-- 客服 结束 -->
-<!--站长统计-->
-    <div style="display: none">
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "https://hm.baidu.com/hm.js?dbb7ff142f4d4b68546c93b9cd6e9328";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
-    </div>
 </html>

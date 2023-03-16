@@ -3,6 +3,8 @@ var game = (function() {
   const MAXIMUM_CHATS = 8;
   const MAXIMUM_ACQUISITION_MAIL = 10;
 	const SAVE_FILE = 'business_sim_save';
+  const HOVER_DELAY = 200
+  const HOVER_HIDE_DELAY = 50
 	//const PRICE_GROWTH = 1.25;
 	
 		var unitCount = new Stat('Employees Employed', 0);
@@ -198,7 +200,7 @@ var game = (function() {
 	  var startTimeAllTime = new DateStat('Start Time (All Businesses)', Date.now());
 	  var lastClick = new DateStat('Last Time Active', Date.now());
     var saveFileSize = new Stat('Save File Size', 0, null, 'kb');
-	  var version = new Stat('Version', '0.7.8');
+	  var version = new Stat('Version', '0.7.11');
     var statsTabViews = new Stat('Stats Tab Views', 0);
     var achievementTabViews = new Stat('Upgrades/Achievements Tab Views', 0);
     var viewingTab = ko.observable('store');
@@ -1116,7 +1118,7 @@ var game = (function() {
     new StatUpgrade('ace9', 'Adults in the Room', 'healing', acquisitionValueMultiplier, 0.3, 1000000000000000000000000000000, 'Increase your <b>Acquisition Value Multiplier</b> by <b>0.3</b>.', "From a kingdom of gold to one of rust and iron."),
 
     new StatUpgrade('exec1', 'Folksy Servility', 'directions_run', defaultExecutives, 1, 250000000000000000000000, 'New <b>Acquisitions</b> begin with <b>1</b> extra <b>Executive Financier</b>.', 'I\'m just a workin\' man. My boss does all the supposin\''),
-    new StatUpgrade('exec2', 'Boy\'s Club Comraderie', 'directions_run', defaultExecutives, 1, 25000000000000000000000000, 'New <b>Acquisitions</b> begin with <b>1</b> extra <b>Executive Financier</b>.', 'Let\'s hurt somebody.'),
+    new StatUpgrade('exec2', 'Boy\'s Club Camaraderie', 'directions_run', defaultExecutives, 1, 25000000000000000000000000, 'New <b>Acquisitions</b> begin with <b>1</b> extra <b>Executive Financier</b>.', 'Let\'s hurt somebody.'),
     new StatUpgrade('exec3', 'Aspirational Loyalty', 'directions_run', defaultExecutives, 1, 2500000000000000000000000000, 'New <b>Acquisitions</b> begin with <b>1</b> extra <b>Executive Financier</b>.', 'As far back as I can remember, I always wanted to be a mid-level executive.'),
     new StatUpgrade('exec4', 'Esprit De Corporate', 'directions_run', defaultExecutives, 1, 250000000000000000000000000000, 'New <b>Acquisitions</b> begin with <b>1</b> extra <b>Executive Financier</b>.', 'Machine men, with machine minds and machine hearts.'),
 
@@ -1486,9 +1488,9 @@ var game = (function() {
         new Award('tc31', 'Immanentized Eschaton', 1000000000000000000000000000000000, ['c30'], totalCashSlowed), // 1 decillion
         new Award('tc32', 'The Abomination of Desolation', 10000000000000000000000000000000000, ['c31'], totalCashSlowed), // 10 decillion
         new Award('tc33', 'The 0.000000000000000001%', 100000000000000000000000000000000000, ['c32'], totalCashSlowed), // 100 dec
-        new Award('tc34', 'Grande Bourgeoisie', 100000000000000000000000000000000000, ['c33', 'tp6'], totalCashSlowed), // 1 undecillion
-        new Award('tc35', 'Mansa Musa', 1000000000000000000000000000000000000, ['c34'], totalCashSlowed), // 10 undecillion
-        new Award('tc36', 'The Whole Heaven is Mine', 10000000000000000000000000000000000000, [], totalCashSlowed), // 100 undecillion
+        new Award('tc34', 'Grande Bourgeoisie', 1000000000000000000000000000000000000, ['c33', 'tp6'], totalCashSlowed), // 1 undecillion
+        new Award('tc35', 'Mansa Musa', 10000000000000000000000000000000000000, ['c34'], totalCashSlowed), // 10 undecillion
+        new Award('tc36', 'The Whole Heaven is Mine', 100000000000000000000000000000000000000, [], totalCashSlowed), // 100 undecillion
 
         /* Upgrade Awards */
 	   
@@ -2246,11 +2248,14 @@ var game = (function() {
 
   var secretAchievements = ko.observableArray([
     new ManualAward('brk', 'On a Break', [], 'Take a break for at least <b>1 month</b> before realizing that you can\'t drop out of this system.'),
+    new ManualAward('brk1', 'The Forgotten Game', [], 'Take a break for at least <b>1 year</b> before realizing that just when you think you\'re out, they pull you back in.'),
     new Award('empk', 'Truly Callous', 1000, [], employeesKilled, 'Discover that at least <b>1,000</b> employees couldn\'t hack it.'),
     new Award('outg', 'Gutenberger', 100000, [], outgoingEmails, 'Compose at least <b>100,000</b> outgoing emails.'),
     new Award('bankr', 'Infinite Looper', 1000, [], bankruptcies, 'Declare bankruptcy at least <b>1,000</b> times.'),
     new Award('chatmax', 'You are typing...', 100000, [], wordsChatted, 'Type at least <b>100,000</b> smart words into acquisition chats.'),
     new Award('auc1', 'Autoclicked', 1000000, [], manualClicks, 'Manually click at least <b>1 million</b> times.'),
+    new Award('elecw', 'Realestpolitik', 10000, [], electionsWon, 'Win at least <b>10,000</b> elections'),
+    new Award('elecl', 'Resigned to Failure', 10000, [], electionsLost, 'Lose at least <b>10,000</b> elections'),
     new ManualAward('timePlayed7', 'Never Forget', [], 'Play this nightmare of a game for at least <b>1 year</b>.'),
     new ManualAward('cheat', 'Prince of Lies', [], 'I can\'t believe you cheated.')
   ]);
@@ -2784,12 +2789,18 @@ var game = (function() {
     this.hoverVisible = ko.observable(false);
     this.viewDetails = function() {
       if (enableHover() && window.screen.availWidth >= 500) {
-        this.hoverVisible(true);
+        clearTimeout(this.visibilityDelay);
+        this.visibilityDelay = setTimeout(function() {
+          this.hoverVisible(true);
+        }.bind(this), HOVER_DELAY);
       }
     }
 
     this.leaveDetails = function() {
-      this.hoverVisible(false);
+      clearTimeout(this.visibilityDelay);
+      this.visibilityDelay = setTimeout(function() {
+        this.hoverVisible(false);
+      }.bind(this), HOVER_HIDE_DELAY);
     }
 	}
 
@@ -3051,13 +3062,19 @@ var game = (function() {
     this.hoverVisible = ko.observable(false);
     this.viewDetails = function(isStatsTab) {
       if (enableHover() && window.screen.availWidth >= 500 && (isStatsTab !== true || this.bought())) {
-        this.hoverVisible(true);
-        this.read(true);
+        clearTimeout(this.visibilityDelay);
+        this.visibilityDelay = setTimeout(function() {
+          this.hoverVisible(true);
+          this.read(true);
+        }.bind(this), HOVER_DELAY);
       }
     }
 
     this.leaveDetails = function() {
-      this.hoverVisible(false);
+      clearTimeout(this.visibilityDelay);
+      this.visibilityDelay = setTimeout(function() {
+        this.hoverVisible(false);
+      }.bind(this), HOVER_HIDE_DELAY);
     }
 
     this.trackAffording();
@@ -3299,13 +3316,19 @@ var game = (function() {
     this.hoverVisible = ko.observable(false);
     this.viewDetails = function(isStatsTab) {
       if (enableHover() && window.screen.availWidth >= 400 && (isStatsTab !== true || this.awarded())) {
-        this.flavorText('Unlocked about ' + achievementTimeSinceStart(this.date()));
-        this.hoverVisible(true);
+        clearTimeout(this.visibilityDelay);
+        this.visibilityDelay = setTimeout(function() {
+          this.hoverVisible(true);
+          this.flavorText('Unlocked about ' + achievementTimeSinceStart(this.date()));
+        }.bind(this), HOVER_DELAY);
       }
     }
 
     this.leaveDetails = function() {
-      this.hoverVisible(false);
+      clearTimeout(this.visibilityDelay);
+      this.visibilityDelay = setTimeout(function() {
+        this.hoverVisible(false);
+      }.bind(this), HOVER_HIDE_DELAY);
     }
 	}
 	
@@ -3423,12 +3446,18 @@ var game = (function() {
     this.hoverVisible = ko.observable(false);
     this.viewDetails = function() {
       if (enableHover() && window.screen.availWidth >= 500) {
-        this.hoverVisible(true);
+        clearTimeout(this.visibilityDelay);
+        this.visibilityDelay = setTimeout(function() {
+          this.hoverVisible(true);
+        }.bind(this), HOVER_DELAY);
       }
     }
 
     this.leaveDetails = function() {
-      this.hoverVisible(false);
+      clearTimeout(this.visibilityDelay);
+      this.visibilityDelay = setTimeout(function() {
+        this.hoverVisible(false);
+      }.bind(this), HOVER_HIDE_DELAY);
     }
   }
 
@@ -4298,12 +4327,18 @@ var game = (function() {
     this.hoverVisible = ko.observable(false);
     this.viewDetails = function() {
       if (enableHover() && window.screen.availWidth >= 500) {
-        this.hoverVisible(true);
+        clearTimeout(this.visibilityDelay);
+        this.visibilityDelay = setTimeout(function() {
+          this.hoverVisible(true);
+        }.bind(this), HOVER_DELAY);
       }
     }
 
     this.leaveDetails = function() {
-      this.hoverVisible(false);
+      clearTimeout(this.visibilityDelay);
+      this.visibilityDelay = setTimeout(function() {
+        this.hoverVisible(false);
+      }.bind(this), HOVER_HIDE_DELAY);
     }
 
     this.select = function() {
@@ -6155,6 +6190,7 @@ var businessWords = ["ASAP", "B2B", "B2C", "BYOD", "CTR", "EBITDA", "EOD", "KPI"
       this.selectedBackground(null);
       this.selectedBackup(null);
       this.selectedPersonality(null);
+      this.finished(false);
     }
 
     this.view = ko.observable('preparing');
@@ -7494,6 +7530,10 @@ var businessWords = ["ASAP", "B2B", "B2C", "BYOD", "CTR", "EBITDA", "EOD", "KPI"
       earnSecretAchievement('brk');
     }
 
+    if (elapsedTimeInSeconds >= 31536000) {
+      earnSecretAchievement('brk1')
+    }
+
     // Cut off at 5 days
     var fiveDays = (60 * 60 * 24 * 5)
     //elapsedTimeInSeconds = 60 * 5; // TODO restore the line below
@@ -8425,6 +8465,8 @@ var businessWords = ["ASAP", "B2B", "B2C", "BYOD", "CTR", "EBITDA", "EOD", "KPI"
     viewingTab: viewingTab,
     viewingModal: viewingModal,
     newAchievements: newAchievements,
-    twoColumnEmployees: twoColumnEmployees
+    twoColumnEmployees: twoColumnEmployees,
+    statsTabViews: statsTabViews,
+    achievementTabViews: achievementTabViews
 	};
 })();
