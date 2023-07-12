@@ -399,6 +399,13 @@ ul {
   position: absolute;
   top: 0;
   left: 25px;
+  margin-top: 15px;
+}
+
+.unit-num span {
+  display: inline-block;
+  vertical-align: middle;
+  margin-bottom: 0;
 }
 
 .upgrade-list button {
@@ -598,6 +605,15 @@ ul {
 
 .upgrades-header .upgrade-all {
   margin-left: 5px;
+}
+
+/* TODO TRY THIS */
+
+.panel .label {
+  position: relative;
+  display: inline-block;
+  vertical-align: bottom;
+  padding: 4px 7px;
 }
 
 /* FIXES FOR BOOTSTRAP MODAL OPENING STYLES */
@@ -812,6 +828,7 @@ body {
   font-style: italic;
 }
 
+.modal-header .material-icons,
 #unitModal .material-icons,
 .mailModal .material-icons,
 #upgradeModal .material-icons,
@@ -825,6 +842,7 @@ body {
   left: 15px;
 }
 
+.modal-title.icon-header,
 #unitModal .modal-title,
 .mailModal .modal-title,
 #upgradeModal .modal-title,
@@ -1068,6 +1086,13 @@ body {
   margin-bottom: 10px;
 }
 
+.label-success.research-badge {
+  position: absolute;
+  left: 63px;
+  top: -5px; 
+  z-index: 5;
+}
+
 .badge.research-badge {
   left: 63px;
 }
@@ -1084,12 +1109,17 @@ body {
     -moz-appearance: textfield;
 }
 
-#productModal .progress-header {
+#productModal .progress-header,
+#negotiationModal .progress-header,
+#brokenMailModal .progress-header,
+#downturnModal .progress-header,
+#lawsuitModal .progress-header,
+#prDisasterModal .progress-header,
+#bankruptcyModal .progress-header {
   border-bottom: solid 1px lightgray;
   text-align: center;
   padding-bottom: 2px;
-/*  position: absolute;
-*/  width: 94%;
+  width: 100%; /* 94% */
   bottom: 40px;
 }
 
@@ -1137,6 +1167,7 @@ body {
 
 .selling {
   opacity: 0.6;
+  pointer-events: none;
 }
 
 .research-input .error,
@@ -1238,6 +1269,35 @@ body {
   right: -8px;
   font-size: 10px !important;
   background-color: #c9302c !important;
+}
+
+.cps-penalty-badge.cps-bonus-badge {
+  background-color: #5cb85c !important;
+}
+
+.nav-tabs .badge.crash-badge {
+  position: relative;
+  top: -1px;
+  left: -3px;
+  right: 0;
+}
+
+.nav-tabs .badge.crash-badge i {
+  color: white;
+}
+
+.badge.crash-badge {
+  padding: 2px 3px;
+}
+
+.crash-badge i {
+  background: none;
+  position: relative;
+  color: white;
+  padding: 0;
+  font-size: 12px !important;
+  top: 0;
+  left: 0;
 }
 
 /* TODO might drop this */
@@ -1401,9 +1461,10 @@ body {
   padding: 0;
   background: transparent;
   color: white;
-  font-size: 12px !important;
-  top: 4px;
+  font-size: 14px !important;
+  top: 2px;
   left: 0px;
+  margin: -2px;
 }
 
 .investment .btn-group.disabled {
@@ -1652,7 +1713,7 @@ p.time-away {
 }
 
 .progress-timer {
-  top: -8px;
+  top: -13.5px;
   left: 0;
   right: 0;
   text-align: center;
@@ -1695,6 +1756,209 @@ p.time-away {
 .training-toggle .material-icons:hover,
 .training-toggle:focus .material-icons {
   opacity: 0.8;
+}
+
+/**********************************
+        BANKRUPTCY OBSTACLES
+**********************************/
+
+.negotiation-btn {
+  width: 100%;
+}
+
+#bankruptcyModal .earned-table input,
+#bankruptcyModal .earned-table i,
+#goalModal .earned-table input,
+#goalModal .earned-table i,
+#obstacleModal .earned-table input,
+#obstacleModal .earned-table i {
+  float: right;
+  margin-right: 5px;
+  margin-top: 0;
+}
+
+#goalModal td,
+#bankruptcyModal td,
+#obstacleModal td {
+  padding: 12px 8px;
+}
+
+#goalModal .earned-table select,
+#bankruptcyModal .earned-table select,
+#obstacleModal .earned-table select {
+  margin-top: -7px;
+  margin-bottom: -7px;
+}
+
+.obstacle-modal label {
+  margin: 0;
+}
+
+#negotiationModal td,
+#brokenMailModal td,
+#downturnModal td,
+#lawsuitModal td,
+#prDisasterModal td,
+#bankruptcyModal td,
+#goalModal td,
+#obstacleModal td {
+  vertical-align: middle;
+}
+
+#goalModal .material-icons {
+  padding: 0 !important;
+}
+
+.na-flag {
+  float: right;
+}
+
+#goalModal #currentGoal .material-icons.success-icon {
+  color: #5cb85c;
+}
+
+#goalModal #currentGoal .material-icons.fail-icon {
+  color: #d9534f;
+}
+
+#downturnModal .progress {
+  margin-bottom: 0;
+}
+
+.obstacle-table.table {
+  margin-bottom: 5px;
+}
+
+.obstacle-table button {
+  float: right;
+  min-width: 150px;
+}
+
+.bad-product-label {
+  background: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: solid 1px lightgray;
+}
+
+tr.disabled {
+  opacity: 0.5;
+}
+
+tr.disabled input {
+  display: none;
+}
+
+#bankruptcyModal .btn.disabled,
+#goalModal .btn.disabled,
+#obstacleModal .btn.disabled {
+  cursor: default;
+  pointer-events: initial;
+}
+
+#bankruptcyModal .material-icons,
+#goalModal .material-icons,
+#obstacleModal .material-icons {
+  display: none;
+}
+
+#bankruptcyModal tr.disabled .material-icons,
+#goalModal tr.disabled .material-icons,
+#goalModal #currentGoal .material-icons,
+#obstacleModal tr.disabled .material-icons {
+  display: block;
+  position: relative;
+  top: 0;
+  left: 5px;
+  color: gray;
+}
+
+#bankruptcyModal .material-icons.obstacles-lock,
+#goalModal .material-icons.obstacles-lock,
+#obstacleModal .material-icons.obstacles-lock {
+  display: inline-block;
+  background: transparent;
+  color: inherit;
+  position: relative;
+  left: 0;
+  top: 2px;
+  font-size: 14px !important;
+}
+
+.no-goal-active.no-content-message {
+  width: 80%;
+  margin: 120px auto;
+  display: block;
+  text-align: center;
+  position: relative;
+}
+
+.panel.work-stopped {
+  box-shadow: 0px 1px 15px -2px red;
+}
+
+.panel.melt-up {
+  box-shadow: 0px 1px 15px -2px goldenrod;
+}
+
+button.innovative {
+  box-shadow: 0px 1px 15px -2px goldenrod;
+}
+
+@keyframes crunchPulse {
+    from {
+        box-shadow: goldenrod 0px 0px 15px; 
+    }
+
+    to {
+        box-shadow: goldenrod 0px 0px 40px;
+    }
+}
+
+.panel.crunch-time {
+  box-shadow: 0px 1px 15px -2px goldenrod;
+  border: solid 1px goldenrod;
+  animation-name: crunchPulse;
+  animation-duration: 0.5s;
+  animation-direction: alternate;
+  -webkit-animation-direction: alternate;
+  -moz-animation-direction: alternate;
+  animation-iteration-count: infinite;
+  -webkit-animation-iteration-count: infinite;
+  -moz-animation-iteration-count: infinite;
+}
+
+.material-icons.work-stopped-icon {
+
+}
+
+.acquisition-earnings-box.bad-meltup-box {
+  background-color: #d9534f;
+}
+
+.spam textarea {
+  opacity: 0.5;
+  background: #EEE;
+  pointer-events: none;
+}
+
+.negotiation-timer {
+  border: solid 1px #ddd;
+  padding: 2px 10px;
+  border-radius: 3px;
+}
+
+.inner-goal-label {
+  margin-top: 10px;
+  display: block;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 5px;
+  background: white;
+}
+
+.current-obstacle-table span {
+  float: right;
 }
 
 /****************************
@@ -2386,6 +2650,17 @@ select.form-control {
   margin: 10px 0 !important;
 }
 
+.ideal-box {
+  border: solid 1px goldenrod;
+  box-shadow: 0 1px 10px goldenrod !important;;
+}
+
+.ideal-label {
+  box-shadow: 0 1px 10px goldenrod;
+  position: relative;
+  top: -2px;
+}
+
 /** ELECTIONS MODAL ICON **/
 
 .ballot-badge {
@@ -2413,6 +2688,28 @@ select.form-control {
   width: 46%;
   margin: 15px 10px;
   display: inline-block;
+}
+
+.donate-group {
+  border: solid 1px #ddd;
+  border-radius: 5px;
+}
+
+.lower-donate-group .btn {
+  width: 96%;
+}
+
+.lower-donate-group {
+  margin-top: 10px;
+}
+
+.lower-donate-group .small-header {
+  border-bottom: solid 1px #ddd;
+  width: 90%;
+  margin: auto;
+  padding-bottom: 5px;
+  margin-top: 12px;
+  margin-bottom: -5px;
 }
 
 /** SOCIAL MODAL **/
@@ -2651,8 +2948,17 @@ of the Bootswatch 'Darkly' theme */
 }
 
 .darkmode .btn.windfall-btn {
-  margin-top: 7px;
+  margin-top: 8.5px;
   height: 33px;
+}
+
+.darkmode .earned-table select {
+  padding: 0px 15px;
+  height: 35px;
+}
+
+.darkmode .inner-goal-label {
+  color: black;
 }
 
 @media only screen  
@@ -2819,6 +3125,14 @@ and (max-width : 767px) {
     width: 100%;
   }
 
+  .btn.windfall-btn .material-icons {
+    top: 8px;
+  }
+
+  .unit-num {
+    left: 15px;
+  }
+
   /* Mobile Icons */
   .settings-button {
     margin-left: 0;
@@ -2855,6 +3169,12 @@ and (max-width : 767px) {
 
   .modal-dialog {
     margin: 10vh auto !important;
+  }
+
+  .donate-btns .btn {
+    width: 90%;
+    margin: 15px auto;
+    display: block;
   }
 
   /* Mobile Cash Display */
@@ -3046,6 +3366,7 @@ and (max-width : 767px) {
   }
 
   /* Mobile Investments */
+
   #investments h3 {
     text-align: center;
     display: block;
@@ -3086,6 +3407,13 @@ and (max-width : 767px) {
 
   .investment-time-remaining {
     min-width: 90px;
+  }
+
+  .ticker-title {
+    max-width: 80%;
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: ellipsis;
   }
 
   /* Mobile Research */
@@ -3178,6 +3506,14 @@ and (max-width : 767px) {
 
   .badge.donation-add {
     top: -10px;
+  }
+
+  #electionModal .election-box .well {
+    width: 100%;
+  }
+
+  .ballot-badge {
+    left: 95px;
   }
 
   /* Mobile Darkmode */

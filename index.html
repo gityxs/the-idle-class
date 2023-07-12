@@ -12,23 +12,40 @@
   <meta name="twitter:site" content="@smallgraygames"/>
   <meta name="twitter:title" content="The Idle Class"/>
   <meta name="twitter:description" content="An incremental descent into the nightmare of capitalism"/>
-  <meta name="twitter:image" content="idleclass.png" />
+  <meta name="twitter:image" content="business-simulator/idleclass.png" />
   <meta name="twitter:url" content="https://www.smallgraygames.com/the-idle-class"/>
 
   <!-- http://plaza.dsolver.ca/m/smallgraygames -->
 
-  <script defer src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.js"></script>
-  <script defer src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script defer src="business-simulator/game.js"></script>
-  <script defer src="business-simulator/main.js"></script>
+  <script src="jquery.min.js"></script>
+  <script src="knockout-min.js"></script>
+  <script src="Chart.min.js"></script>
+  <script src="lz-string.js"></script>
+  <script src="bootstrap.min.js"></script>
+  <script src="business-simulator/game.js"></script>
+  <script src="business-simulator/main.js"></script>
 
   <link async rel="stylesheet" type="text/css" href="business-simulator/styles.css">
-  <link async rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link async rel="stylesheet" href="bootstrap.min.css" >
   <link rel="stylesheet" title="dark">
   <link async rel="shortcut icon" href="business-simulator/favicon.ico" type="image/x-icon" />
+
+<!--客服 开始-->
+<link rel="stylesheet" href="//g8hh.com.cn/static/css/kf.css" type="text/css" media="screen" charset="utf-8">
+<script src="//g8hh.com.cn/static/js/kf.js"></script>
+<!-- 客服 结束 -->
+<!--站长统计-->
+<div style="display: none">
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?dbb7ff142f4d4b68546c93b9cd6e9328";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+        </div>
 </head>
 
 <body data-bind="css: { darkmode: enableDarkMode, fixednav: enableFixedNavTabs }">
@@ -74,22 +91,47 @@
 
         </div>
         <div class="navbar-right">
-          <span class="badge mail-badge" data-bind="text: mail().length, visible: mail().length, css: { 'urgent': containsUrgent, 'cryptic': containsCryptic }"></span>
-          <button class="icon-button mail-button" data-toggle="modal" data-bind="click: setViewingInbox, attr: { 'data-target': locked().mail ? '' : '#mailModal', title:  locked().mail ? 'Unlocks at $100 in per-second earnings' : '' }, css: { 'locked-icon': locked().mail }">
+          <span class="badge mail-badge" data-bind="text: mail().length, visible: mail().length && !obstacles().crashed(), css: { 'urgent': containsUrgent, 'cryptic': containsCryptic }"></span>
+          <span class="badge mail-badge crash-badge" data-bind="visible: obstacles().crashed">
+            <i class="material-icons">build</i>
+          </span>
+
+          <button class="icon-button mail-button" data-toggle="modal" data-bind="visible: !obstacles().crashed(), click: setViewingInbox, attr: { 'data-target': locked().mail ? '' : '#mailModal', title:  locked().mail ? 'Unlocks at $100 in per-second earnings' : '' }, css: { 'locked-icon': locked().mail }">
             <i data-bind="visible: locked().mail" class="material-icons padlock-icon" aria-hidden="true" style="">lock</i>
             <i class="material-icons mail-icon nav-icon">mail</i>
           </button>
 
-          <span class="badge mail-badge research-badge" data-bind="text: research().patents().length, visible: research().patents().length"></span>
-          <button class="icon-button mail-button" data-toggle="modal" data-bind="attr: { 'data-target': locked().research ? '' : '#productModal', title:  locked().research ? 'Unlocks at $100 billion in total earnings' : ''  }, css: { 'locked-icon': locked().research }, click: function() { viewingModal('r&d') }">
+          <button class="icon-button mail-button" data-toggle="modal" data-bind="click: function() { viewingModal('brokenMail') }, visible: obstacles().crashed" data-target="#brokenMailModal">
+            <i class="material-icons mail-icon nav-icon">mail</i>
+          </button>
+
+          <span class="badge mail-badge research-badge" data-bind="text: research().patents().length, visible: research().patents().length && !obstacles().sued()"></span>
+          <span class="badge mail-badge research-badge crash-badge" data-bind="visible: obstacles().sued">
+            <i class="material-icons">build</i>
+          </span>
+
+          <span class="label label-success research-badge" data-bind="visible: researchStats()[1].val() === 0 && !locked().research && !research().active() && research().patents().length === 0">NEW</span>
+          <button class="icon-button mail-button" data-toggle="modal" data-bind="visible: !obstacles().sued(), attr: { 'data-target': locked().research ? '' : '#productModal', title:  locked().research ? 'Unlocks at $100 billion in total earnings' : ''  }, css: { 'locked-icon': locked().research }, click: function() { viewingModal('r&d') }">
             <i data-bind="visible: locked().research" class="material-icons padlock-icon" aria-hidden="true" style="">lock</i>
             <i class="material-icons mail-icon nav-icon">supervised_user_circle</i>
           </button>
 
-          <span class="badge mail-badge ballot-badge" data-bind="visible: election().finished()">1</span>
+          <button class="icon-button mail-button" data-bind="click: function() { viewingModal('lawsuit') }, visible: obstacles().sued" data-toggle="modal" data-target="#lawsuitModal">
+            <i class="material-icons mail-icon nav-icon">supervised_user_circle</i>
+          </button>
+
+          <span class="badge mail-badge ballot-badge" data-bind="visible: !obstacles().disastered() && election().finished()">1</span>
+          <span class="badge mail-badge ballot-badge crash-badge" data-bind="visible: obstacles().disastered">
+            <i class="material-icons">build</i>
+          </span>
+
           <span class="label label-success ballot-badge" data-bind="visible: electionStats2()[2].val() === 0 && !locked().elections && !election().active() && !election().finished()">NEW</span>
-          <button class="icon-button mail-button" data-toggle="modal" data-bind="attr: { 'data-target': locked().elections ? '' : '#electionModal', title:  locked().elections ? 'Unlocks at $1 octillion in total earnings' : ''  }, css: { 'locked-icon': locked().elections }, click: function() { viewingModal('election') }">
+          <button class="icon-button mail-button" data-toggle="modal" data-bind="visible: !obstacles().disastered(), attr: { 'data-target': locked().elections ? '' : '#electionModal', title:  locked().elections ? 'Unlocks at $1 octillion in total earnings' : ''  }, css: { 'locked-icon': locked().elections }, click: function() { viewingModal('election') }">
             <i data-bind="visible: locked().elections" class="material-icons padlock-icon" aria-hidden="true" style="">lock</i>
+            <i class="material-icons mail-icon nav-icon">ballot</i>
+          </button>
+
+          <button class="icon-button mail-button" data-toggle="modal" data-target="#prDisasterModal" data-bind="visible: obstacles().disastered, click: function() { viewingModal('prDisaster') } ">
             <i class="material-icons mail-icon nav-icon">ballot</i>
           </button>
 
@@ -101,8 +143,8 @@
           <div class="panel panel-default">
             <div class="panel-body">
               <span data-bind="text: accessibleDPS.displayVal">0</span>&nbsp;/s
-              <span class="badge cps-penalty-badge" data-bind="visible: activeInvestments().length - pendingInvestmentCount.val() > 0" title="Current deduction for active investments">
-                - <span data-bind="text: investmentPenaltyPercentage()"></span>%
+              <span class="badge cps-penalty-badge" data-bind="css: { 'cps-bonus-badge': !investmentPenaltyPercentage().decrease }, visible: investmentPenaltyPercentage().val > 0" title="Temporary deductions and/or bonuses">
+                <span data-bind="text: investmentPenaltyPercentage().decrease ? '-' : '+'"></span> <span data-bind="text: investmentPenaltyPercentage().val"></span>%
               </span>
             </div>
           </div>
@@ -119,6 +161,21 @@
             <li role="separator" class="divider"></li>
             <li><a href="#" data-toggle="modal" data-target="#donateModal" data-bind="click: function() { viewingModal('donate'); }">Donate</a></li>
             <li role="separator" class="divider"></li>
+
+            <li data-bind="css: { 'nav-disabled': locked().goals }">
+              <a href="#" data-bind="click: function() { viewingModal('addGoal'); goals().nextTab(true); }, attr: {'data-toggle': locked().goals ? '' : 'modal', 'title': locked().goals ? 'Unlocks at bankruptcy multiplier greater than zero' : ''}" data-target="#goalModal">
+                <span data-bind="visible: !locked().goals && metGoals.val() === 0 && unmetGoals.val() === 0" class="label label-success">NEW</span>
+                <i data-bind="visible: locked().goals" class="material-icons padlock-icon">lock</i>Set Goal
+              </a>
+            </li>
+
+            <li data-bind="css: { 'nav-disabled': locked().obstacles || locked().bankruptcy }">
+              <a href="#" data-bind="click: function() { viewingModal('addObstacles'); obstacles().nextTab(true); }, attr: {'data-toggle': locked().obstacles || locked().bankruptcy ? '' : 'modal', 'title': locked().obstacles ? 'Unlocks after 5 seminars have been used' : ''}" data-target="#obstacleModal">
+                <span data-bind="visible: !locked().obstacles && !locked().bankruptcy && obstaclesEncountered.val() === 0" class="label label-success">NEW</span>
+                <i data-bind="visible: locked().obstacles || locked().bankruptcy" class="material-icons padlock-icon">lock</i>Set Obstacles
+              </a>
+            </li>
+
             <li data-bind="css: { 'nav-disabled': locked().bankruptcy }">
               <a href="#" data-bind="attr: {'data-toggle': locked().bankruptcy ? '' : 'modal', 'title': locked().bankruptcy ? 'Unlocks at $1 trillion in total earnings' : ''}" data-target="#bankruptcyModal" onclick="setBankruptcyModalViewed()">
                 <span data-bind="visible: !bankruptcyModalViewed() && !locked().bankruptcy" class="label label-success">NEW</span>
@@ -138,7 +195,7 @@
           <div class="panel-body">
             <span data-bind="text: accessibleDPS.displayVal">0</span>&nbsp;/s
             <span class="badge cps-penalty-badge" data-bind="visible: activeInvestments().length - pendingInvestmentCount.val() > 0" title="Current deduction for active investments">
-              - <span data-bind="text: investmentPenaltyPercentage()"></span>%
+              - <span data-bind="text: investmentPenaltyPercentage().val"></span>%
             </span>
           </div>
         </div>
@@ -151,7 +208,8 @@
       <a id="storetab" href="#store" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: function() { viewingTab('store'); }">
         <i class="material-icons nav-tab-icon">shopping_cart</i>
         <span class="nav-tab-text">Store</span>
-        <span class="badge" data-bind="visible: newUpgradesCount.val, text: newUpgradesCount.displayVal"></span>
+        <span class="badge" data-bind="visible: newUpgradesCount.val() && numOnStrike() === 0, text: newUpgradesCount.displayVal"></span>
+        <span class="badge mail-badge crash-badge" data-bind="visible: numOnStrike() > 0"><i class="material-icons">build</i></span>
       </a>
     </li>
     <li role="presentation">
@@ -173,7 +231,8 @@
         <i class="material-icons nav-tab-icon">trending_up</i>
         <span data-bind="attr: { title:  locked().investments ? 'Unlocks at $100 million in total earnings' : ''}" class="nav-tab-text">Investments</span>
         <span data-bind="visible: !locked().investments && activeInvestments().length < 1 && investmentStats()[1].val() < 1 && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span>
-        <span class="badge" data-bind="visible: pendingInvestmentCount.val() > 0, text: pendingInvestmentCount.displayVal"></span>
+        <span class="badge" data-bind="visible: pendingInvestmentCount.val() > 0 && !obstacles().downturned(), text: pendingInvestmentCount.displayVal"></span>
+        <span class="badge mail-badge crash-badge" data-bind="visible: obstacles().downturned()"><i class="material-icons">build</i></span>
       </a>
     </li>
     <li role="presentation" data-bind="css: { 'nav-disabled': locked().acquisitions }">
@@ -181,8 +240,9 @@
         <i data-bind="visible: locked().acquisitions" class="material-icons padlock-icon">lock</i>
         <i class="material-icons nav-tab-icon">store</i>
         <span data-bind="attr: { title:  locked().acquisitions ? 'Unlocks at $1 quintillion in total earnings' : ''}" class="nav-tab-text">Acquisitions</span>
-        <span data-bind="visible: !locked().acquisitions && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0" class="label label-success">NEW</span>
-        <span class="badge" data-bind="visible: pendingAcquisitionCount.val() > 0, text: pendingAcquisitionCount.displayVal"></span>
+        <span data-bind="visible: !locked().acquisitions && completedAcquisitions.val() === 0 && activeAcquisitions().length === 0 && !obstacles().downturned()" class="label label-success">NEW</span>
+        <span class="badge" data-bind="visible: pendingAcquisitionCount.val() > 0 && !obstacles().downturned(), text: pendingAcquisitionCount.displayVal"></span>
+        <span class="badge mail-badge crash-badge" data-bind="visible: !locked().acquisitions && obstacles().downturned()"><i class="material-icons">build</i></span>
       </a>
     </li>
 
@@ -300,7 +360,7 @@
 
         <ul class="employee-list" data-bind="foreach: units">
           <li data-bind="visible: available, event: { mouseover: viewDetails, mouseout: leaveDetails }, attr: { id: 'employee' + id }, css: { 'reverse-hover': id !== '0' && id !== '1' && ($parent.lastVisibleUnit() - ($parent.twoColumnEmployees() ? 3 : 1) <= parseInt(id) || ($parent.lastVisibleUnit()) === id)}" class="unit-box">
-      		  <div class="panel panel-primary unit" data-bind="css: { 'trainingActive': $parent.isTrainingView }">
+      		  <div class="panel panel-primary unit" data-bind="css: { 'work-stopped': workStopped() && !isCrunch(), 'crunch-time': isCrunch, 'trainingActive': $parent.isTrainingView }">
               <div class="panel-heading">
                 <i class="material-icons" data-bind="text: icon"></i>
                 <button class="wrapper-button panel-title" data-toggle="modal" data-bind="click: select, attr: { 'data-target': $parent.isTrainingView() ? '#trainingModal' : '#unitModal' }">
@@ -317,20 +377,28 @@
       		      <h3 class="unit-num">
                   <span data-bind="text: num.displayVal"></span>
                   <span style="font-size: 14px; margin-left: 10px; top: -2px; vertical-align: middle;" class="well well-sm">
-                    <span data-bind="text: cps.displayVal"></span> /s
+                    <span data-bind="visible: !workStopped() && !jailed()">
+                      <span data-bind="text: cps.displayVal"></span> 
+                      <span>/s</span>
+                    </span>
+                    <span data-bind="visible: workStopped">- On Strike -</span>
+                    <span data-bind="visible: jailed">- Jailed -</span>
                   </span>
                 </h3>
 
       		      <div class="unit-buttons">
-        		      <button data-bind="css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default unit-button-buy">
+        		      <button data-bind="visible: !workStopped() && !jailed() && !isCrunch(), css: { disabled: cantAfford }, click: buy" class="btn btn-md btn-default unit-button-buy">
                     <span class="hiretext">Hire</span>
                     <span data-bind="visible: $parent.buyRate() === 'max', text: (numCanAfford() ? numCanAfford() : minWantToAfford()) + ($parent.twoColumnEmployees() ? ' for ' : '')"></span>
                     <span data-bind="visible: $parent.twoColumnEmployees(), text: price.displayVal"></span>
                   </button>
-        		      <button class="btn btn-md btn-default unit-button-sell" data-bind="click: sell">
+        		      <button class="btn btn-md btn-default unit-button-sell" data-bind="visible: !workStopped() && !jailed() && !isCrunch(), click: sell">
                     <span>Fire</span>
                     <span data-bind="visible: $parent.buyRate() === 'max'">All</span>
                   </button>
+                  <button class="btn btn-md btn-default" data-toggle="modal" data-target="#negotiationModal" data-bind="visible: workStopped, click: viewNegotiation">Negotiate <span class="negotiation-timer" data-bind="visible: !negotiationReady(), text: displayNegotiationTimeRemaining"></span><span data-bind="visible: negotiationReady">Now</span></button>
+                  <button data-bind="visible: jailed, text: displayJailTimeRemaining" class="btn btn-md btn-default disabled">10:00</button>
+                  <button data-bind="visible: isCrunch, text: displayCrunchTimeRemaining" class="btn btn-md btn-default disabled"></button>
       		      </div>
               </div>
 
@@ -572,96 +640,141 @@
         </div>
       </div>
 
-      <div class="col-md-6">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">General Stats</h3>
-          </div>
-          <div class="panel-body">
-            <table class="earned-table table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody data-bind="template: { name: 'stat-template', foreach: generalStats }">
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div data-bind="visible: enableCharts" class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Employee Significance</h3>
-          </div>
-          <div class="panel-body">
-            <canvas id="unitsChart" width="400" height="400"></canvas>
+      <div>
+        <div class="col-md-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">General Stats</h3>
+            </div>
+            <div class="panel-body">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: generalStats }">
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Investment Stats</h3>
-          </div>
-          <div class="panel-body">
-            <table class="earned-table table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody data-bind="template: { name: 'stat-template', foreach: investmentStats }">
-              </tbody>
-            </table>
+        <div class="col-md-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Cash Stats</h3>
+            </div>
+            <div class="panel-body">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: cashStats }">
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-
       </div>
-      <div class="col-md-6">
+
+      <div class="col-md-12">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Cash Stats</h3>
+            <h3 class="panel-title">Bankruptcy Stats</h3>
           </div>
           <div class="panel-body">
-            <table class="earned-table table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody data-bind="template: { name: 'stat-template', foreach: cashStats }">
-              </tbody>
-            </table>
+            <div class="col-md-6 left-col">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: bankruptcyStats1 }">
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: bankruptcyStats2 }">
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div data-bind="visible: enableCharts" class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Comparison of Earnings Types</h3>
-          </div>
-          <div class="panel-body">
-            <canvas id="earnedComparisonGraph" width="400" height="400"></canvas>
+      <div>
+        <div class="col-md-6">
+          <div data-bind="visible: enableCharts" class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Employee Significance</h3>
+            </div>
+            <div class="panel-body">
+              <canvas id="unitsChart" width="400" height="400"></canvas>
+            </div>
           </div>
         </div>
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Email Stats</h3>
+        <div class="col-md-6">
+          <div data-bind="visible: enableCharts" class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Comparison of Earnings Types</h3>
+            </div>
+            <div class="panel-body">
+              <canvas id="earnedComparisonGraph" width="400" height="400"></canvas>
+            </div>
           </div>
-          <div class="panel-body">
-            <table class="earned-table table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody data-bind="template: { name: 'stat-template', foreach: emailStats }">
-              </tbody>
-            </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-md-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Email Stats</h3>
+            </div>
+            <div class="panel-body">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: emailStats }">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Investment Stats</h3>
+            </div>
+            <div class="panel-body">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: investmentStats }">
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -938,44 +1051,213 @@
         </div>
       </div>
 
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Bankruptcy Obstacle Stats</h3>
+          </div>
+          <div class="panel-body">
+            <div class="col-md-6">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: obstacleStats1 }">
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: obstacleStats2 }">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Work Stoppage Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: stoppageStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Server Crash Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: crashStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Lawsuit Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: lawsuitStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Unforgivable Gaffe Stats</h3>
+          </div>
+          <div class="panel-body">
+            <table class="earned-table table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody data-bind="template: { name: 'stat-template', foreach: gaffeStats }">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Market Downturn Stats</h3>
+          </div>
+          <div class="panel-body">
+            <div class="col-md-6">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: downturnStats1 }">
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="earned-table table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'stat-template', foreach: downturnStats2 }">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div role="tabpanel" class="tab-pane" id="investments" data-bind="if: viewingTab() === 'investments'">      
-      <h3><span class="header-text">Active Investments (<span data-bind="text: activeInvestments().length"></span>/<span data-bind="text: totalSimultaneousInvestmentsAllowed.val()"></span>)</span>
-        <button class="btn btn-primary investment-btn" data-toggle="modal" data-target="#investmentModal" data-bind="click: function() { viewingModal('invest'); }">
+      <h3><span class="header-text"><span data-bind="text: obstacles().downturned() ? 'Crashed' : 'Active'"></span> Investments (<span data-bind="text: activeInvestments().length"></span>/<span data-bind="text: totalSimultaneousInvestmentsAllowed.val()"></span>)</span>
+
+        <button class="btn btn-primary investment-btn" data-toggle="modal" data-target="#investmentModal" data-bind="visible: !obstacles().downturned(), click: function() { viewingModal('invest'); }">
           <span class="text">Make Investment</span><span class="mobile-only-text">Invest</span>
         </button>
-        <button style="margin-right: 10px" class="btn btn-primary investment-btn" data-bind="click: cashOutAllInvestments">
+
+        <button class="btn btn-primary investment-btn" data-toggle="modal" data-target="#downturnModal" data-bind="visible: obstacles().downturned, click: function() { viewingModal('downturn'); }">Handle Market Crash</button>
+
+        <button style="margin-right: 10px" class="btn btn-primary investment-btn" data-bind="css: { 'disabled': obstacles().downturned }, click: cashOutAllInvestments">
           <span class="text">Cash Out All Completed</span><span class="mobile-only-text">Cash Out All</span>
         </button>
       </h3>
       <div data-bind="fadeVisible: !activeInvestments().length" class="no-investments-box">
-        <h4 class="no-content-message">No Investments Active</h4>
+        <h4 class="no-content-message" data-bind="text: obstacles().downturned() ? 'Market Crashed' : 'No Investments Active' "></h4>
       </div>
       <div class="active-investments" data-bind="template: {
                             foreach: activeInvestments,
                             beforeRemove: hideItem,
                             afterAdd: showItem }">
-        <div class="panel panel-default investment">
+        <div data-bind="css: { 'bad-shadow': isBad, 'melt-up': isMeltUp }" class="panel panel-default investment">
           <div data-bind="css: { 'paid': paid() }" class="panel-heading">
             <h3 class="panel-title" data-bind="text: name"></h3>
             <div class="investment-earnings">
-              <div class="investment-value investment-data-box">
+
+              <div data-bind="visible: !$parent.obstacles().downturned() && !$parent.investmentsPaused()" class="investment-value investment-data-box">
                 $<span data-bind="text: baseEarnings.displayVal"></span>
-                <span class="label label-success">+ $<span data-bind="text: interestEarnings.displayVal"></span></span>
+                <span data-bind="visible: !isBad()" class="label label-success">+ $<span data-bind="text: interestEarnings.displayVal"></span></span>
+                <span data-bind="visible: isBad() && !isMeltUp()" class="label label-danger">- $<span data-bind="text: interestEarnings.displayVal"></span></span>
+                <span data-bind="visible: isMeltUp" class="label label-warning">+ $<span data-bind="text: interestEarnings.displayVal"></span></span>
               </div>
+              <!-- <div data-bind="visible: !$parent.obstacles().downturned() && isBad() && !isMeltUp()" class="investment-value investment-data-box">
+                - Bad Investment -
+              </div>
+              <div data-bind="visible: !$parent.obstacles().downturned() && isBad() && isMeltUp()" class="investment-value investment-data-box">
+                - Stock Melt-Up -
+              </div> -->
+              <div data-bind="visible: $parent.obstacles().downturned" class="investment-value investment-data-box">
+                - Market Crashed -
+              </div>
+
+              <div data-bind="visible: $parent.investmentsPaused" class="investment-value investment-data-box">
+                - Paused: Income Too Low -
+              </div>
+
             </div>
             <div class="investment-header-right">
               <div data-bind="visible: !active(), css: { 'disabled': $parent.locked().acquisitions || $parent.activeAcquisitions().length > 0 }" class="btn-group">
-                <button data-bind="click: handleAcquisition" class="btn btn-sm btn-success inv-acquisition-btn">Acquire</button>
-                <button data-bind="click: handleAcquisition, visible: $parent.locked().acquisitions" class="btn btn-sm btn-success inv-acquisition-info-btn">
+                <button data-bind="css: { 'disabled': $root.obstacles().downturned, 'btn-danger': isBad() && !isMeltUp(), 'btn-success': !isBad() || isMeltUp() }, click: handleAcquisition" class="btn btn-sm inv-acquisition-btn">Acquire</button>
+                <button data-bind="click: handleAcquisition, visible: $parent.locked().acquisitions, css: { 'btn-danger': isBad() && !isMeltUp(), 'btn-success': !isBad() || isMeltUp() }" class="btn btn-sm inv-acquisition-info-btn">
                   <i class="material-icons inv-acquisition-icon">lock</i>
                 </button>
-                <button data-bind="visible: !$parent.locked().acquisitions, click: function() { $root.viewingModal('acquisition'); }" class="btn btn-sm btn-success inv-acquisition-info-btn" data-toggle="modal" data-target="#acquisitionHelpModal">
+                <button data-bind="css: { 'disabled': $root.obstacles().downturned, 'btn-danger': isBad() && !isMeltUp(), 'btn-success': !isBad() || isMeltUp() }, visible: !$parent.locked().acquisitions, click: function() { $root.viewingModal('acquisition'); }" class="btn btn-sm inv-acquisition-info-btn" data-toggle="modal" data-target="#acquisitionHelpModal">
                   <i class="material-icons inv-acquisition-icon">help</i>
                 </button>
               </div>
-              <button data-bind="visible: !active(), click: handlePayout" class="btn btn-sm btn-success">Cash Out</button>
-              <button data-bind="visible: active(), click: handlePayout" class="btn btn-sm btn-danger">Cancel</button>
+              <button data-bind="css: { 'disabled': $root.obstacles().downturned() || cantPayOff(), 'btn-danger': isBad() && !isMeltUp(), 'btn-success': !isBad() || isMeltUp() }, visible: !active(), click: cantPayOff() ? '' : handlePayout, text: isBad() && !isMeltUp() ? 'Pay Off' : 'Cash Out'" class="btn btn-sm"></button>
+              <button data-bind="css: { 'disabled': $root.obstacles().downturned() || isBad }, visible: active(), click: handlePayout" class="btn btn-sm btn-danger">Cancel</button>
               <div class="investment-data-box investment-time-remaining">
                 <span data-bind="text: displayTimeRemaining"></span>
               </div>
@@ -983,11 +1265,12 @@
           </div>
           <div data-bind="css: { 'paid': paid() }" class="panel-body">
       			<div class="progress">
-              <div class="progress-bar" role="progressbar" data-bind="style: { width: percentageRipe() }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
+              <div class="progress-bar" role="progressbar" data-bind="css: { 'progress-bar-danger': isBad() && !isMeltUp(), 'progress-bar-warning': isMeltUp() }, style: { width: percentageRipe() }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
             </div>
           </div>
           <div data-bind="visible: paid()" class="investment-success-box">
-            <h3 class="label-success">+ $<span data-bind="text: finalTotal"></span> total</h3>
+            <h3 data-bind="visible: !isBad() || isMeltUp()" class="label-success">+ $<span data-bind="text: finalTotal"></span> total</h3>
+            <h3 data-bind="visible: isBad() && !isMeltUp()" class="label-danger">- $<span data-bind="text: finalTotal"></span> total</h3>
           </div>
         </div>
       </div>
@@ -995,20 +1278,22 @@
     </div>
 
     <div role="tabpanel" class="tab-pane" id="acquisitions" data-bind="if: viewingTab() === 'acquisitions'">      
-      <h3>Active Acquisitions (<span data-bind="text: activeAcquisitions().length"></span>/<span data-bind="text: simultaneousAcquisitions.val()"></span>)
+      <h3><span data-bind="text: activeAcquisitions().length && activeAcquisitions()[0].isBad() ? (activeAcquisitions()[0].isMeltUp() ? 'Melt-Up' : 'Bad') : (obstacles().downturned() ? 'Crashed' : 'Active')"></span> Acquisition
+        <button style="margin-left:10px;" class="btn btn-primary investment-btn hide-mobile" data-toggle="modal" data-target="#downturnModal" data-bind="visible: obstacles().downturned, click: function() { viewingModal('downturn'); }">Handle Market Crash</button>
         <button class="btn btn-primary inv-acquisition-help-btn" data-toggle="modal" data-target="#acquisitionHelpModal" data-bind="click: function() { viewingModal('acquisition'); }">
-          <span>Instructions</span>
+          <span>Help</span>
           <i class="material-icons">help</i>
         </button>
       </h3>
       <div data-bind="fadeVisible: !activeAcquisitions().length" class="no-investments-box">
-        <h4 class="no-content-message">No Acquisitions Held</h4>
+        <h4 class="no-content-message">No Acquisition Held</h4>
       </div>
       <div class="active-investments" data-bind="template: {
                             foreach: activeAcquisitions,
                             beforeRemove: hideItem,
                             afterAdd: showItem }">
-        <div data-bind="css: { 'pending': !active() }" class="panel panel-default acquisition">
+       <!-- <div data-bind="css: { 'bad-shadow': isBad, 'melt-up': isMeltUp, 'pending': !active() }" class="panel panel-default acquisition"> -->
+        <div data-bind="css: { 'bad-shadow': isBad, 'melt-up': isMeltUp }" class="panel panel-default acquisition">
           <div data-bind="css: { 'sold': sold() }" class="panel-heading">
             <h3 class="panel-title" data-bind="text: name"></h3>
 
@@ -1029,7 +1314,7 @@
                 <span data-bind="visible: netValue.val() < 0">-</span>
                 <span data-bind="text: netValue.displayVal()"></span>
               </div>
-              <button class="btn btn-sm btn-danger" data-bind="css: { 'btn-success': !active(), 'btn-danger': active(), 'disabled': netValue.val() <= 0 }, click: sell">Sell</button>
+              <button class="btn btn-sm btn-danger" data-bind="css: { 'btn-success': !active() && !isBad(), 'btn-danger': active() || isBad(), 'disabled': payOffDisabled() || $root.obstacles().downturned() }, text: isBad() && !isMeltUp() ? 'Pay Off' : 'Sell', click: sell"></button>
             </div>
           </div>
           <div data-bind="css: { 'sold': sold() }" class="panel-body">
@@ -1039,7 +1324,7 @@
                 <div>
                   <ul data-bind="foreach: workers" class="upgrade-list">
                     <li>
-                      <div class="panel panel-primary unit acquisition-worker">
+                      <div data-bind="css: { 'panel-danger': $parent.isBad() && !$parent.isMeltUp(), 'panel-warning': $parent.isMeltUp, 'panel-primary': !$parent.isBad() }" class="panel unit acquisition-worker">
                         <div class="panel-heading">
                           <h3 class="panel-title" data-toggle="modal" data-target="#acqWorkerModal" data-bind="click: select, text: name, event: { mouseover: viewDetails, mouseout: leaveDetails }"></h3>
                           <span class="badge">
@@ -1049,7 +1334,7 @@
                         <div class="panel-body">
                           <h3 class="unit-num" data-bind="text: num"></h3>
                           <div class="unit-buttons">
-                            <button data-bind="click: hire, css: { 'disabled': price.val() > $parent.netValue.val() }" class="btn btn-md btn-default">Hire</button>
+                            <button data-bind="click: hire, css: { 'disabled': (price.val() > $parent.netValue.val()) || $root.obstacles().downturned() }" class="btn btn-md btn-default">Hire</button>
                           </div>
                         </div>
                       </div>
@@ -1099,7 +1384,7 @@
                     </tr>
                   </tbody>
                 </table>
-                <button style="width: 100%" class="btn btn-danger" data-bind="click: fire, css: { 'layoffs': activeLayoff(), 'fudged': activeValBonus() }">
+                <button style="width: 100%" class="btn btn-danger" data-bind="click: fire, css: { 'disabled': $root.obstacles().downturned(), 'layoffs': activeLayoff(), 'fudged': activeValBonus() }">
                   <span data-bind="visible: !activeLayoff() && !activeValBonus()">Fire Employees</span>
                   <span data-bind="visible: activeLayoff() && !activeValBonus()">Massive Layoffs</span>
                   <span data-bind="visible: activeValBonus() && !activeLayoff()">Fudge the Numbers</span>
@@ -1108,11 +1393,11 @@
               </div>
             </div>
             <div class="divider"></div>
-            <h5 class="employees-remaining">Employees Remaining: <span data-bind="text: currentEmployees.displayVal()"></span>
+            <h5 class="employees-remaining">Employees Remaining: <span data-bind="text: currentEmployeesDisplay"></span>
               <span class="fired-label label label-danger" data-bind="quickFadeVisible: fireClicked()">- <span data-bind="text: clickMod.displayVal()"></span></span>
             </h5>
             <div class="progress">
-              <div class="progress-bar" role="progressbar" data-bind="style: { width: employeePercentageRemaining }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
+              <div class="progress-bar" role="progressbar" data-bind="css: { 'progress-bar-danger': isBad() && !isMeltUp(), 'progress-bar-warning': isMeltUp }, style: { width: employeePercentageRemaining }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="70"></div>
             </div>
           </div>
 
@@ -1134,9 +1419,10 @@
                 </tr>
               </tbody>
             </table>
-            <div class="acquisition-earnings-box">
+            <div data-bind="css: { 'bad-meltup-box': isBad() && !isMeltUp() }" class="acquisition-earnings-box">
               <h5>Net Earnings:</h5>
-              <h3>+ <span data-bind="text: netValue.displayVal()"></span> total</h3>
+              <h3 data-bind="visible: isBad() && !isMeltUp()">- <span data-bind="text: netValue.displayVal()"></span> total</h3>
+              <h3 data-bind="visible: (!isBad() && !isMeltUp()) || isMeltUp()">+ <span data-bind="text: netValue.displayVal()"></span> total</h3>
             </div>
           </div>
 
@@ -1150,12 +1436,12 @@
 <div class="push">&nbsp;</div>
 
 <footer class="footer">
-  <p>The Idle Class v<span data-bind="text: generalStats()[10].displayVal"></span></p> |
+  <p>The Idle Class v<span data-bind="text: generalStats()[9].displayVal"></span></p> |
   <a href="/">Home</a> |
   <span id="changelog-footer-link"><a href="business-simulator/changelog.html" target="_blank">Changelog</a> |</span>
   <a href="#" data-toggle="modal" data-target="#socialModal" data-bind="click: function() { viewingModal('social'); }">Social</a> |
   <a href="#" data-toggle="modal" data-target="#donateModal" data-bind="click: function() { viewingModal('donate'); }">Donate</a> 
-  <span class="hide-mobile">| <a target="_blank" href="https://smallgraygames.itch.io/the-salt-keep">New Game</a> <span style="position: relative;top:-1px;" class="label label-success">NEW</span></span>
+  <span class="hide-mobile">| <a target="_blank" href="https://smallgraygames.itch.io/the-salt-keep">The Salt Keep</a></span>
 </footer>
 
 <!-- MODALS -->
@@ -1309,8 +1595,8 @@
         <textarea class="export-data" data-bind="value: exportedSaveData"></textarea>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="copyToClipboard()">COPY TO CLIPBOARD</button>
-        <button type="button" class="btn btn-primary" onclick="downloadExport()">DOWNLOAD</button>
+        <button type="button" class="btn btn-primary" onclick="copyToClipboard()">Copy to Clipboard</button>
+        <button type="button" class="btn btn-primary" onclick="downloadExport()">Download</button>
         <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
       </div>
     </div>
@@ -1359,7 +1645,348 @@
   </div>
 </div>
 
-<div class="modal fade" id="bankruptcyModal" tabindex="-1" role="dialog" aria-labelledby="bankruptcyModalLabel">
+<div class="modal fade obstacle-modal" id="goalModal" tabindex="-1" role="dialog" aria-labelledby="goalModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'addGoal'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="goalModalLabel">Business Goals</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div data-bind="fadeVisible: !goals().helpView()" class="modal-body">
+        <ul class="nav nav-tabs nav-justified" role="tablist" style="margin-top:0;">
+          <li role="presentation" class="active">
+            <a id="inboxToggle" href="#addGoal" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: function() { goals().nextTab(true) }">
+              <span class="nav-tab-text">Next Goal</span>
+            </a>
+          </li>
+
+          <li role="presentation" data-bind="click: function() { goals().nextTab(false) }">
+            <a href="#currentGoal" aria-controls="home" role="tab" data-toggle="tab">
+              <span class="nav-tab-text">Current Goal</span>
+            </a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="addGoal">
+            <h4 style="margin: 100px auto;" data-bind="fadeVisible: goals().goalSet()" class="no-goal-active no-content-message">
+              <span>Goal Set for Next Business</span>
+              <span class="inner-goal-label">$<span data-bind="text: $root.format(goals().nextEarningsGoal().goal)"></span>&nbsp;as of now</span>
+            </h4>
+            <table data-bind="fadeVisible: !goals().goalSet() " style="margin-bottom: -10px; margin-top: 10px;" class="earned-table table">
+              <tbody>
+                <tr class="select-row">
+                  <td style="border-top: none;"><label for="frequency">Earnings Goal</label></td>
+                  <td style="border-top: none;">
+                    <select class="form-control" name="obstacle-frequency" title="Earnings Goals" data-bind="value: goals().earningsGoalSelected">
+                      <option selected value='A'>Match Greatest Earnings</option>
+                      <option data-bind="text: goals().getEarningsValue('B').multi + 'X Greatest Earnings'" value='B'></option>
+                      <option data-bind="text: goals().getEarningsValue('C').multi + 'X Greatest Earnings'" value='C'></option>
+                      <option data-bind="text: goals().getEarningsValue('D').multi + 'X Greatest Earnings'" value='D'></option>
+                      <option data-bind="text: goals().getEarningsValue('E').multi + 'X Greatest Earnings'" value='E'></option>
+                      <option data-bind="text: goals().getEarningsValue('F').multi + 'X Greatest Earnings'" value='F'>s</option>
+                    </select>
+                  </td>
+                </tr>
+                <td><label for="frequency">Time Limit</label></td>
+                  <td>
+                    <select class="form-control" name="obstacle-frequency" title="Obstacle Frequency" data-bind="value: goals().timeLimitSelected">
+                      <option selected value='Z'>No Limit</option>
+                      <option value='A'>1 Week</option>
+                      <option value='B'>2 Days</option>
+                      <option value='C'>24 Hours</option>
+                      <option value='D'>12 Hours</option>
+                      <option value='E'>6 Hours</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().mail }" class="select-row">
+                  <td><label for="servercrash">Without Email Earnings</label></td>
+                  <td>
+                    <input name="servercrash" id="servercrash" type="checkbox" data-bind="checked: goals().nextNoMail">
+                    <i class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().investments }" class="select-row">
+                  <td><label for="marketdown">Without Investment Earnings</label></td>
+                  <td>
+                    <input name="marketdown" id="marketdown" type="checkbox" data-bind="checked: goals().nextNoInvest">
+                    <i class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().research }" class="select-row">
+                  <td><label for="lawsuits">Without R&D Earnings</label></td>
+                  <td>
+                    <input name="lawsuits" id="lawsuits" type="checkbox" data-bind="checked: goals().nextNoResearch">
+                    <i class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().acquisitions }" class="select-row">
+                  <td><label for="acquisitions">Without Acquisition Earnings</label></td>
+                  <td>
+                    <input name="acquisitions" id="acquisitions" type="checkbox" data-bind="checked: goals().nextNoAcquisition">
+                    <i class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().elections }" class="select-row">
+                  <td><label for="prdisaster">Without Election Earnings</label></td>
+                  <td>
+                    <input name="prdisaster" id="prdisaster" type="checkbox" data-bind="checked: goals().nextNoElection">
+                    <i class="material-icons">lock</i>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div role="tabpanel" data-bind="css: { 'goal-passed': goals().alreadyPassed(), 'goal-failed': goals().anyFailed() }" class="tab-pane" id="currentGoal">
+            <h4 data-bind="visible: !goals().currentBonus()" class="no-goal-active no-content-message">No Goal Active</h4>
+
+             <table data-bind="visible: goals().currentBonus()" style="margin-bottom: -10px; margin-top: 10px;" class="earned-table table">
+              <tbody>
+                <tr class="select-row">
+                  <td style="border-top: none;"><label for="frequency">Earnings Goal</label></td>
+                  <td style="border-top: none;">
+                    <span style="float:right;" data-bind="visible: !goals().earningsGoalMet(), text: '$' + format(goals().earningsGoal().goal)"></span>
+                    <i data-bind="visible: goals().earningsGoalMet()" class="success-icon material-icons">check_circle</i>
+                  </td>
+                </tr>
+                <td><label for="frequency">Time Remaining</label></td>
+                  <td>
+                    <span style="float:right;" data-bind="visible: !goals().failedTimeLimit() && !goals().passedTimeLimit(), text: goals().timeRemaining().formatted"></span>
+                    <i data-bind="visible: goals().passedTimeLimit" class="success-icon material-icons">check_circle</i>
+                    <i data-bind="visible: goals().failedTimeLimit" class="fail-icon material-icons">cancel</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().mail }" class="select-row">
+                  <td><label for="servercrash">Without Email Earnings</label></td>
+                  <td>
+                    <i data-bind="visible: !locked().mail && goals().currentNoMail() && !goals().failedNoMail()" class="success-icon material-icons">check_circle</i>
+                    <i data-bind="visible: !locked().mail && goals().currentNoMail() && goals().failedNoMail()" class="fail-icon material-icons">cancel</i>
+                    <span class="na-flag" data-bind="visible: !locked().mail && !goals().currentNoMail()">N/A</span>
+                    <i data-bind="visible: locked().mail" class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().investments }" class="select-row">
+                  <td><label for="marketdown">Without Investment Earnings</label></td>
+                  <td>
+                    <i data-bind="visible: !locked().investments && goals().currentNoInvest() && !goals().failedNoInvest()" class="success-icon material-icons">check_circle</i>
+                    <i data-bind="visible: !locked().investments && goals().currentNoInvest() && goals().failedNoInvest()" class="fail-icon material-icons">cancel</i>
+                    <span class="na-flag" data-bind="visible: !locked().investments && !goals().currentNoInvest()">N/A</span>
+                    <i data-bind="visible: locked().investments" class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().research }" class="select-row">
+                  <td><label for="lawsuits">Without R&D Earnings</label></td>
+                  <td>
+                    <i data-bind="visible: !locked().research && goals().currentNoResearch() && !goals().failedNoResearch()" class="success-icon material-icons">check_circle</i>
+                    <i data-bind="visible: !locked().research && goals().currentNoResearch() && goals().failedNoResearch()" class="fail-icon material-icons">cancel</i>
+                    <span class="na-flag" data-bind="visible: !locked().research && !goals().currentNoResearch()">N/A</span>
+                    <i data-bind="visible: locked().research" class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().acquisitions }" class="select-row">
+                  <td><label for="acquisitions">Without Acquisition Earnings</label></td>
+                  <td>
+                    <i data-bind="visible: !locked().acquisitions && goals().currentNoAcquisition() && !goals().failedNoAcquisition()" class="success-icon material-icons">check_circle</i>
+                    <i data-bind="visible: !locked().acquisitions && goals().currentNoAcquisition() && goals().failedNoAcquisition()" class="fail-icon material-icons">cancel</i>
+                    <span class="na-flag" data-bind="visible: !locked().acquisitions && !goals().currentNoAcquisition()">N/A</span>
+                    <i data-bind="visible: locked().acquisitions" class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().elections }" class="select-row">
+                  <td><label for="prdisaster">Without Election Earnings</label></td>
+                  <td>
+                    <i data-bind="visible: !locked().elections && goals().currentNoElection() && !goals().failedNoElection()" class="success-icon material-icons">check_circle</i>
+                    <i data-bind="visible: !locked().elections && goals().currentNoElection() && goals().failedNoElection()" class="fail-icon material-icons">cancel</i>
+                    <span class="na-flag" data-bind="visible: !locked().elections && !goals().currentNoElection()">N/A</span>
+                    <i data-bind="visible: locked().elections" class="material-icons">lock</i>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div data-bind="fadeVisible: goals().helpView()" class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">If you aim at nothing, you will hit it every time</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Zig Zigler, Quote Writer</cite></footer>
+        </blockquote>
+        <p>The greatest minds in business don't compete with others, but with the only truly worthy adversary: themselves. By creating <b>Business Goals</b>, you can do exactly that. Choose the amount you expect to earn in your next business, how quickly you intend to do it, and which earning opportunities you want to forego to challenge yourself, then set the goal. Once you <b>Declare Bankruptcy,</b> your next business will begin with your new goal in mind.</p>
+        <p>Every goal will add an additional bonus to your <b>Next Bankruptcy Bonus,</b> and the more ambitious a goal you set for yourself, the greater it will be.</p>
+        <p>Remember, though: failure to meet your goal will have consequences.</p>
+      </div>
+
+      <div class="modal-footer">
+        <div class="left-box well resting-box">
+          <p><span data-bind="text: goals().nextTab() ? 'Next' : 'Current'"></span><span class="hide-mobile"> Bonus</span>: <span class="stress-percent"><span data-bind="text: goals().nextTab() ? goals().nextBonus() : goals().currentBonus()"></span>%</span></p>
+        </div>
+
+        <button data-bind="click: goals().toggleHelpView" class="btn btn-primary">Help</button>
+        <button data-bind="visible: !goals().goalSet(), click: goals().toggleSetGoal" class="btn btn-primary">Set Goal</button>
+        <button data-bind="visible: goals().goalSet(), click: goals().toggleSetGoal" class="btn btn-danger">Cancel Goal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade obstacle-modal" id="obstacleModal" tabindex="-1" role="dialog" aria-labelledby="obstacleModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'addObstacles'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="obstacleModalLabel">Bankruptcy Obstacles</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div data-bind="fadeVisible: obstacles().helpView()" class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">Risk more than others think is safe.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Howar Schultz, USA President-elect</cite></footer>
+        </blockquote>
+        <p>The average business charlatan strives to take the path of least resistance, but the strong among us understand that only suffering leads to true greatness. With that in mind, optional <b>Bankruptcy Obstacles</b> allow you to burden your next business with various troubles. They strike at random, but all can be resolved through sheer force of will.</p>
+        <p>The more types of obstacles you embrace, the higher your <b>Seminar Bonus</b> will be, meaning that once your burdened business finally declares bankruptcy, the reward of institutional knowledge via <b>Training Seminars</b> will be greater than ever before.</p>
+      </div>
+
+      <div data-bind="fadeVisible: !obstacles().helpView()" class="modal-body">
+
+        <ul class="nav nav-tabs nav-justified" role="tablist" style="margin-top:0;">
+          <li role="presentation" class="active">
+            <a id="inboxToggle" href="#addObstacles" aria-controls="home" role="tab" data-toggle="tab" data-bind="click: function() { obstacles().nextTab(true) }">
+              <span class="nav-tab-text">Next Obstacles</span>
+            </a>
+          </li>
+
+          <li role="presentation" data-bind="click: function() { obstacles().nextTab(false) }">
+            <a href="#currentObstacles" aria-controls="home" role="tab" data-toggle="tab">
+              <span class="nav-tab-text">Current Obstacles</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="addObstacles">
+
+            <h4 data-bind="fadeVisible: obstacles().obstaclesSet()" class="no-goal-active no-content-message">Obstacles Set for Next Business</h4>
+
+            <table data-bind="fadeVisible: !obstacles().obstaclesSet()" style="margin-bottom: -10px; margin-top: 10px;" class="earned-table table">
+              <tbody>
+                <tr class="select-row">
+                  <td style="border-top: none;"><label for="frequency">Obstacle Frequency</label></td>
+                  <td style="border-top: none;">
+                    <select class="form-control" name="obstacle-frequency" title="Obstacle Frequency" data-bind="value: nextObstacleFrequency">
+                      <!-- <option value="" disabled selected hidden>Select Frequency...</option> -->
+                      <option data-bind="visible: obstacleFrequencyUpgrade.val() > 1" value='0'>Barely Ever</option>
+                      <option data-bind="visible: obstacleFrequencyUpgrade.val() > 0" value='1'>Not That Often</option>
+                      <option selected value='2'>Sometimes</option>
+                      <option data-bind="visible: obstacleFrequencyUpgrade.val() > 0" value='3'>Pretty Often</option>
+                      <option data-bind="visible: obstacleFrequencyUpgrade.val() > 1" value='4'>Constantly</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr class="select-row">
+                  <td><label for="workstop">Work Stoppages</label></td>
+                  <td><input name="workstop" id="workstop" type="checkbox" data-bind="checked: obstacles().nextWorkStoppage"></td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().mail }" class="select-row">
+                  <td><label for="servercrash">Server Crashes</label></td>
+                  <td>
+                    <input name="servercrash" id="servercrash" type="checkbox" data-bind="checked: obstacles().nextServerCrash">
+                    <i class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().investments }" class="select-row">
+                  <td><label for="marketdown">Market Downturns</label></td>
+                  <td>
+                    <input name="marketdown" id="marketdown" type="checkbox" data-bind="checked: obstacles().nextMarketDownturn">
+                    <i class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().research }" class="select-row">
+                  <td><label for="lawsuits">Class Action Lawsuits</label></td>
+                  <td>
+                    <input name="lawsuits" id="lawsuits" type="checkbox" data-bind="checked: obstacles().nextLawsuit">
+                    <i class="material-icons">lock</i>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().elections }" class="select-row">
+                  <td><label for="prdisaster">Unforgivable Gaffes</label></td>
+                  <td>
+                    <input name="prdisaster" id="prdisaster" type="checkbox" data-bind="checked: obstacles().nextPRDisaster">
+                    <i class="material-icons">lock</i>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="currentObstacles">
+            <h4 data-bind="fadeVisible: obstacles().currentBonus() === 0" class="no-goal-active no-content-message">No Obstacles Set</h4>
+
+            <table data-bind="fadeVisible: obstacles().currentBonus() > 0" style="margin-bottom: -10px; margin-top: 10px;" class="current-obstacle-table earned-table table">
+              <tbody>
+                <tr class="select-row">
+                  <td style="border-top: none;"><label for="frequency">Obstacle Frequency</label></td>
+                  <td style="border-top: none;">
+                    <span data-bind="text: obstacles().getObstacleFrequencyLabel(obstacleFrequencySelected.val())"></span>
+                  </td>
+                </tr>
+                <tr class="select-row">
+                  <td><label for="workstop">Work Stoppages</label></td>
+                  <td>
+                    <span class="label label-success" data-bind="visible: obstacles().workStoppagePossible">Active</span>
+                    <span data-bind="visible: !obstacles().workStoppagePossible()">N/A</span>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().mail }" class="select-row">
+                  <td><label for="servercrash">Server Crashes</label></td>
+                  <td>
+                    <span class="label label-success" data-bind="visible: obstacles().serverCrashPossible">Active</span>
+                    <span data-bind="visible: !obstacles().serverCrashPossible()">N/A</span>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().investments }" class="select-row">
+                  <td><label for="marketdown">Market Downturns</label></td>
+                  <td>
+                    <span class="label label-success" data-bind="visible: obstacles().marketDownturnPossible()">Active</span>
+                    <span data-bind="visible: !obstacles().marketDownturnPossible()">N/A</span>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().research }" class="select-row">
+                  <td><label for="lawsuits">Class Action Lawsuits</label></td>
+                  <td>
+                    <span class="label label-success" data-bind="visible: obstacles().lawsuitPossible()">Active</span>
+                    <span data-bind="visible: !obstacles().lawsuitPossible()">N/A</span>
+                  </td>
+                </tr>
+                <tr data-bind="css: { 'disabled': locked().elections }" class="select-row">
+                  <td><label for="prdisaster">Unforgivable Gaffes</label></td>
+                  <td>
+                    <span class="label label-success" data-bind="visible: obstacles().disasterPossible()">Active</span>
+                    <span data-bind="visible: !obstacles().disasterPossible()">N/A</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="left-box well resting-box">
+          <p><span data-bind="text: obstacles().nextTab() ? 'Next' : 'Current'"></span><span class="hide-mobile"> Bonus</span>: <span class="stress-percent"><span data-bind="text: obstacles().nextTab() ? obstacles().nextBonus() : obstacles().currentBonus()"></span>%</span></p>
+        </div>
+        <button type="button" class="btn btn-primary" data-bind="click: obstacles().toggleHelpView">Help</button>
+        <button type="button" class="btn btn-danger" data-bind="visible: obstacles().obstaclesSet(), click: obstacles().toggleSetObstacles">Cancel Obstacles</button>
+        <button type="button" class="btn btn-primary" data-bind="visible: !obstacles().obstaclesSet(), click: obstacles().toggleSetObstacles">Set <span class="hide-mobile">Obstacles</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade obstacle-modal" id="bankruptcyModal" tabindex="-1" role="dialog" aria-labelledby="bankruptcyModalLabel">
   <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'bankruptcy'">
     <div class="modal-content">
       <div class="modal-header">
@@ -1368,6 +1995,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+
       <div class="modal-body">
         <blockquote class="blockquote text-right">
           <p style="margin: 15px 0 0 0;" class="mb-0">I've failed over and over and over again in my life.</p>
@@ -1376,10 +2004,10 @@
         </blockquote>
         <p>Choosing to declare bankruptcy will put an end to your current business &mdash; <span data-bind="text: businessName().name"></span> &mdash; which you have been faithfully grinding since something like <span data-bind="text: startTime.displayVal"></span>.</p>
         <p>However, while your employees, your upgrades, and your accumulated cash will all reset, capital never truly dies. You will reemerge from bankruptcy retaining <b>all of your achievements</b>, as well as a powerful sense of boot-strap grit.</p>
-        <p>You'll also start your next business with an additional <b data-bind="text: nextBankruptcyBonus.displayVal"></b> added to your <b>Bankruptcy Multiplier</b>, which is currently a total of <b data-bind="text: cashStats()[8].displayVal"></b>, as well as an additional <b data-bind="text: nextBankruptcySeminars.displayVal"></b> <b>Training Seminars</b> to help your employees develop their careers.</p>
+        <p>You'll also start your next business with an additional <b data-bind="text: nextBankruptcyBonus.displayVal"></b> added to your <b>Bankruptcy Multiplier</b>, which is currently a total of <b data-bind="text: bankruptcyStats1()[0].displayVal"></b>, as well as an additional <b data-bind="text: nextBankruptcySeminars.displayVal"></b> <b>Training Seminars</b> to help your employees develop their careers.</p>
       </div>
+
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="game.restartGame();">Declare Bankruptcy</button>
       </div>
     </div>
@@ -1390,7 +2018,8 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="investmentModalLabel">Make a New Investment</h3>
+        <i class="material-icons" aria-hidden="true">trending_up</i>
+        <h3 class="modal-title icon-header" id="investmentModalLabel">Make an Investment</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -1775,11 +2404,12 @@
   </div>
 </div>
 
-<div class="modal fade" id="electionModal" tabindex="-1" role="dialog" aria-labelledby="electionModalLabel">
+<div class="modal fade electionModal" id="electionModal" tabindex="-1" role="dialog" aria-labelledby="electionModalLabel">
   <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'election'">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="electionModalLabel">Elections</h3>
+        <i class="material-icons" aria-hidden="true">ballot</i>
+        <h3 class="icon-header modal-title" id="electionModalLabel">Elections</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -1907,6 +2537,7 @@
             <h4 style="text-align: center; border-bottom: solid 1px #eee; padding-bottom: 5px;">
               <span data-bind="text: election().firstName"></span>
               <span data-bind="text: election().lastName"></span>
+              <span data-bind="visible: election().isIdeal" class="label label-warning ideal-label">Ideal Candidate</span>
             </h4>
             <p class="well hide-mobile" data-bind="html: election().miniBio"></p>
             <p class="well mobile-only-text">
@@ -1916,7 +2547,10 @@
               <table class="table earned-table policy-ideas">
                 <tr>
                   <td>Kickbacks on Win</td>
-                  <td data-bind="text: election().winValue.displayVal"></td>
+                  <td>
+                    <span data-bind="text: election().winValue.displayVal"></span>
+                    <span class="label label-warning ideal-label" data-bind="visible: election().isIdeal()"> +<span data-bind="text: election().idealBonus.displayVal"></span></span>
+                  </td>
                 </tr>
                 <tr>
                   <td>Donations so Far</td>
@@ -1957,9 +2591,15 @@
           </div>
       </div>
       <div class="modal-footer">
+
         <div data-bind="visible: election().view() !== 'preparing' && election().view() !== 'help'" class="left-box well">
           <span class="election-timer" data-bind="text: election().displayTimeRemaining"></span>
         </div>
+
+        <div data-bind="visible: election().view() == 'preparing' && election().idealCandidates() > 0" class="ideal-box left-box well">
+          <span>Ideal Candidates: <span class="election-timer"><span data-bind="text: election().idealCandidates()"></span></span></span>
+        </div>
+
         <button data-bind="visible: election().view() !== 'help', click: election().setView.bind(election(), 'help')" type="button" class="btn btn-primary">Help</button>
         <button data-bind="visible: election().view() === 'preparing', click: election().start.bind(election()), css: { 'disabled': !election().readyToBegin() }" type="button" class="btn btn-primary">Begin Election</button>
         <button data-bind="visible: election().view() === 'help', click: election().setView.bind(election(), election().active() || election().finished() ? 'main' : 'preparing')" type="button" class="btn btn-primary">Return</button>
@@ -1969,6 +2609,357 @@
           Donate <span data-bind="text: election().donationAmount.displayVal"></span>
         </button>
         <button data-bind="css: { 'disabled': election().resultsView() }, visible: election().view() === 'main' && election().finished(), click: election().seeResults.bind(election())" type="button" class="donate-btn btn btn-success">Finish Election</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" data-bind="class: obstacles().negotiating() ? 'unit' + obstacles().negotiating().id : ''" id="negotiationModal" tabindex="-1" role="dialog" aria-labelledby="negotiationModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'negotiate'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true" data-bind="text: obstacles().negotiating().icon"></i>
+        <h3 class="modal-title icon-header" id="negotiationModalLabel">Negotiate</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div data-bind="fadeVisible: !obstacles().negotiating().helpView()" class="modal-body">
+
+        <div class="main" data-bind="css: { 'selling': obstacles().negotiating().ending }">
+          <div class="row gaffe-risk-box">
+            <div class="col-md-6">Strike Started: <b data-bind="text: obstacles().negotiating().whenStoppageStarted.displayVal"></b></div>
+            <div class="col-md-6">Earnings Lost: <b data-bind="text: obstacles().negotiating().earningsLost.displayVal"></b></div>
+          </div>
+
+          <table class="obstacle-table earned-table table">
+            <tbody>
+              <tr>
+                <td><span>Print Propaganda</span> <span class="label label-success">+<span>4</span>%</span></td>
+                <td><button data-bind="css: { 'disabled': ($root.currentCashSlowed() < obstacles().negotiating().clickUpgradeCost.val()) || obstacles().negotiating().negotiationChance() >= 100 }, click: obstacles().negotiating().upgradeClick" class="btn btn-md btn-default">$<span data-bind="text: obstacles().negotiating().clickUpgradeCost.displayVal"></span></button></td>
+              </tr>
+              <tr>
+                <td><span>Deploy Pinkertons</span> <span class="label label-success">+<span>0.02</span>% / second</span></td>
+                <td><button data-bind="css: { 'disabled': ($root.currentCashSlowed() < obstacles().negotiating().secondUpgradeCost.val()) || obstacles().negotiating().negotiationChance() >= 100 }, click: obstacles().negotiating().upgradeSecond" class="btn btn-md btn-default">$<span data-bind="text: obstacles().negotiating().secondUpgradeCost.displayVal"></span></button></td>
+              </tr>
+              <tr>
+                <td><span>Send a Message</span> <span class="label label-success">+<span>25</span>%</span></td>
+                <td><button data-bind="css: { 'disabled': $root.obstacles().negotiating().negotiationChance() >= 100 || $root.obstacles().negotiating().num.val() === 0 }, click: obstacles().negotiating().eliminate" class="btn btn-md btn-default">Lose 1 Employee</button></td>
+              </tr>
+            </tbody>
+
+          </table>
+
+          <h4 class="progress-header">Preparing for Negotiation</h4>
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" data-bind="style: { width: obstacles().negotiating().negotiationPercentage }" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+
+        <div class="sell-value label-success" data-bind="visible: obstacles().negotiating().ending, css: { 'label-success': obstacles().negotiating().success(), 'label-danger': !obstacles().negotiating().success() }">
+          <p class="label"><span data-bind="text: obstacles().negotiating().endLabel"></span></p>
+          <h4 data-bind="text: obstacles().negotiating().results"></h4>
+        </div>
+
+      </div>
+      <div data-bind="fadeVisible: obstacles().negotiating().helpView" class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">The greatest victory is that which requires no battle.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Sun Tzu, Business Writer</cite></footer>
+        </blockquote>
+        <p>The primary flaw in a free market economy is that the less scrupulous among us are sometimes overcome by greed. That's how a <b>Work Stoppage</b> comes to be: lowly employees, already duly compensated, come to feel that it still isn't enough. While work has stopped, that category of employee <b>produces nothing.</b></p>
+        <p>Fortunately, every business leader has options. Spend as much as you want to increase your chances of <b>Breaking the Strike</b> through well-meaning negotiation. If you win, your employees will be back to work, but even if you lose, you certainly won't be meeting any demands. Just bide your time until you can enter negotiations again.</p>
+        <p>And keep in mind, sometimes a loss can lead to <b>even greater productivity</b>...</p>
+      </div>
+      <div class="modal-footer">
+        <div class="left-box well resting-box">
+          <p>Success<span class="hide-mobile"> Chance</span>: <span class="stress-percent"><span data-bind="text: obstacles().negotiating().negotiationChance"></span>%</span></p>
+        </div>
+        <button data-bind="click: obstacles().negotiating().toggleHelpView" type="button" class="btn btn-primary">Help</button>
+        <button data-bind="click: obstacles().negotiating().end, css: { 'disabled': !obstacles().negotiating().negotiationReady() } " type="button" class="btn btn-primary">Negotiate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade downturnModal" id="downturnModal" tabindex="-1" role="dialog" aria-labelledby="downturnModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'downturn'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true">trending_up</i>
+        <h3 class="icon-header modal-title" id="brokenMailModalLabel">Crashed Market</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div data-bind="fadeVisible: !obstacles().marketDownturn().helpView()" class="modal-body">
+
+        <div class="main" data-bind="css: { 'selling': obstacles().marketDownturn().ending }">
+          <div class="row gaffe-risk-box">
+            <div class="col-md-6">Crashed: <b data-bind="text: obstacles().marketDownturn().whenCrashed.displayVal"></b></div>
+            <div class="col-md-6">Ticker Trend: <b><span data-bind="text: obstacles().marketDownturn().trend">0</span>%</b></div>
+
+          </div>
+
+          <table class="obstacle-table earned-table table">
+            <tbody>
+              <tr>
+                <td><span>Pump Penny Stocks</span> <span class="label label-success">+<span>4</span>% Trend</span></td>
+                <td><button data-bind="css: { 'disabled': $root.currentCashSlowed() < obstacles().marketDownturn().trendUpgradeCost.val() }, click: obstacles().marketDownturn().upgradeTrend" class="btn btn-md btn-default">$<span data-bind="text: obstacles().marketDownturn().trendUpgradeCost.displayVal"></span></button></td>
+              </tr>
+               <tr>
+                <td><span>Buy Back Shares</span> <span class="label label-success">+<span>5</span>% Speed</span></td>
+                <td><button data-bind="css: { 'disabled': $root.currentCashSlowed() < obstacles().marketDownturn().speedUpgradeCost.val() }, click: obstacles().marketDownturn().upgradeSpeed" class="btn btn-md btn-default">$<span data-bind="text: obstacles().marketDownturn().speedUpgradeCost.displayVal"></span></button></td>
+              </tr>
+               <tr>
+                <td><span>Flood the Market</span> <span class="label label-success">+<span>10</span>% Trend</span></td>
+                <td><button data-bind="css: { 'disabled': $root.activeInvestments().length === 0 }, click: obstacles().marketDownturn().loseInvestment" class="btn btn-md btn-default"><span>Lose 1 Investment</span></button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h4 class="progress-header">Stock Ticker</h4>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="panel" data-bind="class: obstacles().marketDownturn().class">
+                <div class="panel-heading">
+                  <h3 class="panel-title ticker-title" data-bind="text: obstacles().marketDownturn().name">Loading...</h3>
+                  <span data-bind="visible: obstacles().marketDownturn().tickSuccess() !== null" style="min-width:50px;float:right;" class="badge">
+                    <span data-bind="text: obstacles().marketDownturn().tickSuccess() ? '+' : '-'"></span><span data-bind="text: obstacles().marketDownturn().tickAmount"></span>%
+                  </span>
+                </div>
+                <div class="panel-body">
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" data-bind="visible: obstacles().marketDownturn().currentBar() === 'a', style: { width: obstacles().marketDownturn().progressA() + '%' }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar" role="progressbar" data-bind="visible: obstacles().marketDownturn().currentBar() === 'b', style: { width: obstacles().marketDownturn().progressB() + '%' }" aria-valuenow="1" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sell-value label-success" data-bind="visible: obstacles().marketDownturn().ending, css: { 'label-success': obstacles().marketDownturn().success(), 'label-danger': !obstacles().marketDownturn().success() }">
+          <p class="label"><span data-bind="text: obstacles().marketDownturn().endLabel"></span></p>
+          <h4 data-bind="text: obstacles().marketDownturn().results"></h4>
+        </div>
+
+      </div>
+      <div data-bind="fadeVisible: obstacles().marketDownturn().helpView" class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">"It's a proprietary strategy. I can't go into it in great detail."</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Bernard L. Madoff, Financier</cite></footer>
+        </blockquote>
+        <p>While a properly massaged and stimulated market is generally a rollercoaster of runaway growth careening into a bright future that holds only prosperity, they are sometimes known to experience <b>Downturns</b>. You may find your investments grinding to a halt, and your acquisitions frozen in place, their fat refusing to be trimmed.</p>
+        <p>When faced with such a dilemma, forward-thinking business leaders have no choice but to employ costly strategies to nudge the market along. It's simple enough to <b>Resolve a Crash</b> at any time, but without ensuring the health of the market first, even the most discerning among us run the risk of making a <b>Bad Investment,</b> or even a <b>Bad Acquisition.</b> Once you have one, you're stuck with it until you can pay it off.</p> 
+        <p>Then again, even bad choices can sometimes turn into <b>something valuable</b>...</p>
+      </div>
+      <div class="modal-footer">
+        <div class="left-box well resting-box">
+          <p>Market Health: <span class="stress-percent"><span data-bind="text: obstacles().marketDownturn().marketHealth"></span>%</span></p>
+        </div>
+        <button data-bind="click: obstacles().marketDownturn().toggleHelpView" type="button" class="btn btn-primary">Help</button>
+        <button data-bind="click: obstacles().marketDownturn().end" type="button" class="btn btn-primary">Resolve<span class="hide-mobile"> Crash</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade brokenMailModal" id="brokenMailModal" tabindex="-1" role="dialog" aria-labelledby="brokenMailModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'brokenMail'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true">mail</i>
+        <h3 class="modal-title icon-header" id="brokenMailModalLabel">Crashed Mail</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div data-bind="fadeVisible: !obstacles().serverCrash().helpView()" class="modal-body">
+
+        <div class="main" data-bind="css: { 'selling': obstacles().serverCrash().ending }">
+          <div class="row gaffe-risk-box">
+            <div class="col-md-6">Crashed: <b data-bind="text: obstacles().serverCrash().whenCrashed.displayVal"></b></div>
+            <div class="col-md-6">Emails Lost: <b data-bind="text: obstacles().serverCrash().emailsMissed.displayVal">0</b></div>
+          </div>
+
+          <table class="obstacle-table earned-table table">
+            <tbody>
+              <tr>
+                <td><span>IT Manuals</span> <span class="label label-success">+<span>0.1</span>% / click</span></td>
+                <td><button data-bind="css: { 'disabled': $root.currentCashSlowed() < obstacles().serverCrash().clickUpgradeCost.val() }, click: obstacles().serverCrash().upgradeClick" class="btn btn-md btn-default">$<span data-bind="text: obstacles().serverCrash().clickUpgradeCost.displayVal"></span></button></td>
+              </tr>
+              <tr>
+                <td><span>On-Call Support</span> <span class="label label-success">+<span>0.05</span>% / second</span></td>
+                <td><button data-bind="css: { 'disabled': $root.currentCashSlowed() < obstacles().serverCrash().secondUpgradeCost.val() }, click: obstacles().serverCrash().upgradeSecond" class="btn btn-md btn-default">$<span data-bind="text: obstacles().serverCrash().secondUpgradeCost.displayVal"></span></button></td>
+              </tr>
+              <tr>
+                <td><span>Hard Reset</span> <span class="label label-success">-<span>20</span>% spam risk</span></td>
+                <td><button data-bind="css: { 'disabled': $root.mail().length < 5 }, click: obstacles().serverCrash().loseEmails" class="btn btn-md btn-default">Lose 5 Emails</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h4 class="progress-header">Employee at Fault: <span data-bind="text: obstacles().serverCrash().employeeName"></span></h4>
+          <button style="width: 100%" data-bind="click: obstacles().serverCrash().click" class="btn btn-md btn-primary">Reduce Risk <span class="badge">-<span data-bind="text: obstacles().serverCrash().clickAmount.displayVal"></span>%</span></button>
+        </div>
+
+        <div class="sell-value" data-bind="visible: obstacles().serverCrash().ending, css: { 'label-success': obstacles().serverCrash().success(), 'label-danger': !obstacles().serverCrash().success() }">
+          <p class="label"><span data-bind="text: obstacles().serverCrash().endLabel"></span></p>
+          <h4 data-bind="text: obstacles().serverCrash().results"></h4>
+        </div>
+
+      </div>
+      <div data-bind="fadeVisible: obstacles().serverCrash().helpView" class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">Lo! Men have become the tools of their tools.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Henry David Thorough, Author</cite></footer>
+        </blockquote>
+        <p>No technology is without its flaws. Even something as simple as email can periodically experience a <b>Server Crash,</b> and given that nobody truly knows how email servers are formed or maintained, it often falls on business leaders to resolve such disasters.</p>
+        <p>All one needs to do to repair a server is press a single button &mdash; <b>Fix Mail</b> &mdash; but savvy entrepeneurs know that a sloppy fix may open their servers up to the costly siren song of <b>Spam Emails.</b> Spend what you want to reduce your risk of spam, or move quickly and let it fill your inbox as the sight of tempting products drains your coffers.</p>
+        <p>Then again, even spam can sometimes turn out to be <b>quite lucrative</b>...
+      </div>
+      <div class="modal-footer">
+        <div class="left-box well resting-box">
+          <p>Spam Risk: <span class="stress-percent"><span data-bind="text: obstacles().serverCrash().spamRisk.displayVal"></span>%</span></p>
+        </div>
+        <button data-bind="click: obstacles().serverCrash().toggleHelpView" type="button" class="btn btn-primary">Help</button>
+        <button data-bind="click: obstacles().serverCrash().end" type="button" class="btn btn-primary">Fix Mail</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade prDisasterModal" id="prDisasterModal" tabindex="-1" role="dialog" aria-labelledby="prDisasterModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'prDisaster'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true">ballot</i>
+        <h3 class="icon-header modal-title" id="prDisasterModalLabel">Unforgivable Gaffe</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div data-bind="fadeVisible: !obstacles().disaster().helpView()" class="modal-body">
+
+        <div class="main" data-bind="css: { 'selling': obstacles().disaster().ending }">
+          <div class="row gaffe-risk-box">
+            <div class="col-md-6">Gaffed: <b data-bind="text: obstacles().disaster().whenStruck.displayVal"></b></div>
+            <div class="col-md-6">Sacrificed: <b data-bind="text: obstacles().disaster().sacrificed()"></b></div>
+          </div>
+
+          <table class="obstacle-table earned-table table">
+            <tbody>
+              <tr>
+                <td><span>Apology Tours</span> <span class="label label-success">-<span>0.1</span>% / click</span></td>
+                <td><button data-bind="css: { 'disabled': $root.currentCashSlowed() < obstacles().disaster().clickUpgradeCost.val() }, click: obstacles().disaster().upgradeClick" class="btn btn-md btn-default">$<span data-bind="text: obstacles().disaster().clickUpgradeCost.displayVal"></span></button></td>
+              </tr>
+              <tr>
+                <td><span>Charitable Donations</span> <span class="label label-success">-<span>0.05</span>% / second</span></td>
+                <td><button data-bind="css: { 'disabled': $root.currentCashSlowed() < obstacles().disaster().secondUpgradeCost.val() }, click: obstacles().disaster().upgradeSecond" class="btn btn-md btn-default">$<span data-bind="text: obstacles().disaster().secondUpgradeCost.displayVal"></span></button></td>
+              </tr>
+              <tr>
+                <td><span>Sacrificial Lamb</span> <span class="label label-success">-<span>25</span>% total</span></td>
+                <td><button data-bind="css: { 'disabled': game.getUnit(7).num.val() === 0 || obstacles().disaster().violenceRisk.val() === 0 }, click: obstacles().disaster().reduceViolence" class="btn btn-md btn-default">Lose 1 Politician</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h4 class="progress-header">People Angered: <span data-bind="text: obstacles().disaster().currentAngryPeople.displayVal"></span></h4>
+
+          <button style="width: 100%" data-bind="click: obstacles().disaster().fixPeople" class="btn btn-md btn-primary">Apologize <span class="badge">-<span data-bind="text: obstacles().disaster().clickAmount.displayVal"></span> angry people</span></button>
+        </div>
+
+        <div class="sell-value label-success" data-bind="visible: obstacles().disaster().ending, css: { 'label-success': obstacles().disaster().success(), 'label-danger': !obstacles().disaster().success() }">
+          <p class="label"><span data-bind="text: obstacles().disaster().endLabel"></span></p>
+          <h4 data-bind="text: obstacles().disaster().results"></h4>
+        </div>
+
+      </div>
+
+      <div data-bind="fadeVisible: obstacles().disaster().helpView" class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">I'm very sorry that in the process of accomplishing things, I've made errors.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Roger McNamara, US Secretary of Defense</cite></footer>
+        </blockquote>
+        <p>While political gaffes are common, some simply cannot be forgiven. Perhaps your chosen canditate said that [redacted], or put a [redacted] into [redacted]. When such a disaster occurs, people get angry, and when people get angry, the <b>risk of violence</b> grows.</p>
+        <p>As a politically-minded business leader, it's up to you to try and satiate the masses and lower that risk, and once it reaches a manageable level, <b>move on</b> from the controversy. However, even a slim chance sometimes boils over, and the <b>Privatized Cops</b> dutifully protecting you and your candidates pay the price.</p>
+        <p>Then again, sometimes the <b>greatest candidates</b> emerge from controversy...</p>
+      </div>
+
+      <div class="modal-footer">
+        <div class="left-box well resting-box">
+          <p><span class="hide-mobile">Violence</span> Risk: <span class="stress-percent"><span data-bind="text: obstacles().disaster().violenceRisk.displayVal"></span>%</span></p>
+        </div>
+        <button data-bind="click: obstacles().disaster().toggleHelpView" type="button" class="btn btn-primary">Help</button>
+        <button data-bind="click: obstacles().disaster().end" type="button" class="btn btn-primary">Move On</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade lawsuitModal" id="lawsuitModal" tabindex="-1" role="dialog" aria-labelledby="lawsuitModalLabel">
+  <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'lawsuit'">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="material-icons" aria-hidden="true">supervised_user_circle</i>
+        <h3 class="icon-header modal-title" id="lawsuitModalLabel">Class Action Lawsuit</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div data-bind="fadeVisible: !obstacles().lawsuit().helpView()" class="modal-body">
+
+        <div class="main" data-bind="css: { 'selling': obstacles().lawsuit().ending }">
+          <div class="row gaffe-risk-box">
+            <div class="col-md-6">Sued: <b data-bind="text: obstacles().lawsuit().whenSued.displayVal"></b></div>
+            <div class="col-md-6">Patsies Jailed: <b data-bind="text: obstacles().lawsuit().patsiesVolunteered">0</b></div>
+          </div>
+
+          <table class="obstacle-table earned-table table">
+            <tbody>
+              <tr>
+                <td><span>Threatening Letters</span> <span class="label label-success">+<span>0.1</span>% / click</span></td>
+                <td><button data-bind="css: { 'disabled': $root.currentCashSlowed() < obstacles().lawsuit().clickUpgradeCost.val() }, click: obstacles().lawsuit().upgradeClick" class="btn btn-md btn-default">$<span data-bind="text: obstacles().lawsuit().clickUpgradeCost.displayVal"></span></button></td>
+              </tr>
+              <tr>
+                <td><span>Rented Paralegals</span> <span class="label label-success">+<span>0.05</span>% / second</span></td>
+                <td><button data-bind="css: { 'disabled': $root.currentCashSlowed() < obstacles().lawsuit().secondUpgradeCost.val() }, click: obstacles().lawsuit().upgradeSecond" class="btn btn-md btn-default">$<span data-bind="text: obstacles().lawsuit().secondUpgradeCost.displayVal"></span></button></td>
+              </tr>
+              <tr>
+                <td><span>Volunteer a Patsy</span> <span class="label label-success">+<span>15</span>% max chance</span></td>
+                <td><button data-bind="css: { 'disabled': $root.numJailable() === 0 || obstacles().lawsuit().maxChance() >= 100 }, click: obstacles().lawsuit().upgradeMax" class="btn btn-md btn-default">1 Minute Jail</button></td>
+              </tr>
+
+            </tbody>
+          </table>
+
+          <h4 class="progress-header">Sued For Product: <span data-bind="html: obstacles().lawsuit().product"></span></h4>
+
+          <button style="width: 100%" data-bind="click: obstacles().lawsuit().click" class="btn btn-md btn-primary">Boost Win Chance <span class="badge">+<span data-bind="text: obstacles().lawsuit().clickAmount.displayVal"></span>%</span></button>
+        </div>
+
+        <div class="sell-value label-success" data-bind="visible: obstacles().lawsuit().ending, css: { 'label-success': obstacles().lawsuit().success(), 'label-danger': !obstacles().lawsuit().success() }">
+          <p class="label"><span data-bind="text: obstacles().lawsuit().endLabel"></span></p>
+          <h4 data-bind="text: obstacles().lawsuit().results"></h4>
+        </div>
+
+      </div>
+      <div data-bind="fadeVisible: obstacles().lawsuit().helpView" class="modal-body">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">Exploding Cars! Breast Implants! Flammable Pajamas!</p>
+          <footer class="blockquote-footer"><cite title="Source Title">John Stossel, Tort Reform Enthusiast</cite></footer>
+        </blockquote>
+        <p>Every business leader is familiar with the frivolous lawsuits that result from greedy consumers and unscrupulous lawyers. One or two can be easily squashed, but when these nefarious parties group together, you get <b>Class Action Lawsuits.</b></p>
+        <p><b>Class Action Lawsuits</b> put a stop to your Research & Development until you can resolve them. Spend as much as you want to increase your chances of winning the lawsuit, then <b>Go to Trial</b> when you're ready. The lawsuit will end whether you win or lose, but be warned: a loss may have <b>legal consequences</b> for your employees.</p> 
+        <p>Then again, sometimes a loss can lead to the <b>greatest innovations</b>...</p>
+      </div>
+      <div class="modal-footer">
+        <div class="left-box well resting-box">
+          <p>Win: <span class="stress-percent"><span><span data-bind="text: obstacles().lawsuit().winChance.displayVal"></span>% / <span data-bind="text: obstacles().lawsuit().maxChance"></span>%</span></span></p>
+        </div>
+        <button data-bind="click: obstacles().lawsuit().toggleHelpView" type="button" class="btn btn-primary">Help</button>
+        <button data-bind="click: obstacles().lawsuit().end" type="button" class="btn btn-primary">Go to Trial</button>
       </div>
     </div>
   </div>
@@ -2062,7 +3053,7 @@
       </div>
       <div class="modal-footer">
         <div style="float:left;">
-          <button class="btn btn-success" data-bind="click: research().sellPatents.bind(research())">
+          <button class="btn" data-bind="css: { 'innovative': research().innovativeNum(), 'btn-success': !research().innovativeNum(), 'btn-warning': research().innovativeNum() }, click: research().sellPatents.bind(research())">
             Sell <span class="hide-mobile">Patents</span> 
             <span data-bind="text: research().patents().length" class="sell-num badge"></span>
           </button>
@@ -2110,22 +3101,48 @@
   <div class="modal-dialog" role="document" data-bind="if: viewingModal() === 'donate'">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="donateModalLabel">Make a Donation</h3>
+        <h3 data-bind="visible: cartel.helpView()" class="modal-title" id="donateModalLabel">Business Cartels</h3>
+        <h3 data-bind="visible: !cartel.helpView()" class="modal-title" id="donateModalLabel">Donate or Subscribe</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body donate-btns">
+      <div data-bind="fadeVisible: cartel.helpView()" class="modal-body donate-btns">
+        <blockquote class="blockquote text-right">
+          <p class="mb-0">A rising tide lifts all boats.</p>
+          <footer class="blockquote-footer"><cite title="Source Title">Robert F. Kennedy, Medical Activist</cite></footer>
+        </blockquote>
+        <p style="text-align:left;">While research has always shown that collectivism leads only to despair and degradation, there is one critical exception: the formation of <b>Business Cartels</b>. The greatest thinkers among us surround themselves with other greats, and in so doing, create favorable market conditions that benefit them all. This is what's commonly referred to as "solidarity."</p>
+        <p style="text-align:left;">By becoming a <a target="_blank" href="https://www.patreon.com/smallgraygames">subscriber to the Patreon</a> of this game's esteemed developer, you will form a Business Cartel with other subscribers, the results of which manifest as a <b>direct percentage bonus</b> to total income. As is the nature of collectivism, this bonus will be available not just in your own game, but in the games of all players.</p>
+        <p style="text-align:left;"><em>NOTE: new subscriptions may take ~30 minutes to appear.</em></p>
+      </div>
+      <div data-bind="fadeVisible: !cartel.helpView()" class="modal-body donate-btns">
         <blockquote class="blockquote text-right">
           <p class="mb-0">Happiness doesn’t result from what we get, but from what we give.</p>
           <footer class="blockquote-footer"><cite title="Source Title">Dr. Benjamin Solomon "Ben" Carson Sr., M.D.</cite></footer>
         </blockquote>
-        <p style="text-align:left;">Is there such a thing as <b>ethical consumption</b> under capitalism? Some would tell you there isn't, but those people are workshy grifters and charlatans, because they're clearly unaware of the opportunity to <b>donate to the continued creation of this game.</b> We need your support to add new features, such as the VR Premium Edition and LinkedIn Integration.</p>
-        <a class="btn btn-success" target="_blank" href="https://www.patreon.com/smallgraygames">Donate on Patreon</a>
-        <a class="btn btn-success" target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate on PayPal</a>
+        <p style="text-align:left;">Is there such a thing as <b>ethical consumption</b> under capitalism? Some would say no, but those people are workshy grifters and charlatans, because they're clearly unaware of the opportunity to <b>donate to Small Gray Games.</b> We need your support to add new features, such as the VR Premium Edition and LinkedIn Integration.</p>
+        <div class="donate-group">
+          <a class="btn btn-success" target="_blank" href="https://www.patreon.com/smallgraygames">Subscribe on Patreon</a>
+          <a class="btn btn-success" target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=smallgraygames%40gmail%2ecom&lc=US&item_name=Small%20Gray%20Games&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate on PayPal</a>
+        </div>
+        <div class="donate-group lower-donate-group">
+          <button data-bind="visible: communityLocked.val() === 0, click: cartel.unlock" class="btn btn-success">Unlock Business Cartels <span class="badge">FREE</span></button>
+          <div data-bind="visible: communityLocked.val() > 0" class="row">
+            <div class="col-md-12">
+              <h5 class="small-header">Upgraded Bonus from Cartel Members</h5>
+              <h5>
+                <span data-bind="text: totalCommunityBonus.displayVal"></span>
+                <span data-bind="visible: communityBonusUpgrade.val() > 0, text: '(Base ' + (communityBonus.val() / 10) + '%)'">
+              </h5>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+        <button class="btn btn-primary" data-bind="visible: cartel.helpView(), click: cartel.toggleHelpView">Return</button>
+        <button class="btn btn-primary" data-bind="visible: !cartel.helpView(), click: cartel.toggleHelpView">Help</button>
+        <button type="button" data-bind="visible: !cartel.helpView()" class="btn btn-primary" data-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
@@ -2305,23 +3322,6 @@
   gtag('config', 'UA-117412788-1');
 </script> -->
 
-<!--客服 开始-->
-<script src="//g8hh.com/static/js/jquery.min.js"></script>
-<link rel="stylesheet" href="//g8hh.com/static/css/kf.css" type="text/css" media="screen" charset="utf-8">
-<script src="//g8hh.com/static/js/kf.js"></script>
-<!-- 客服 结束 -->
-<!--站长统计-->
-<div style="display: none">
-    <script>
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?dbb7ff142f4d4b68546c93b9cd6e9328";
-      var s = document.getElementsByTagName("script")[0]; 
-      s.parentNode.insertBefore(hm, s);
-    })();
-    </script>
-        </div>
 </body>
 
 <script type="text/html" id="stat-template">
@@ -2342,7 +3342,7 @@
 </script>
 
 <script type="text/html" id="mail-template">
-  <div class="email-message" data-bind="css: { replied: replied, 'special': isSpecial(), 'acquisition': isAcquisition(), 'cryptic': isCryptic() }" style="border: solid 1px gray">
+  <div class="email-message" data-bind="css: { replied: replied, 'spam': isSpam(), 'special': isSpecial() || isLucrative(), 'acquisition': isAcquisition(), 'cryptic': isCryptic() }" style="border: solid 1px gray">
     <form data-bind="submit: respond">
       <span class="timer alert-info" data-bind="text: displayTimeRemaining"></span>
       <p class="email-info">
@@ -2350,15 +3350,17 @@
         <span data-bind="text: from"></span>
         <span data-bind="visible: isCryptic()" class="label label-cryptic">CLASSIFIED</span>
         <span data-bind="visible: isSpecial()" class="label label-danger">URGENT</span>
+        <span data-bind="visible: isSpam() && !isLucrative()" class="label label-danger">SPAM RISK</span>
+        <span data-bind="visible: isSpam() && isLucrative()" class="label label-danger">LUCRATIVE SPAM</span>
         <span data-bind="visible: stressLevel === 0" class="label label-primary">LOW PRIORITY</span>
         <span data-bind="visible: stressLevel === 1" class="label label-warning">HIGH PRIORITY</span>
       </p>
       <p class="email-info"><b>Date:</b> <span data-bind="text: date.toLocaleString()"></span></p>
-      <p class="email-info"><b>Subject:</b> <span data-bind="text: subject"></span></p>
-      <p data-bind="text: body"></p>
+      <p class="email-info"><b>Subject:</b> <span data-bind="html: subject"></span></p>
+      <p data-bind="html: body"></p>
       <textarea class="form-control" data-bind="value: inputText, attr: { title: isAcquisition() ? 'Add your notes' : 'Enter your response' }" maxlength="200"></textarea>
-      <button class="btn btn-primary" type="submit">
-        <span data-bind="visible: !isAcquisition()">Reply</span>
+      <button class="btn" data-bind="css: { 'disabled': cantAfford, 'btn-danger': isSpam, 'btn-primary': !isSpam() }" type="submit">
+        <span data-bind="visible: !isAcquisition(), text: isSpam() ? 'Delete' : 'Reply'"></span>
         <span data-bind="visible: isAcquisition()">Accept</span>
       </button>
       <div style="clear:both;"></div>
@@ -2376,7 +3378,13 @@
           </tr>
         </tbody>
       </table>
-      <h2 data-bind="visible: !isCryptic()" class="label-success">
+      <h2 data-bind="visible: !isCryptic() && !isSpam()" class="label-success">
+        + $<span data-bind="text: payout"></span>
+      </h2>
+      <h2 data-bind="visible: !isCryptic() && isSpam() && !isLucrative()" class="label-danger">
+        - $<span data-bind="text: payout"></span>
+      </h2>
+      <h2 data-bind="visible: !isCryptic() && isSpam() && isLucrative()" class="label-success">
         + $<span data-bind="text: payout"></span>
       </h2>
       <h2 data-bind="visible: isCryptic()" style="background:purple;">
