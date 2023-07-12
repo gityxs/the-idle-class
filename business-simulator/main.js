@@ -129,6 +129,9 @@ function startGame() {
 	setInterval(function() {
 	  game.saveGame();
     checkSessionLength();
+    console.log('checking for obstacles...')
+    game.checkForObstacles();
+    game.cartel.checkForUpdate();
 	}, LONG_INTERVAL);
 }
 
@@ -238,6 +241,28 @@ function initializeGame() {
     }, 3000);
   });
 
+  document.addEventListener("goal-failed", function(e) {
+    var details = '<span><b>' + e.detail  + '</b></span>';
+    var alert = getAlertHTML('goal-failed-alert', 'GOAL FAILED', 'alert-danger', details);
+    $('#achievement-box').append(alert);
+    setTimeout(function() {
+      $('.goal-failed-alert').fadeOut(500, function() {
+        $(this).remove();
+      })
+    }, 5000);
+  });
+
+    document.addEventListener("goal-met", function(e) {
+    var details = '<span><b>' + e.detail  + '</b></span>';
+    var alert = getAlertHTML('goal-met-alert', 'GOAL SUCCEEDED', 'alert-success', details);
+    $('#achievement-box').append(alert);
+    setTimeout(function() {
+      $('.goal-met-alert').fadeOut(500, function() {
+        $(this).remove();
+      })
+    }, 5000);
+  });
+
   document.addEventListener("cryptic-notification", function(e) {
     var details = '<span><b>' + e.detail  + '</b></span>';
     var id = Date.now();
@@ -262,7 +287,9 @@ function initializeGame() {
   });
 
   document.addEventListener("new-message", function(e) {
-    $('.messages-box').scrollTop($('.messages-box')[0].scrollHeight);
+    if (game.viewingTab() === 'acquisitions') {
+      $('.messages-box').scrollTop($('.messages-box')[0].scrollHeight);
+    }
   });
   
   $('#investmentForm').submit(function(e) {
